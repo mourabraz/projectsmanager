@@ -7,15 +7,21 @@ import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { AuthRepository } from './auth.repository';
 import { JwtStrategy } from './jwt.strategy';
+import { AppConfigModule } from 'src/config/app/config.module';
+import { AppConfigService } from 'src/config/app/config.service';
 
 @Module({
   imports: [
     PassportModule.register({ defaultStrategy: 'jwt' }),
-    JwtModule.register({
-      secret: 'topsecret',
-      signOptions: {
-        expiresIn: '7d',
-      },
+    JwtModule.registerAsync({
+      imports: [AppConfigModule],
+      useFactory: async (configService: AppConfigService) => ({
+        secret: configService.key,
+        signOptions: {
+          expiresIn: configService.experiesIn,
+        },
+      }),
+      inject: [AppConfigService],
     }),
     TypeOrmModule.forFeature([AuthRepository]),
   ],

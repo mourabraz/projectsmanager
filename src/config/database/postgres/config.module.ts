@@ -17,7 +17,7 @@ import { PostgresConfigService } from './config.service';
       validationSchema: Joi.object({
         DB_TYPE: Joi.string().default('mysql'),
         DB_HOST: Joi.string().default('127.0.0.1'),
-        DB_PORT: Joi.number().default(3306),
+        DB_PORT: Joi.string().default('3306'),
         DB_USERNAME: Joi.string().default('mysql'),
         DB_PASSWORD: Joi.string().default('mysql'),
         DB_NAME: Joi.string().default('mysql'),

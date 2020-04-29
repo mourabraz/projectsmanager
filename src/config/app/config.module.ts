@@ -21,6 +21,8 @@ import { AppConfigService } from './config.service';
           .default('development'),
         APP_URL: Joi.string().default('http://localhost:3333'),
         APP_PORT: Joi.number().default(3333),
+        APP_KEY: Joi.string().default('topsecret'),
+        APP_JWT_EXPIRES_IN: Joi.string().default('1d'),
       }),
     }),
   ],

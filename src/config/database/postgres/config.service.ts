@@ -42,7 +42,7 @@ export class PostgresConfigService {
       username: this.username,
       password: this.password,
       database: this.name,
-      entities: [join(__dirname, '..', './**/*.entity{.ts,.js}')],
+      entities: [join(__dirname, '..', '..', '..', './**/*.entity{.ts,.js}')],
       synchronize: this.typeSync,
     };
   }
