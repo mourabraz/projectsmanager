@@ -21,7 +21,7 @@ import { PostgresConfigService } from './config.service';
         DB_USERNAME: Joi.string().default('mysql'),
         DB_PASSWORD: Joi.string().default('mysql'),
         DB_NAME: Joi.string().default('mysql'),
-        TYPEORM_SYNC: Joi.string().default(false),
+        TYPEORM_SYNC: Joi.boolean().default(false),
       }),
     }),
   ],

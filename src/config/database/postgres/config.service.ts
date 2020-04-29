@@ -31,7 +31,7 @@ export class PostgresConfigService {
     return this.configService.get<string>('postgres.name');
   }
   get typeSync(): boolean {
-    return Boolean(this.configService.get<boolean>('postgres.typeSync'));
+    return Boolean(this.configService.get<boolean>('postgres.typeormSync'));
   }
 
   get typeOrmConfig(): TypeOrmModuleOptions {
