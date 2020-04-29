@@ -9,6 +9,7 @@ import {
   ValidationPipe,
   Delete,
   Param,
+  Patch,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 
@@ -43,6 +44,24 @@ export class GroupsController {
       )}`,
     );
     return this.groupsService.createGroup(createGroupDto, user);
+  }
+
+  @Patch('/:id')
+  @UsePipes(ValidationPipe)
+  update(
+    @Param('id') id: string,
+    @Body() createGroupDto: CreateGroupDto,
+    @GetUser() user: User,
+  ): Promise<Group> {
+    this.logger.verbose(
+      `User "${
+        user.email
+      }" update group with id: "${id}". Data: ${JSON.stringify(
+        createGroupDto,
+      )}`,
+    );
+
+    return this.groupsService.updateGroup(id, createGroupDto, user);
   }
 
   @Delete('/:id')

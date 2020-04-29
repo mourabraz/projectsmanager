@@ -46,6 +46,19 @@ export class GroupRepository extends Repository<Group> {
     }
   }
 
+  async getGroupById(id: string, user: User): Promise<Group> {
+    const found = await this.findOne({
+      where: { id, userId: user.id },
+    });
+
+    if (!found) {
+      this.logger.error(`Failed to find group by id: "${id}".`);
+      throw new NotFoundException();
+    }
+
+    return found;
+  }
+
   async createGroup(
     createGroupDto: CreateGroupDto,
     user: User,
@@ -75,6 +88,30 @@ export class GroupRepository extends Repository<Group> {
       if (error.code === TypeOrmErrorCode.DUPLICATE_UNIQUE) {
         throw new ConflictException(`This name: "${name}" is not available`);
       }
+
+      throw new InternalServerErrorException();
+    }
+  }
+
+  async updateGroup(
+    id: string,
+    createGroupDto: CreateGroupDto,
+    user: User,
+  ): Promise<Group> {
+    const group: Group = await this.getGroupById(id, user);
+    group.name = createGroupDto.name;
+
+    try {
+      await group.save();
+
+      return group;
+    } catch (error) {
+      this.logger.error(
+        `Failed to update group with id: "${id}". Data: ${JSON.stringify(
+          createGroupDto,
+        )}`,
+        error.stack,
+      );
 
       throw new InternalServerErrorException();
     }
