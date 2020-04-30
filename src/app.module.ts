@@ -11,6 +11,7 @@ import { TasksModule } from './tasks/tasks.module';
 import { FiilesModule } from './fiiles/fiiles.module';
 import { PostgresConfigService } from './config/database/postgres/config.service';
 import { PostgresConfigModule } from './config/database/postgres/config.module';
+import { UsersGroupsModule } from './users-groups/users-groups.module';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { PostgresConfigModule } from './config/database/postgres/config.module';
     ProjectsModule,
     TasksModule,
     FiilesModule,
+    UsersGroupsModule,
   ],
 })
 export class AppModule {}

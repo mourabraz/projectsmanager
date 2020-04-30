@@ -7,14 +7,13 @@ import {
   UpdateDateColumn,
   ManyToOne,
   JoinColumn,
-  ManyToMany,
-  JoinTable,
   OneToMany,
   Index,
 } from 'typeorm';
 
 import { User } from 'src/users/user.entity';
 import { Project } from 'src/projects/project.entity';
+import { UserGroup } from 'src/users-groups/user-group.entity';
 
 @Entity('groups')
 @Index(['name', 'ownerId'], { unique: true })
@@ -42,13 +41,13 @@ export class Group extends BaseEntity {
   @JoinColumn({ name: 'user_id' })
   owner: User;
 
-  @ManyToMany(
-    type => User,
-    user => user.groups,
+  @OneToMany(
+    type => UserGroup,
+    userGroup => userGroup.user,
     { eager: false },
   )
-  @JoinTable()
-  participants: User[];
+  usersGroups: UserGroup[];
+  //participants: UserGroup[];
 
   @OneToMany(
     type => Project,

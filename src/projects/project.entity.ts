@@ -7,13 +7,10 @@ import {
   Entity,
   ManyToOne,
   JoinColumn,
-  ManyToMany,
-  JoinTable,
   OneToMany,
 } from 'typeorm';
 
 import { Group } from 'src/groups/group.entity';
-import { User } from 'src/users/user.entity';
 import { Task } from 'src/tasks/task.entity';
 import { Fiile } from 'src/fiiles/fiile.entity';
 
@@ -63,14 +60,6 @@ export class Project extends BaseEntity {
   )
   @JoinColumn({ name: 'group_id' })
   group: Group;
-
-  @ManyToMany(
-    type => User,
-    user => user.projects,
-    { eager: false },
-  )
-  @JoinTable()
-  users: User[];
 
   @OneToMany(
     type => Task,

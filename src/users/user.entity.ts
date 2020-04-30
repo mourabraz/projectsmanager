@@ -6,15 +6,13 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   OneToMany,
-  ManyToMany,
   Unique,
 } from 'typeorm';
 import * as bcrypt from 'bcryptjs';
 
 import { Group } from 'src/groups/group.entity';
-import { Project } from 'src/projects/project.entity';
-import { Task } from 'src/tasks/task.entity';
 import { Fiile } from 'src/fiiles/fiile.entity';
+import { UserGroup } from 'src/users-groups/user-group.entity';
 
 @Entity('users')
 @Unique(['email'])
@@ -47,25 +45,12 @@ export class User extends BaseEntity {
   )
   ownerGroups: Group[];
 
-  @ManyToMany(
-    type => Group,
-    group => group.participants,
-    { eager: false },
-  )
-  groups: Group[];
-
-  @ManyToMany(
-    type => Project,
-    project => project.users,
-  )
-  projects: Project[];
-
   @OneToMany(
-    type => Task,
-    task => task.user,
+    type => UserGroup,
+    userGroup => userGroup.user,
     { eager: false },
   )
-  tasks: Task[];
+  groups: UserGroup[];
 
   @OneToMany(
     type => Fiile,

@@ -10,7 +10,6 @@ import {
   OneToMany,
 } from 'typeorm';
 
-import { User } from 'src/users/user.entity';
 import { Project } from 'src/projects/project.entity';
 import { Fiile } from 'src/fiiles/fiile.entity';
 
@@ -31,9 +30,6 @@ export class Task extends BaseEntity {
   @Column('timestamptz', { name: 'completed_at' })
   completedAt: Date;
 
-  @Column({ name: 'user_id', nullable: true })
-  userId: string;
-
   @Column({ name: 'project_id' })
   projectId: string;
 
@@ -42,14 +38,6 @@ export class Task extends BaseEntity {
 
   @UpdateDateColumn({ name: 'updated_at', type: 'timestamptz' })
   updatedAt: Date;
-
-  @ManyToOne(
-    type => User,
-    user => user.tasks,
-    { eager: false, onDelete: 'SET NULL' },
-  )
-  @JoinColumn({ name: 'user_id' })
-  user: User;
 
   @ManyToOne(
     type => Project,

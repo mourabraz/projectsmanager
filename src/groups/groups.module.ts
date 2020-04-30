@@ -10,5 +10,6 @@ import { AuthModule } from 'src/auth/auth.module';
   imports: [TypeOrmModule.forFeature([GroupRepository]), AuthModule],
   providers: [GroupsService],
   controllers: [GroupsController],
+  exports: [GroupsService],
 })
 export class GroupsModule {}
