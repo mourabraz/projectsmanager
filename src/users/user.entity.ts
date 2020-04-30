@@ -13,6 +13,7 @@ import * as bcrypt from 'bcryptjs';
 import { Group } from 'src/groups/group.entity';
 import { Fiile } from 'src/fiiles/fiile.entity';
 import { UserGroup } from 'src/users-groups/user-group.entity';
+import { Invitation } from 'src/invitations/invitation.entity';
 
 @Entity('users')
 @Unique(['email'])
@@ -44,6 +45,13 @@ export class User extends BaseEntity {
     { eager: false },
   )
   ownerGroups: Group[];
+
+  @OneToMany(
+    type => Invitation,
+    invitation => invitation.user,
+    { eager: false },
+  )
+  invitations: Invitation[];
 
   @OneToMany(
     type => UserGroup,

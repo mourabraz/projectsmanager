@@ -12,6 +12,7 @@ import { FiilesModule } from './fiiles/fiiles.module';
 import { PostgresConfigService } from './config/database/postgres/config.service';
 import { PostgresConfigModule } from './config/database/postgres/config.module';
 import { UsersGroupsModule } from './users-groups/users-groups.module';
+import { InvitationsModule } from './invitations/invitations.module';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { UsersGroupsModule } from './users-groups/users-groups.module';
     TasksModule,
     FiilesModule,
     UsersGroupsModule,
+    InvitationsModule,
   ],
 })
 export class AppModule {}

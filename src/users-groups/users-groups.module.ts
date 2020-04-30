@@ -7,5 +7,6 @@ import { UserGroupRepository } from './user-group.repository';
 @Module({
   imports: [TypeOrmModule.forFeature([UserGroupRepository])],
   providers: [UsersGroupsService],
+  exports: [UsersGroupsService],
 })
 export class UsersGroupsModule {}
