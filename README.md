@@ -2,12 +2,12 @@
 
 ## Description
 
-[] all users must be athenticated
-[] each user can create, update, delete groups created by hilmself (group's owner)
-[] each group can have several projects
-[] the owner can invite other users (participants) to the group, the participant must accept the invite
-[] each project can have several tasks
-[] the owner can change the group's owner to another participant (the old owner becomes a participant)
+- [] all users must be athenticated
+- [] each user can create, update, delete groups created by hilmself (group's owner)
+- [] each group can have several projects
+- [] the owner can invite other users (participants) to the group, the participant must accept the invite
+- [] each project can have several tasks
+- [] the owner can change the group's owner to another participant (the old owner becomes a participant)
 
 ## API
 
