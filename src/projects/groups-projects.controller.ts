@@ -2,12 +2,12 @@ import {
   Controller,
   UseGuards,
   Logger,
+  Post,
   UsePipes,
   ValidationPipe,
   Body,
+  Get,
   Param,
-  Put,
-  Delete,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 
@@ -17,30 +17,36 @@ import { GetUser } from 'src/auth/get-user.decorator';
 import { User } from 'src/users/user.entity';
 import { Project } from './project.entity';
 
-@Controller('projects')
+@Controller('/groups/:groupId/projects')
 @UseGuards(AuthGuard())
-export class ProjectsController {
-  private logger = new Logger('ProjectsController');
+export class GroupsProjectsController {
+  private logger = new Logger('GroupsProjectsController');
 
   constructor(private projectsService: ProjectsService) {}
 
-  @Put('/:id')
+  @Get()
+  index(
+    @Param('groupId') groupId: string,
+    @GetUser() user: User,
+  ): Promise<Project[]> {
+    this.logger.verbose(`User "${user.email}" retrieving all projects.`);
+    return this.projectsService.getProjectsByGroupId(user, groupId);
+  }
+
+  @Post()
   @UsePipes(ValidationPipe)
-  update(
-    @Param('id') id: string,
+  store(
+    @Param('groupId') groupId: string,
     @Body() createProjectDto: CreateProjectDto,
     @GetUser() user: User,
   ): Promise<Project> {
     this.logger.verbose(
-      `User "${user.email}" update project id: "${id}". Data: ${JSON.stringify(
+      `User "${
+        user.email
+      }" creating a new project in group id: "${groupId}". Data: ${JSON.stringify(
         createProjectDto,
       )}`,
     );
-    return this.projectsService.updateProject(id, createProjectDto, user);
-  }
-
-  @Delete('/:id')
-  destroy(@Param('id') id: string, @GetUser() user: User): Promise<void> {
-    return this.projectsService.deleteProject(id, user);
+    return this.projectsService.createProject(createProjectDto, groupId, user);
   }
 }

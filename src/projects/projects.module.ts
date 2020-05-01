@@ -7,6 +7,7 @@ import { ProjectRepository } from './project.repository';
 import { AuthModule } from 'src/auth/auth.module';
 import { UsersModule } from 'src/users/users.module';
 import { GroupsModule } from 'src/groups/groups.module';
+import { GroupsProjectsController } from './groups-projects.controller';
 
 @Module({
   imports: [
@@ -16,6 +17,6 @@ import { GroupsModule } from 'src/groups/groups.module';
     GroupsModule,
   ],
   providers: [ProjectsService],
-  controllers: [ProjectsController],
+  controllers: [ProjectsController, GroupsProjectsController],
 })
 export class ProjectsModule {}

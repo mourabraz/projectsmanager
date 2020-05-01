@@ -21,10 +21,38 @@ export class ProjectsService {
 
     return this.projectRepository.getProjectsByGroupId(groupId);
   }
-  async createProject(createProjectDto: CreateProjectDto, user: User) {
-    // check if groupId exists and is related to authenticated user
-    await this.groupsService.getGroupById(createProjectDto.groupId, user);
 
-    return this.projectRepository.createProject(createProjectDto);
+  async createProject(
+    createProjectDto: CreateProjectDto,
+    groupId: string,
+    user: User,
+  ) {
+    // check if groupId exists and is related to authenticated user
+    await this.groupsService.getGroupById(groupId, user);
+
+    return this.projectRepository.createProject(
+      createProjectDto,
+      groupId,
+      user,
+    );
+  }
+
+  async updateProject(
+    id: string,
+    createProjectDto: CreateProjectDto,
+    user: User,
+  ): Promise<Project> {
+    const groups = await this.groupsService.getGroups(user);
+    user.groups = groups;
+
+    return await this.projectRepository.updateProject(
+      id,
+      createProjectDto,
+      user,
+    );
+  }
+
+  async deleteProject(id: string, user: User): Promise<void> {
+    return this.projectRepository.deleteProject(id, user);
   }
 }

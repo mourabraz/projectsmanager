@@ -13,21 +13,21 @@
 
 ## Routes
 
-| Method | Path                 | Public | Description                                                          |
-| :----: | :------------------- | :----: | -------------------------------------------------------------------- |
-|  POST  | /auth/signup         |   Y    | register a new user                                                  |
-|  GET   | /autj/signin         |   Y    | login                                                                |
-|   -    | -                    |   -    | -                                                                    |
-|  GET   | /groups              |   N    | List all groups for the authenticated user (as onwer or participant) |
-|  POST  | /groups              |   N    | create a new group (the authenticated user as owner)                 |
-| PATCH  | /groups/:id          |   N    | update the group's name, the authenticated user must be the owner    |
-| DELETE | /groups/:id          |   N    | delete a group. All associations to the group will be lost.          |
-|   -    | -                    |   -    | -                                                                    |
-|  GET   | /groups/:id/projects |   N    | List all projects for a group                                        |
-|  POST  | /groups/:id/projects |   N    | create a new project in a group                                      |
-|   -    | -                    |   -    | -                                                                    |
-| PATCH  | /projects/:id        |   N    | update the name of a project                                         |
-| DELETE | /projects/:id        |   N    | delete a project                                                     |
+| Method | Path                 | Public | Description                                                                                         |
+| :----: | :------------------- | :----: | --------------------------------------------------------------------------------------------------- |
+|  POST  | /auth/signup         |   Y    | register a new user                                                                                 |
+|  GET   | /autj/signin         |   Y    | login                                                                                               |
+|   -    | -                    |   -    | -                                                                                                   |
+|  GET   | /groups              |   N    | List all groups for the authenticated user (as onwer or participant)                                |
+|  POST  | /groups              |   N    | create a new group (the authenticated user as owner)                                                |
+| PATCH  | /groups/:id          |   N    | update the group's name, the authenticated user must be the owner                                   |
+| DELETE | /groups/:id          |   N    | delete a group. All associations to the group will be lost.                                         |
+|   -    | -                    |   -    | -                                                                                                   |
+|  GET   | /groups/:id/projects |   N    | List all projects for a group                                                                       |
+|  POST  | /groups/:id/projects |   N    | create a new project in a group                                                                     |
+|   -    | -                    |   -    | -                                                                                                   |
+|  PUT   | /projects/:id        |   N    | update the title or description of a project (the authenticated must be the owner or a participant) |
+| DELETE | /projects/:id        |   N    | delete a project                                                                                    |
 
 ## License
 

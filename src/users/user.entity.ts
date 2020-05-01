@@ -58,7 +58,7 @@ export class User extends BaseEntity {
     userGroup => userGroup.user,
     { eager: false },
   )
-  groups: UserGroup[];
+  usersGroups: UserGroup[];
 
   @OneToMany(
     type => Fiile,
@@ -66,6 +66,8 @@ export class User extends BaseEntity {
     { eager: false },
   )
   fiiles: Fiile[];
+
+  groups: Group[];
 
   async validatePassword(password: string): Promise<boolean> {
     return bcrypt.compare(password, this.password);

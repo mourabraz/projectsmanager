@@ -47,6 +47,9 @@ export class Project extends BaseEntity {
   @Column({ name: 'group_id' })
   groupId: string;
 
+  @Column({ name: 'user_id' })
+  ownerId: string;
+
   @CreateDateColumn({ name: 'created_at', type: 'timestamptz' })
   createdAt: Date;
 
