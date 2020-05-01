@@ -1,3 +1,4 @@
+import { resolve } from 'path';
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { HandlebarsAdapter, MailerModule } from '@nestjs-modules/mailer';
@@ -14,6 +15,8 @@ import { PostgresConfigService } from './config/database/postgres/config.service
 import { PostgresConfigModule } from './config/database/postgres/config.module';
 import { UsersGroupsModule } from './users-groups/users-groups.module';
 import { InvitationsModule } from './invitations/invitations.module';
+import { EmailConfigModule } from './config/email/config.module';
+import { EmailConfigService } from './config/email/config.service';
 
 @Module({
   imports: [
@@ -25,27 +28,37 @@ import { InvitationsModule } from './invitations/invitations.module';
       inject: [PostgresConfigService],
     }),
     MailerModule.forRootAsync({
-      useFactory: () => ({
+      imports: [EmailConfigModule],
+      useFactory: async (configServide: EmailConfigService) => ({
         transport: {
-          host: 'smtp.mailtrap.io',
-          port: 2525,
-          secure: false, // upgrade later with STARTTLS
+          host: configServide.host,
+          port: configServide.port,
+          secure: false,
           auth: {
-            user: '38b296b17255a2',
-            pass: '5d9bd1f573e028',
+            user: configServide.user,
+            pass: configServide.pass,
           },
         },
         defaults: {
-          from: '"nest-modules" <modules@nestjs.com>',
+          from: configServide.from,
         },
         template: {
-          dir: __dirname + '/templates',
+          dir: resolve(__dirname, 'views', 'emails'),
           adapter: new HandlebarsAdapter(),
           options: {
             strict: true,
           },
         },
+        options: {
+          partials: {
+            dir: resolve(__dirname, 'views', 'emails', 'partials'),
+            options: {
+              strict: true,
+            },
+          },
+        },
       }),
+      inject: [EmailConfigService],
     }),
     AuthModule,
     UsersModule,

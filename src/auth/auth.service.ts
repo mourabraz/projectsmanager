@@ -22,14 +22,14 @@ export class AuthService {
   async signUp(authCredentialsDto: AuthCredentialsDto): Promise<User> {
     const user = await this.userRepository.signUp(authCredentialsDto);
 
-    console.log('signUp', user);
-
     // Send welcome e-mail
     this.mailerService.sendMail({
-      to: 'test@nestjs.com', // list of receivers
-      subject: 'Testing Nest MailerModule ✔', // Subject line
-      text: 'welcome', // plaintext body
-      html: '<b>welcome</b>', // HTML body content
+      to: user.email,
+      subject: 'Welcome',
+      template: 'NewRegistration',
+      context: {
+        name: user.name || user.email,
+      },
     });
 
     this.logger.verbose(`Send Welcome Email to User "${user.email}".`);
