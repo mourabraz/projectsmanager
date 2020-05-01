@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { HandlebarsAdapter, MailerModule } from '@nestjs-modules/mailer';
 
 import { AppConfigModule } from './config/app/config.module';
 
@@ -22,6 +23,29 @@ import { InvitationsModule } from './invitations/invitations.module';
       useFactory: async (configService: PostgresConfigService) =>
         configService.typeOrmConfig,
       inject: [PostgresConfigService],
+    }),
+    MailerModule.forRootAsync({
+      useFactory: () => ({
+        transport: {
+          host: 'smtp.mailtrap.io',
+          port: 2525,
+          secure: false, // upgrade later with STARTTLS
+          auth: {
+            user: '38b296b17255a2',
+            pass: '5d9bd1f573e028',
+          },
+        },
+        defaults: {
+          from: '"nest-modules" <modules@nestjs.com>',
+        },
+        template: {
+          dir: __dirname + '/templates',
+          adapter: new HandlebarsAdapter(),
+          options: {
+            strict: true,
+          },
+        },
+      }),
     }),
     AuthModule,
     UsersModule,

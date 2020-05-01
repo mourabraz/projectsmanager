@@ -14,6 +14,7 @@ import { Group } from 'src/groups/group.entity';
 import { Fiile } from 'src/fiiles/fiile.entity';
 import { UserGroup } from 'src/users-groups/user-group.entity';
 import { Invitation } from 'src/invitations/invitation.entity';
+import { Project } from 'src/projects/project.entity';
 
 @Entity('users')
 @Unique(['email'])
@@ -27,7 +28,7 @@ export class User extends BaseEntity {
   @Column()
   email: string;
 
-  @Column()
+  @Column({ select: false })
   password: string;
 
   @Column({ nullable: true })
@@ -52,6 +53,13 @@ export class User extends BaseEntity {
     { eager: false },
   )
   invitations: Invitation[];
+
+  @OneToMany(
+    type => Project,
+    project => project.user,
+    { eager: false },
+  )
+  projects: Project[];
 
   @OneToMany(
     type => UserGroup,

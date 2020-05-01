@@ -13,6 +13,7 @@ import {
 import { Group } from 'src/groups/group.entity';
 import { Task } from 'src/tasks/task.entity';
 import { Fiile } from 'src/fiiles/fiile.entity';
+import { User } from 'src/users/user.entity';
 
 @Entity('projects')
 export class Project extends BaseEntity {
@@ -47,7 +48,7 @@ export class Project extends BaseEntity {
   @Column({ name: 'group_id' })
   groupId: string;
 
-  @Column({ name: 'user_id' })
+  @Column({ name: 'user_id', nullable: true })
   ownerId: string;
 
   @CreateDateColumn({ name: 'created_at', type: 'timestamptz' })
@@ -63,6 +64,14 @@ export class Project extends BaseEntity {
   )
   @JoinColumn({ name: 'group_id' })
   group: Group;
+
+  @ManyToOne(
+    type => User,
+    user => user.projects,
+    { eager: false, onDelete: 'SET NULL' },
+  )
+  @JoinColumn({ name: 'user_id' })
+  user: User;
 
   @OneToMany(
     type => Task,

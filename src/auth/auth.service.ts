@@ -1,21 +1,40 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable, UnauthorizedException, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { JwtService } from '@nestjs/jwt';
+import { MailerService } from '@nestjs-modules/mailer';
 
 import { AuthRepository } from './auth.repository';
 import { AuthCredentialsDto } from './dto/auth-credentials.dto';
 import { JwtPayload } from './jwt-payload.interface';
+import { User } from 'src/users/user.entity';
 
 @Injectable()
 export class AuthService {
+  private logger = new Logger('AuthService');
+
   constructor(
     @InjectRepository(AuthRepository)
     private userRepository: AuthRepository,
     private jwtService: JwtService,
+    private readonly mailerService: MailerService,
   ) {}
 
-  async signUp(authCredentialsDto: AuthCredentialsDto): Promise<void> {
-    return this.userRepository.signUp(authCredentialsDto);
+  async signUp(authCredentialsDto: AuthCredentialsDto): Promise<User> {
+    const user = await this.userRepository.signUp(authCredentialsDto);
+
+    console.log('signUp', user);
+
+    // Send welcome e-mail
+    this.mailerService.sendMail({
+      to: 'test@nestjs.com', // list of receivers
+      subject: 'Testing Nest MailerModule ✔', // Subject line
+      text: 'welcome', // plaintext body
+      html: '<b>welcome</b>', // HTML body content
+    });
+
+    this.logger.verbose(`Send Welcome Email to User "${user.email}".`);
+
+    return user;
   }
 
   async signIn(
