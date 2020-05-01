@@ -13,7 +13,7 @@
 
 ## Routes
 
-| Method | Path                 | Public | description                                                          |
+| Method | Path                 | Public | Description                                                          |
 | :----: | :------------------- | :----: | -------------------------------------------------------------------- |
 |  POST  | /auth/signup         |   Y    | register a new user                                                  |
 |  GET   | /autj/signin         |   Y    | login                                                                |
