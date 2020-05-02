@@ -70,4 +70,8 @@ import { EmailConfigService } from './config/email/config.service';
     InvitationsModule,
   ],
 })
-export class AppModule {}
+export class AppModule {
+  onModuleInit() {
+    console.log('MAIN ', process.pid);
+  }
+}

@@ -7,6 +7,7 @@ import { AuthRepository } from './auth.repository';
 import { AuthCredentialsDto } from './dto/auth-credentials.dto';
 import { JwtPayload } from './jwt-payload.interface';
 import { User } from 'src/users/user.entity';
+import { EmailsService } from 'src/queue/emails.service';
 
 @Injectable()
 export class AuthService {
@@ -16,6 +17,7 @@ export class AuthService {
     @InjectRepository(AuthRepository)
     private userRepository: AuthRepository,
     private jwtService: JwtService,
+    private emailsService: EmailsService,
     private readonly mailerService: MailerService,
   ) {}
 
@@ -23,16 +25,18 @@ export class AuthService {
     const user = await this.userRepository.signUp(authCredentialsDto);
 
     // Send welcome e-mail
-    this.mailerService.sendMail({
-      to: user.email,
-      subject: 'Welcome',
-      template: 'NewRegistration',
-      context: {
-        name: user.name || user.email,
-      },
-    });
+    this.emailsService.addWelcomeEmailToQueue(user);
 
-    this.logger.verbose(`Send Welcome Email to User "${user.email}".`);
+    // this.mailerService.sendMail({
+    //   to: user.email,
+    //   subject: 'Welcome',
+    //   template: 'NewRegistration',
+    //   context: {
+    //     name: user.name || user.email,
+    //   },
+    // });
+
+    this.logger.verbose(`call email service "${user.email}".`);
 
     return user;
   }
