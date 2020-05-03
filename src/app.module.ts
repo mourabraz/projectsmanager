@@ -1,7 +1,5 @@
-import { resolve } from 'path';
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { HandlebarsAdapter, MailerModule } from '@nestjs-modules/mailer';
 
 import { AppConfigModule } from './config/app/config.module';
 
@@ -15,8 +13,6 @@ import { PostgresConfigService } from './config/database/postgres/config.service
 import { PostgresConfigModule } from './config/database/postgres/config.module';
 import { UsersGroupsModule } from './users-groups/users-groups.module';
 import { InvitationsModule } from './invitations/invitations.module';
-import { EmailConfigModule } from './config/email/config.module';
-import { EmailConfigService } from './config/email/config.service';
 
 @Module({
   imports: [
@@ -26,39 +22,6 @@ import { EmailConfigService } from './config/email/config.service';
       useFactory: async (configService: PostgresConfigService) =>
         configService.typeOrmConfig,
       inject: [PostgresConfigService],
-    }),
-    MailerModule.forRootAsync({
-      imports: [EmailConfigModule],
-      useFactory: async (configServide: EmailConfigService) => ({
-        transport: {
-          host: configServide.host,
-          port: configServide.port,
-          secure: false,
-          auth: {
-            user: configServide.user,
-            pass: configServide.pass,
-          },
-        },
-        defaults: {
-          from: configServide.from,
-        },
-        template: {
-          dir: resolve(__dirname, 'views', 'emails'),
-          adapter: new HandlebarsAdapter(),
-          options: {
-            strict: true,
-          },
-        },
-        options: {
-          partials: {
-            dir: resolve(__dirname, 'views', 'emails', 'partials'),
-            options: {
-              strict: true,
-            },
-          },
-        },
-      }),
-      inject: [EmailConfigService],
     }),
     AuthModule,
     UsersModule,

@@ -1,22 +1,18 @@
 import { resolve } from 'path';
 import { Module } from '@nestjs/common';
-import { BullModule } from '@nestjs/bull';
+import { NestFactory } from '@nestjs/core';
 import { HandlebarsAdapter, MailerModule } from '@nestjs-modules/mailer';
 
 import { EmailConfigModule } from '../config/email/config.module';
 import { EmailConfigService } from '../config/email/config.service';
-import { EmailProcessor } from './email.processor';
-import { EmailsService } from './emails.service';
+
+import { EmailConsumer } from './email.consumer';
+import { EventGateway } from './event.gateway';
+import { RedisReusableConnection } from './redis-reusable-connection';
+import { RedisIoAdapter } from './redis-io-adapter';
 
 @Module({
   imports: [
-    BullModule.registerQueue({
-      name: 'emails',
-      redis: {
-        host: 'localhost',
-        port: 6379,
-      },
-    }),
     MailerModule.forRootAsync({
       imports: [EmailConfigModule],
       useFactory: async (configServide: EmailConfigService) => ({
@@ -33,7 +29,7 @@ import { EmailsService } from './emails.service';
           from: configServide.from,
         },
         template: {
-          dir: resolve(__dirname, 'views', 'emails'),
+          dir: resolve(__dirname, '..', 'views', 'emails'),
           adapter: new HandlebarsAdapter(),
           options: {
             strict: true,
@@ -41,7 +37,7 @@ import { EmailsService } from './emails.service';
         },
         options: {
           partials: {
-            dir: resolve(__dirname, 'views', 'emails', 'partials'),
+            dir: resolve(__dirname, '..', 'views', 'emails', 'partials'),
             options: {
               strict: true,
             },
@@ -51,8 +47,7 @@ import { EmailsService } from './emails.service';
       inject: [EmailConfigService],
     }),
   ],
-  providers: [EmailsService, EmailProcessor],
-  exports: [EmailsService],
+  providers: [RedisReusableConnection, EmailConsumer, EventGateway],
 })
 export class QueueModule {
   onModuleInit() {
@@ -60,10 +55,10 @@ export class QueueModule {
   }
 }
 
-// async function bootstrap() {
-//   const app = await NestFactory.create(QueueModule);
+async function bootstrap() {
+  const app = await NestFactory.create(QueueModule);
+  app.useWebSocketAdapter(new RedisIoAdapter(app));
+  await app.init();
+}
 
-//   await app.init();
-// }
-
-// bootstrap();
+bootstrap();

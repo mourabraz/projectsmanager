@@ -9,7 +9,7 @@ import { AuthRepository } from './auth.repository';
 import { JwtStrategy } from './jwt.strategy';
 import { AppConfigModule } from 'src/config/app/config.module';
 import { AppConfigService } from 'src/config/app/config.service';
-import { QueueModule } from 'src/queue/queue.module';
+import { EmailsModule } from 'src/emails/emails.module';
 
 @Module({
   imports: [
@@ -25,7 +25,7 @@ import { QueueModule } from 'src/queue/queue.module';
       inject: [AppConfigService],
     }),
     TypeOrmModule.forFeature([AuthRepository]),
-    QueueModule,
+    EmailsModule,
   ],
   controllers: [AuthController],
   providers: [AuthService, JwtStrategy],
