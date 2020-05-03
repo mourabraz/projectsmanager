@@ -21,6 +21,7 @@ export class AuthService {
 
   async signUp(authCredentialsDto: AuthCredentialsDto): Promise<User> {
     const user = await this.userRepository.signUp(authCredentialsDto);
+    delete user.password;
 
     this.logger.verbose(`call email service "${user.email}".`);
 
