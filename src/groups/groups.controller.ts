@@ -10,6 +10,7 @@ import {
   Delete,
   Param,
   Patch,
+  ParseUUIDPipe,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 
@@ -29,7 +30,7 @@ export class GroupsController {
   @Get()
   index(@GetUser() user: User) {
     this.logger.verbose(`User "${user.email}" retrieving all groups.`);
-    return this.groupsService.getGroups(user);
+    return this.groupsService.getGroupsForUser(user);
   }
 
   @Post()
@@ -49,7 +50,7 @@ export class GroupsController {
   @Patch('/:id')
   @UsePipes(ValidationPipe)
   update(
-    @Param('id') id: string,
+    @Param('id', new ParseUUIDPipe()) id: string,
     @Body() createGroupDto: CreateGroupDto,
     @GetUser() user: User,
   ): Promise<Group> {
@@ -65,7 +66,10 @@ export class GroupsController {
   }
 
   @Delete('/:id')
-  destroy(@Param('id') id: string, @GetUser() user: User): Promise<void> {
+  destroy(
+    @Param('id', new ParseUUIDPipe()) id: string,
+    @GetUser() user: User,
+  ): Promise<number> {
     this.logger.verbose(`User "${user.email}" delete group with id: "${id}".`);
     return this.groupsService.deleteGroup(id, user);
   }
