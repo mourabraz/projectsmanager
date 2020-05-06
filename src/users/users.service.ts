@@ -15,7 +15,7 @@ export class UsersService {
   ) {}
 
   async isUserInGroup(user: User, group: Group): Promise<boolean> {
-    const groups = await this.groupsService.getGroups(user);
+    const groups = await this.groupsService.getGroupsForUser(user);
 
     return groups.findIndex(i => i.id === group.id) !== -1;
   }
