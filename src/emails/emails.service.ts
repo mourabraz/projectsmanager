@@ -44,7 +44,7 @@ export class EmailsService {
 
     const queue = new Bull(EmailConsumer.channelName);
 
-    const link = `${this.appConfigService.url}/invitations/${invitation.id}`;
+    const link = `${this.appConfigService.url}/invitations/accept/${invitation.token}`;
 
     queue.add({
       payload: {

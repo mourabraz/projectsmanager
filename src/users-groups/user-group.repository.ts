@@ -9,11 +9,11 @@ export class UserGroupRepository extends Repository<UserGroup> {
   private logger = new Logger('UserGroupRepository');
 
   async createUserGroup(user: User, groupId: string): Promise<UserGroup> {
-    const userGroup = new UserGroup();
-    userGroup.userId = user.id;
-    userGroup.groupId = groupId;
-
     try {
+      const userGroup = new UserGroup();
+      userGroup.userId = user.id;
+      userGroup.groupId = groupId;
+
       await userGroup.save();
       // delete userGroup.user;
 

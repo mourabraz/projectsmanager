@@ -21,6 +21,9 @@ export class Invitation extends BaseEntity {
   @Column({ name: 'email_to' })
   emailTo: string;
 
+  @Column()
+  token: string;
+
   @Column({ name: 'group_id' })
   groupId: string;
 

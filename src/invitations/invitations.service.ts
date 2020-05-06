@@ -3,6 +3,7 @@ import {
   Logger,
   BadRequestException,
   NotFoundException,
+  InternalServerErrorException,
 } from '@nestjs/common';
 
 import { InvitationRepository } from './invitation.repository';
@@ -25,6 +26,23 @@ export class InvitationsService {
     private usersGroupsService: UsersGroupsService,
     private emailsService: EmailsService,
   ) {}
+
+  async getInvitationsByGroupId(
+    groupId: string,
+    user: User,
+  ): Promise<Invitation[]> {
+    // check if groupId exists and is owned by authenticated user
+    const foundGroup = await this.groupsService.getGroupByIdForOwner(
+      groupId,
+      user,
+    );
+
+    if (!foundGroup) {
+      throw new NotFoundException();
+    }
+
+    return this.invitationRepository.getInvitationsByGroupId(groupId);
+  }
 
   async createInvitation(
     createInvitationDto: CreateInvitationDto,
@@ -62,21 +80,55 @@ export class InvitationsService {
     return invitation;
   }
 
-  async acceptInvitation(id: string, user: User): Promise<Invitation> {
-    //update date on acceptedAt
-    const invitation = await this.invitationRepository.updateInvitation(
-      id,
-      user,
-    );
+  async acceptInvitation(token: string, user: User): Promise<Invitation> {
+    const invitation = await this.invitationRepository.findOne({
+      where: { token, emailTo: user.email },
+    });
 
-    //update table users_groups (groupId already confirmed to proced)
-    await this.usersGroupsService.addParticipantToGroup(
-      user,
-      invitation.groupId,
-    );
+    if (!invitation) {
+      this.logger.error(
+        `Failed to found invitation with ${token} for user "${user.email}".`,
+      );
+
+      throw new NotFoundException();
+    }
+
+    invitation.acceptedAt = new Date();
+
+    try {
+      await invitation.save();
+
+      //update table users_groups
+      await this.usersGroupsService.addParticipantToGroup(
+        user,
+        invitation.groupId,
+      );
+    } catch (error) {
+      this.logger.error(
+        `Failed to update invitation with ${token} for user "${user.email}".`,
+        error.stack,
+      );
+
+      throw new InternalServerErrorException();
+    }
 
     //send email to inviter
 
     return invitation;
+  }
+
+  async deleteInvitation(id: string, user: User): Promise<number> {
+    const result = await this.invitationRepository.delete({
+      id,
+      userId: user.id,
+      acceptedAt: null,
+    });
+
+    if (result.affected === 0) {
+      this.logger.error(`Failed to delete invitation with id: "${id}".`);
+      throw new NotFoundException();
+    }
+
+    return result.affected;
   }
 }
