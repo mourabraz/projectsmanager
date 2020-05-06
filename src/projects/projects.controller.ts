@@ -8,6 +8,7 @@ import {
   Param,
   Put,
   Delete,
+  ParseUUIDPipe,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 
@@ -27,7 +28,7 @@ export class ProjectsController {
   @Put('/:id')
   @UsePipes(ValidationPipe)
   update(
-    @Param('id') id: string,
+    @Param('id', new ParseUUIDPipe()) id: string,
     @Body() createProjectDto: CreateProjectDto,
     @GetUser() user: User,
   ): Promise<Project> {
@@ -36,11 +37,17 @@ export class ProjectsController {
         createProjectDto,
       )}`,
     );
-    return this.projectsService.updateProject(id, createProjectDto, user);
+
+    createProjectDto.ownerId = user.id;
+
+    return this.projectsService.updateProject(id, createProjectDto);
   }
 
   @Delete('/:id')
-  destroy(@Param('id') id: string, @GetUser() user: User): Promise<void> {
+  destroy(
+    @Param('id', new ParseUUIDPipe()) id: string,
+    @GetUser() user: User,
+  ): Promise<number> {
     return this.projectsService.deleteProject(id, user);
   }
 }

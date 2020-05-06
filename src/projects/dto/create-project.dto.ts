@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsString } from 'class-validator';
+import { IsNotEmpty, IsString, IsUUID, IsOptional } from 'class-validator';
 
 export class CreateProjectDto {
   @IsNotEmpty()
@@ -7,4 +7,12 @@ export class CreateProjectDto {
 
   @IsString()
   description: string;
+
+  @IsUUID()
+  @IsOptional()
+  groupId?: string;
+
+  @IsUUID()
+  @IsOptional()
+  ownerId?: string;
 }

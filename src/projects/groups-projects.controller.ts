@@ -8,6 +8,7 @@ import {
   Body,
   Get,
   Param,
+  ParseUUIDPipe,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 
@@ -26,17 +27,17 @@ export class GroupsProjectsController {
 
   @Get()
   index(
-    @Param('groupId') groupId: string,
+    @Param('groupId', new ParseUUIDPipe()) groupId: string,
     @GetUser() user: User,
   ): Promise<Project[]> {
     this.logger.verbose(`User "${user.email}" retrieving all projects.`);
-    return this.projectsService.getProjectsByGroupId(user, groupId);
+    return this.projectsService.getProjectsByGroupId(groupId, user);
   }
 
   @Post()
   @UsePipes(ValidationPipe)
   store(
-    @Param('groupId') groupId: string,
+    @Param('groupId', new ParseUUIDPipe()) groupId: string,
     @Body() createProjectDto: CreateProjectDto,
     @GetUser() user: User,
   ): Promise<Project> {
@@ -47,6 +48,10 @@ export class GroupsProjectsController {
         createProjectDto,
       )}`,
     );
-    return this.projectsService.createProject(createProjectDto, groupId, user);
+
+    createProjectDto.groupId = groupId;
+    createProjectDto.ownerId = user.id;
+
+    return this.projectsService.createProjectForUser(createProjectDto, user);
   }
 }

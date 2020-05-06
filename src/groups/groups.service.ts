@@ -21,9 +21,9 @@ export class GroupsService {
     return this.groupRepository.getGroupsForUser(user);
   }
 
-  // async getGroupByIdForUser(id: string, user: User): Promise<Group> {
-  //   return await this.groupRepository.getGroupByIdForUser(id, user);
-  // }
+  async getGroupByIdForUser(id: string, user: User): Promise<Group> {
+    return await this.groupRepository.getGroupByIdForUser(id, user);
+  }
 
   async createGroup(
     createGroupDto: CreateGroupDto,

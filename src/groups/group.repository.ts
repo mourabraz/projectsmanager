@@ -43,30 +43,25 @@ export class GroupRepository extends Repository<Group> {
   //   }
   // }
 
-  // async getGroupByIdForUser(id: string, user: User): Promise<Group> {
-  //   try {
-  //     return this.query(
-  //       `SELECT groups.id FROM groups
-  //     INNER JOIN users_groups ON users_groups.group_id = groups.id
-  //     INNER JOIN users ON users_groups.user_id = users.id
-  //     WHERE users.id = $1 AND groups.id = $2 LIMIT 1`,
-  //       [user.id, id],
-  //     );
-  //   } catch (error) {
-  //     this.logger.error(
-  //       `Failed to get groups for user "${user.email}".`,
-  //       error.stack,
-  //     );
-  //     throw new InternalServerErrorException();
-  //   }
+  async getGroupByIdForUser(id: string, user: User): Promise<Group> {
+    try {
+      const groups = await this.query(
+        `SELECT groups.id FROM groups
+      INNER JOIN users_groups ON users_groups.group_id = groups.id
+      INNER JOIN users ON users_groups.user_id = users.id
+      WHERE users.id = $1 AND groups.id = $2 LIMIT 1`,
+        [user.id, id],
+      );
 
-  //   // if (!found[0]) {
-  //   //   this.logger.error(
-  //   //     `Failed to find group by id: "${id}" for user "${user.email}".`,
-  //   //   );
-  //   //   throw new BadRequestException();
-  //   // }
-  // }
+      return groups[0];
+    } catch (error) {
+      this.logger.error(
+        `Failed to get groups for user "${user.email}".`,
+        error.stack,
+      );
+      throw new InternalServerErrorException();
+    }
+  }
 
   async getGroupByIdForOwner(id: string, user: User): Promise<Group> {
     const found = await this.findOne({

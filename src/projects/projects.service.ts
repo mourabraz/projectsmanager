@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 
 import { ProjectRepository } from './project.repository';
@@ -9,50 +9,69 @@ import { GroupsService } from 'src/groups/groups.service';
 
 @Injectable()
 export class ProjectsService {
+  private logger = new Logger(ProjectsService.name);
+
   constructor(
     @InjectRepository(ProjectRepository)
     private projectRepository: ProjectRepository,
     private groupsService: GroupsService,
   ) {}
 
-  async getProjectsByGroupId(user: User, groupId: string): Promise<Project[]> {
+  async getProjectsByGroupId(groupId: string, user: User): Promise<Project[]> {
     // check if groupId exists and is related to authenticated user
-    await this.groupsService.getGroupById(groupId, user);
+    const foundGroup = await this.groupsService.getGroupByIdForUser(
+      groupId,
+      user,
+    );
+
+    if (!foundGroup) {
+      throw new NotFoundException();
+    }
 
     return this.projectRepository.getProjectsByGroupId(groupId);
   }
 
-  async createProject(
-    createProjectDto: CreateProjectDto,
-    groupId: string,
-    user: User,
-  ) {
+  async createProjectForUser(createProjectDto: CreateProjectDto, user: User) {
     // check if groupId exists and is related to authenticated user
-    await this.groupsService.getGroupById(groupId, user);
-
-    return this.projectRepository.createProject(
-      createProjectDto,
-      groupId,
+    const foundGroup = await this.groupsService.getGroupByIdForUser(
+      createProjectDto.groupId,
       user,
     );
+
+    if (!foundGroup) {
+      throw new NotFoundException();
+    }
+
+    return this.projectRepository.createProject(createProjectDto);
   }
 
   async updateProject(
     id: string,
     createProjectDto: CreateProjectDto,
-    user: User,
   ): Promise<Project> {
-    const groups = await this.groupsService.getGroups(user);
-    user.groups = groups;
-
-    return await this.projectRepository.updateProject(
+    const found = await this.projectRepository.findOne({
       id,
-      createProjectDto,
-      user,
-    );
+      ownerId: createProjectDto.ownerId,
+    });
+
+    if (!found) {
+      throw new NotFoundException();
+    }
+
+    return await this.projectRepository.updateProject(id, createProjectDto);
   }
 
-  async deleteProject(id: string, user: User): Promise<void> {
-    return this.projectRepository.deleteProject(id, user);
+  async deleteProject(id: string, user: User): Promise<number> {
+    const result = await this.projectRepository.delete({
+      id,
+      ownerId: user.id,
+    });
+
+    if (result.affected === 0) {
+      this.logger.error(`Failed to delete project with id: "${id}".`);
+      throw new NotFoundException();
+    }
+
+    return result.affected;
   }
 }

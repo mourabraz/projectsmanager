@@ -71,7 +71,7 @@ export class Project extends BaseEntity {
     { eager: false, onDelete: 'SET NULL' },
   )
   @JoinColumn({ name: 'user_id' })
-  user: User;
+  owner: User;
 
   @OneToMany(
     type => Task,
