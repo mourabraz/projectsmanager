@@ -23,7 +23,7 @@ export class AuthService {
     const user = await this.userRepository.signUp(authCredentialsDto);
     delete user.password;
 
-    this.logger.verbose(`call email service "${user.email}".`);
+    this.logger.verbose(`Call welcome email service "${user.email}".`);
 
     this.emailsService.addWelcomeEmailToQueue(user);
 
