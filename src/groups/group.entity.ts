@@ -14,6 +14,7 @@ import {
 import { User } from 'src/users/user.entity';
 import { Project } from 'src/projects/project.entity';
 import { UserGroup } from 'src/users-groups/user-group.entity';
+import { Invitation } from 'src/invitations/invitation.entity';
 
 @Entity('groups')
 @Index(['name', 'ownerId'], { unique: true })
@@ -55,4 +56,11 @@ export class Group extends BaseEntity {
     { eager: false },
   )
   projects: Project[];
+
+  @OneToMany(
+    type => Invitation,
+    invitation => invitation.group,
+    { eager: false },
+  )
+  invitations: Invitation[];
 }

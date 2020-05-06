@@ -65,7 +65,7 @@ export class GroupRepository extends Repository<Group> {
 
   async getGroupByIdForOwner(id: string, user: User): Promise<Group> {
     const found = await this.findOne({
-      where: { id, userId: user.id },
+      where: { id, ownerId: user.id },
     });
 
     if (!found) {

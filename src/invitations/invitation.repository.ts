@@ -15,25 +15,24 @@ export class InvitationRepository extends Repository<Invitation> {
 
   async createInvitation(
     createInvitationDto: CreateInvitationDto,
-    user: User,
   ): Promise<Invitation> {
-    const { emailTo, groupId } = createInvitationDto;
-
-    const invitation = new Invitation();
-    invitation.user = user;
-    invitation.emailTo = emailTo;
-    invitation.groupId = groupId;
+    const { emailTo, userId, groupId } = createInvitationDto;
 
     try {
+      const invitation = new Invitation();
+      invitation.userId = userId;
+      invitation.emailTo = emailTo;
+      invitation.groupId = groupId;
+
       await invitation.save();
       delete invitation.user;
 
       return invitation;
     } catch (error) {
       this.logger.error(
-        `Failed to create invitation for user "${
-          user.email
-        }". Data: ${JSON.stringify(createInvitationDto)}`,
+        `Failed to create invitation for user id"${userId}". Data: ${JSON.stringify(
+          createInvitationDto,
+        )}`,
         error.stack,
       );
       throw new InternalServerErrorException();

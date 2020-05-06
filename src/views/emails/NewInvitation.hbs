@@ -1,0 +1,24 @@
+{{> header }}
+
+<h1 style="color: #333; font-size: 19px; font-weight: bold;">
+  Olá, {{ name }}
+</h1>
+
+<p>
+  O usuário com o email {{ owner }} convidou-o para participar
+  no grupo {{ groupName }}.
+</p>
+
+<p>
+  Você precisa aceitar o convite para começar a participar.
+</p>
+
+<p>
+  Clique no link caso pretenda aceitar o convite:
+</p>
+
+<p>
+  <a href="{{ link }}">ACEITAR O CONVITE</a>
+</p>
+
+{{> footer }}

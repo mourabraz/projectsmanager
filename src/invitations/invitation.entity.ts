@@ -10,6 +10,7 @@ import {
   Index,
 } from 'typeorm';
 import { User } from 'src/users/user.entity';
+import { Group } from 'src/groups/group.entity';
 
 @Entity('invitations')
 @Index(['emailTo', 'groupId'], { unique: true })
@@ -42,4 +43,12 @@ export class Invitation extends BaseEntity {
   )
   @JoinColumn({ name: 'user_id' })
   user: User;
+
+  @ManyToOne(
+    type => Group,
+    group => group.invitations,
+    { eager: false, onDelete: 'CASCADE' },
+  )
+  @JoinColumn({ name: 'group_id' })
+  group: Group;
 }

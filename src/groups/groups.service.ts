@@ -25,6 +25,10 @@ export class GroupsService {
     return await this.groupRepository.getGroupByIdForUser(id, user);
   }
 
+  async getGroupByIdForOwner(id: string, user: User): Promise<Group> {
+    return await this.groupRepository.getGroupByIdForOwner(id, user);
+  }
+
   async createGroup(
     createGroupDto: CreateGroupDto,
     user: User,
