@@ -75,8 +75,6 @@ export class User extends BaseEntity {
   )
   fiiles: Fiile[];
 
-  groups: Group[];
-
   async validatePassword(password: string): Promise<boolean> {
     return bcrypt.compare(password, this.password);
   }
