@@ -16,7 +16,6 @@ import { GroupsService } from './../src/groups/groups.service';
 import { ProjectsModule } from './../src/projects/projects.module';
 import { Project } from './../src/projects/project.entity';
 import { AuthService } from './../src/auth/auth.service';
-// import { UserGroup } from './../src/users-groups/user-group.entity';
 import { UsersGroupsService } from './../src/users-groups/users-groups.service';
 import { UsersGroupsModule } from './../src/users-groups/users-groups.module';
 import { ProjectsService } from './../src/projects/projects.service';
