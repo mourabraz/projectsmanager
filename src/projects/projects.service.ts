@@ -61,7 +61,7 @@ export class ProjectsService {
     return await this.projectRepository.updateProject(id, createProjectDto);
   }
 
-  async deleteProject(id: string, user: User): Promise<number> {
+  async deleteProject(id: string, user: User): Promise<{ total: number }> {
     const result = await this.projectRepository.delete({
       id,
       ownerId: user.id,
@@ -72,6 +72,8 @@ export class ProjectsService {
       throw new NotFoundException();
     }
 
-    return result.affected;
+    return {
+      total: result.affected,
+    };
   }
 }

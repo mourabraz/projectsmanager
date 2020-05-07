@@ -47,7 +47,7 @@ export class ProjectsController {
   destroy(
     @Param('id', new ParseUUIDPipe()) id: string,
     @GetUser() user: User,
-  ): Promise<number> {
+  ): Promise<{ total: number }> {
     this.logger.verbose(`User "${user.email}" delete project id: "${id}".`);
 
     return this.projectsService.deleteProject(id, user);
