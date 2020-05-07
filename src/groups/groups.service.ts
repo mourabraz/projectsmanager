@@ -69,7 +69,7 @@ export class GroupsService {
     return await this.groupRepository.updateGroup(id, createGroupDto);
   }
 
-  async deleteGroup(id: string, user: User): Promise<number> {
+  async deleteGroup(id: string, user: User): Promise<{ total: number }> {
     const found = await this.groupRepository.findOne({
       where: { id, ownerId: user.id },
     });
@@ -78,6 +78,8 @@ export class GroupsService {
       throw new NotFoundException();
     }
 
-    return await this.groupRepository.deleteGroup(id);
+    return {
+      total: (await this.groupRepository.deleteGroup(id)).affected,
+    };
   }
 }

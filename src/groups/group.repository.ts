@@ -1,4 +1,4 @@
-import { Repository, EntityRepository } from 'typeorm';
+import { Repository, EntityRepository, DeleteResult } from 'typeorm';
 import { Logger, InternalServerErrorException } from '@nestjs/common';
 
 import { Group } from './group.entity';
@@ -129,7 +129,7 @@ export class GroupRepository extends Repository<Group> {
     }
   }
 
-  async deleteGroup(id: string): Promise<number> {
+  async deleteGroup(id: string): Promise<DeleteResult> {
     const result = await this.delete({ id });
 
     if (result.affected === 0) {
@@ -137,6 +137,6 @@ export class GroupRepository extends Repository<Group> {
       throw new InternalServerErrorException();
     }
 
-    return result.affected;
+    return result;
   }
 }

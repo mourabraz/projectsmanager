@@ -69,8 +69,9 @@ export class GroupsController {
   destroy(
     @Param('id', new ParseUUIDPipe()) id: string,
     @GetUser() user: User,
-  ): Promise<number> {
+  ): Promise<{ total: number }> {
     this.logger.verbose(`User "${user.email}" delete group with id: "${id}".`);
+
     return this.groupsService.deleteGroup(id, user);
   }
 }
