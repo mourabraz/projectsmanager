@@ -1,8 +1,8 @@
 import { Repository, EntityRepository } from 'typeorm';
+import { Logger, InternalServerErrorException } from '@nestjs/common';
 import { uuid } from 'uuidv4';
 
 import { Invitation } from './invitation.entity';
-import { Logger, InternalServerErrorException } from '@nestjs/common';
 import { CreateInvitationDto } from './dto/create-invitation.dto';
 
 @EntityRepository(Invitation)

@@ -7,15 +7,15 @@ import { InvitationRepository } from './invitation.repository';
 import { AuthModule } from 'src/auth/auth.module';
 import { GroupsModule } from 'src/groups/groups.module';
 import { UsersGroupsModule } from 'src/users-groups/users-groups.module';
-import { AppConfigService } from 'src/config/app/config.service';
+import { EmailsModule } from 'src/emails/emails.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([InvitationRepository]),
     AuthModule,
-    AppConfigService,
     GroupsModule,
     UsersGroupsModule,
+    EmailsModule,
   ],
   providers: [InvitationsService],
   controllers: [InvitationsController],

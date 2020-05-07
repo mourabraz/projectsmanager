@@ -33,7 +33,7 @@ export class UserGroup extends BaseEntity {
 
   @ManyToOne(
     type => User,
-    user => user.groups,
+    user => user.usersGroups,
     { eager: false, onDelete: 'CASCADE' },
   )
   @JoinColumn({ name: 'user_id' })
