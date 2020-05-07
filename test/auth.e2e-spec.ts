@@ -98,5 +98,76 @@ describe('Auth (e2e)', () => {
         updatedAt: expect.any(String),
       });
     });
+
+    it('should return error when try to creat a new user with an email already used', async () => {
+      await request(app.getHttpServer())
+        .post('/auth/signup')
+        .set('Accept', 'application/json')
+        .send({ email: 'email@email.teste', password: '12345678' });
+
+      const response = await request(app.getHttpServer())
+        .post('/auth/signup')
+        .set('Accept', 'application/json')
+        .send({ email: 'email@email.teste', password: '987654321' });
+
+      expect(response.status).toEqual(409);
+      expect(response.body).toMatchObject({
+        error: 'Conflict',
+        message: 'Email already exists',
+        statusCode: 409,
+      });
+    });
+  });
+
+  describe('POST /signin', () => {
+    it('should return Unauthorized when try to sign in with a user that not exists', async () => {
+      const response = await request(app.getHttpServer())
+        .post('/auth/signin')
+        .set('Accept', 'application/json')
+        .send({ email: 'email@email.teste', password: '12345678' });
+
+      expect(response.status).toEqual(401);
+      expect(response.body).toMatchObject({
+        statusCode: 401,
+        message: 'Invalid credentials',
+        error: 'Unauthorized',
+      });
+    });
+
+    it('should return Unauthorized when try to sign in with wrong email/password', async () => {
+      await request(app.getHttpServer())
+        .post('/auth/signup')
+        .set('Accept', 'application/json')
+        .send({ email: 'email@email.teste', password: '12345678' });
+
+      const response = await request(app.getHttpServer())
+        .post('/auth/signin')
+        .set('Accept', 'application/json')
+        .send({ email: 'email@email.tes', password: '123456' });
+
+      expect(response.status).toEqual(401);
+      expect(response.body).toMatchObject({
+        statusCode: 401,
+        message: 'Invalid credentials',
+        error: 'Unauthorized',
+      });
+    });
+
+    it('should return token', async () => {
+      await request(app.getHttpServer())
+        .post('/auth/signup')
+        .set('Accept', 'application/json')
+        .send({ email: 'email@email.teste', password: '12345678' });
+
+      const response = await request(app.getHttpServer())
+        .post('/auth/signin')
+        .set('Accept', 'application/json')
+        .send({ email: 'email@email.teste', password: '12345678' });
+
+      expect(response.status).toEqual(201);
+      expect(response.body).toMatchObject({
+        accessToken: expect.any(String),
+      });
+    });
   });
 });
