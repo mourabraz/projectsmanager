@@ -21,16 +21,16 @@ export class InvitationsController {
 
   constructor(private invitationsService: InvitationsService) {}
 
-  @Patch('/accept/:token')
+  @Patch('/:id')
   update(
-    @Param('token') token: string,
+    @Param('id', new ParseUUIDPipe()) id: string,
     @GetUser() user: User,
   ): Promise<Invitation> {
     this.logger.verbose(
-      `User "${user.email}" update invitation with token: "${token}".`,
+      `User "${user.email}" update invitation with id: "${id}".`,
     );
 
-    return this.invitationsService.acceptInvitation(token, user);
+    return this.invitationsService.acceptInvitation(id, user);
   }
 
   @Delete('/:id')

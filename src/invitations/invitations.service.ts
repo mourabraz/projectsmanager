@@ -111,14 +111,14 @@ export class InvitationsService {
     return invitation;
   }
 
-  async acceptInvitation(token: string, user: User): Promise<Invitation> {
+  async acceptInvitation(id: string, user: User): Promise<Invitation> {
     const invitation = await this.invitationRepository.findOne({
-      where: { token, emailTo: user.email },
+      where: { id, emailTo: user.email },
     });
 
     if (!invitation) {
       this.logger.error(
-        `Failed to found invitation with ${token} for user "${user.email}".`,
+        `Failed to found invitation with id "${id}" for user "${user.email}".`,
       );
 
       throw new NotFoundException();
@@ -136,7 +136,7 @@ export class InvitationsService {
       );
     } catch (error) {
       this.logger.error(
-        `Failed to update invitation with ${token} for user "${user.email}".`,
+        `Failed to update invitation with id "${id}" for user "${user.email}".`,
         error.stack,
       );
 

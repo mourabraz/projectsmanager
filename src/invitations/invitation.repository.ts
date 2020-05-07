@@ -1,6 +1,5 @@
 import { Repository, EntityRepository } from 'typeorm';
 import { Logger, InternalServerErrorException } from '@nestjs/common';
-import { uuid } from 'uuidv4';
 
 import { Invitation } from './invitation.entity';
 import { CreateInvitationDto } from './dto/create-invitation.dto';
@@ -31,7 +30,6 @@ export class InvitationRepository extends Repository<Invitation> {
       invitation.userId = userId;
       invitation.emailTo = emailTo;
       invitation.groupId = groupId;
-      invitation.token = uuid();
 
       await invitation.save();
       delete invitation.user;
