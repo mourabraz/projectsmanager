@@ -77,7 +77,8 @@
     "ts-loader": "^6.2.1",
     "ts-node": "^8.6.2",
     "tsconfig-paths": "^3.9.0",
-    "typescript": "^3.7.4"
+    "typescript": "^3.7.4",
+    "uuidv4": "^6.0.8"
   },
   "jest": {
     "moduleFileExtensions": [
