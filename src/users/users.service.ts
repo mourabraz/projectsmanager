@@ -19,4 +19,8 @@ export class UsersService {
 
     return groups.findIndex(i => i.id === group.id) !== -1;
   }
+
+  async getUserByEmail(email: string): Promise<User> {
+    return await this.userRepository.findOne({ where: { email } });
+  }
 }

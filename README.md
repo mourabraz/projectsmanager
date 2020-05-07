@@ -38,7 +38,7 @@
 |  GET   | /groups/:id/invitations    |   N    | List all invitations for a group (only the owner)                                                   |
 |  POST  | /groups/:id/invitations    |   N    | create a new invitation for a user to get into a group                                              |
 |   -    | -                          |   -    | -                                                                                                   |
-| PATCH  | /invitations/accept/:token |   N    | update the invitation to mark as accepted                                                           |
+|  GET   | /invitations/accept/:token |   N    | update the invitation to mark as accepted                                                           |
 | DELETE | /invitations/:id           |   N    | delete an invitation not accepted                                                                   |
 
 ## License

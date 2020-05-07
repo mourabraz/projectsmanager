@@ -14,6 +14,7 @@ import { User } from 'src/users/user.entity';
 import { GroupsService } from 'src/groups/groups.service';
 import { UsersGroupsService } from 'src/users-groups/users-groups.service';
 import { EmailsService } from 'src/emails/emails.service';
+import { UsersService } from 'src/users/users.service';
 
 @Injectable()
 export class InvitationsService {
@@ -25,6 +26,7 @@ export class InvitationsService {
     private groupsService: GroupsService,
     private usersGroupsService: UsersGroupsService,
     private emailsService: EmailsService,
+    private usersService: UsersService,
   ) {}
 
   async getInvitationsByGroupId(
@@ -58,6 +60,23 @@ export class InvitationsService {
       throw new NotFoundException();
     }
 
+    // check if emailTo belongs to a valid user
+    const participant = await this.usersService.getUserByEmail(
+      createInvitationDto.emailTo,
+    );
+    if (!participant) {
+      throw new NotFoundException();
+    }
+
+    // check if invited is not already a participant
+    const usersGroups = await this.usersGroupsService.isUserByIdInGroupById(
+      participant.id,
+      createInvitationDto.groupId,
+    );
+    if (usersGroups) {
+      throw new BadRequestException('User already participate on group.');
+    }
+
     if (createInvitationDto.emailTo === user.email) {
       this.logger.error(
         `Failed to create invitation to authenticated user"${
@@ -68,6 +87,18 @@ export class InvitationsService {
       throw new BadRequestException(
         'Create an invite to himself is not allowed',
       );
+    }
+
+    const prevValidInvitation = await this.invitationRepository.findOne({
+      where: {
+        emailTo: createInvitationDto.emailTo,
+        groupId: createInvitationDto.groupId,
+        acceptedAt: null,
+      },
+    });
+
+    if (prevValidInvitation) {
+      throw new BadRequestException('A pending invitation already exists.');
     }
 
     const invitation = await this.invitationRepository.createInvitation(
@@ -111,8 +142,6 @@ export class InvitationsService {
 
       throw new InternalServerErrorException();
     }
-
-    //send email to inviter
 
     return invitation;
   }

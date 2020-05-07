@@ -15,4 +15,13 @@ export class UsersGroupsService {
   async addParticipantToGroup(user: User, id: string): Promise<UserGroup> {
     return this.userGroupRepository.createUserGroup(user, id);
   }
+
+  async isUserByIdInGroupById(
+    userId: string,
+    groupId: string,
+  ): Promise<boolean> {
+    return !!(await this.userGroupRepository.findOne({
+      where: { userId, groupId },
+    }));
+  }
 }

@@ -2,10 +2,10 @@ import {
   Controller,
   Logger,
   UseGuards,
-  Patch,
   Param,
   Delete,
   ParseUUIDPipe,
+  Patch,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 

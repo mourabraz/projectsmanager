@@ -44,6 +44,9 @@ export class EmailsService {
 
     const queue = new Bull(EmailConsumer.channelName);
 
+    // const payload = { email: invitation.emailTo, token: invitation.token };
+    // const urlToken = this.jwtService.sign(payload);
+
     const link = `${this.appConfigService.url}/invitations/accept/${invitation.token}`;
 
     queue.add({
