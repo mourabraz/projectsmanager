@@ -2,10 +2,10 @@ import { Injectable, Logger } from '@nestjs/common';
 import * as Bull from 'bull';
 
 import { EmailConsumer } from '../queue/email.consumer';
-import { Invitation } from 'src/invitations/invitation.entity';
-import { User } from 'src/users/user.entity';
-import { Group } from 'src/groups/group.entity';
-import { AppConfigService } from 'src/config/app/config.service';
+import { Invitation } from '../invitations/invitation.entity';
+import { User } from '../users/user.entity';
+import { Group } from '../groups/group.entity';
+import { AppConfigService } from '../config/app/config.service';
 
 @Injectable()
 export class EmailsService {

@@ -4,7 +4,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { GroupsService } from './groups.service';
 import { GroupsController } from './groups.controller';
 import { GroupRepository } from './group.repository';
-import { AuthModule } from 'src/auth/auth.module';
+import { AuthModule } from '../auth/auth.module';
 
 @Module({
   imports: [TypeOrmModule.forFeature([GroupRepository]), AuthModule],

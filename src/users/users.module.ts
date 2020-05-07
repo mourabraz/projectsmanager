@@ -3,7 +3,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 
 import { UserRepository } from './user.repository';
 import { UsersService } from './users.service';
-import { GroupsModule } from 'src/groups/groups.module';
+import { GroupsModule } from '../groups/groups.module';
 
 @Module({
   imports: [TypeOrmModule.forFeature([UserRepository]), GroupsModule],

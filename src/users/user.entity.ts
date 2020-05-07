@@ -10,11 +10,11 @@ import {
 } from 'typeorm';
 import * as bcrypt from 'bcryptjs';
 
-import { Group } from 'src/groups/group.entity';
-import { Fiile } from 'src/fiiles/fiile.entity';
-import { UserGroup } from 'src/users-groups/user-group.entity';
-import { Invitation } from 'src/invitations/invitation.entity';
-import { Project } from 'src/projects/project.entity';
+import { Group } from '../groups/group.entity';
+import { Fiile } from '../fiiles/fiile.entity';
+import { UserGroup } from '../users-groups/user-group.entity';
+import { Invitation } from '../invitations/invitation.entity';
+import { Project } from '../projects/project.entity';
 
 @Entity('users')
 @Unique(['email'])

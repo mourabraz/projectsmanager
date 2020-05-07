@@ -2,7 +2,7 @@ import { Repository, EntityRepository } from 'typeorm';
 import { Logger, InternalServerErrorException } from '@nestjs/common';
 
 import { UserGroup } from './user-group.entity';
-import { User } from 'src/users/user.entity';
+import { User } from '../users/user.entity';
 
 @EntityRepository(UserGroup)
 export class UserGroupRepository extends Repository<UserGroup> {

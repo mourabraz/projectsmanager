@@ -3,8 +3,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 
 import { UserRepository } from './user.repository';
 import { User } from './user.entity';
-import { Group } from 'src/groups/group.entity';
-import { GroupsService } from 'src/groups/groups.service';
+import { Group } from '../groups/group.entity';
+import { GroupsService } from '../groups/groups.service';
 
 @Injectable()
 export class UsersService {

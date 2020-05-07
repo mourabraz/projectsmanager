@@ -10,8 +10,8 @@ import {
   JoinColumn,
 } from 'typeorm';
 
-import { Group } from 'src/groups/group.entity';
-import { User } from 'src/users/user.entity';
+import { Group } from '../groups/group.entity';
+import { User } from '../users/user.entity';
 
 @Entity('users_groups')
 @Index(['userId', 'groupId'], { unique: true })

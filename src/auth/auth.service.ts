@@ -5,8 +5,8 @@ import { JwtService } from '@nestjs/jwt';
 import { AuthRepository } from './auth.repository';
 import { AuthCredentialsDto } from './dto/auth-credentials.dto';
 import { JwtPayload } from './jwt-payload.interface';
-import { User } from 'src/users/user.entity';
-import { EmailsService } from 'src/emails/emails.service';
+import { User } from '../users/user.entity';
+import { EmailsService } from '../emails/emails.service';
 
 @Injectable()
 export class AuthService {

@@ -5,9 +5,9 @@ import {
 } from '@nestjs/common';
 import * as bcrypt from 'bcryptjs';
 
-import { User } from 'src/users/user.entity';
+import { User } from '../users/user.entity';
 import { AuthCredentialsDto } from './dto/auth-credentials.dto';
-import { TypeOrmErrorCode } from 'src/util/TypeOrmErrorCode.enum';
+import { TypeOrmErrorCode } from '../util/TypeOrmErrorCode.enum';
 
 @EntityRepository(User)
 export class AuthRepository extends Repository<User> {

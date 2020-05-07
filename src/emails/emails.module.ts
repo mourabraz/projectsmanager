@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 
 import { EmailsService } from './emails.service';
-import { AppConfigModule } from 'src/config/app/config.module';
+import { AppConfigModule } from '../config/app/config.module';
 
 @Module({
   imports: [AppConfigModule],

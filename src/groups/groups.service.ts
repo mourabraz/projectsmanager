@@ -6,7 +6,7 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 
 import { GroupRepository } from './group.repository';
-import { User } from 'src/users/user.entity';
+import { User } from '../users/user.entity';
 import { Group } from './group.entity';
 import { CreateGroupDto } from './dto/create-group.dto';
 

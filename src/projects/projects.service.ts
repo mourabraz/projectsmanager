@@ -2,10 +2,10 @@ import { Injectable, NotFoundException, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 
 import { ProjectRepository } from './project.repository';
-import { User } from 'src/users/user.entity';
+import { User } from '../users/user.entity';
 import { Project } from './project.entity';
 import { CreateProjectDto } from './dto/create-project.dto';
-import { GroupsService } from 'src/groups/groups.service';
+import { GroupsService } from '../groups/groups.service';
 
 @Injectable()
 export class ProjectsService {

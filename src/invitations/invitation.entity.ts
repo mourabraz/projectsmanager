@@ -9,8 +9,8 @@ import {
   JoinColumn,
   Index,
 } from 'typeorm';
-import { User } from 'src/users/user.entity';
-import { Group } from 'src/groups/group.entity';
+import { User } from '../users/user.entity';
+import { Group } from '../groups/group.entity';
 
 @Entity('invitations')
 @Index(['emailTo', 'groupId'], { unique: true })

@@ -10,10 +10,10 @@ import {
   OneToMany,
 } from 'typeorm';
 
-import { Group } from 'src/groups/group.entity';
-import { Task } from 'src/tasks/task.entity';
-import { Fiile } from 'src/fiiles/fiile.entity';
-import { User } from 'src/users/user.entity';
+import { Group } from '../groups/group.entity';
+import { Task } from '../tasks/task.entity';
+import { Fiile } from '../fiiles/fiile.entity';
+import { User } from '../users/user.entity';
 
 @Entity('projects')
 export class Project extends BaseEntity {

@@ -5,16 +5,16 @@ import {
   NotFoundException,
   InternalServerErrorException,
 } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
 
 import { InvitationRepository } from './invitation.repository';
-import { InjectRepository } from '@nestjs/typeorm';
 import { Invitation } from './invitation.entity';
 import { CreateInvitationDto } from './dto/create-invitation.dto';
-import { User } from 'src/users/user.entity';
-import { GroupsService } from 'src/groups/groups.service';
-import { UsersGroupsService } from 'src/users-groups/users-groups.service';
-import { EmailsService } from 'src/emails/emails.service';
-import { UsersService } from 'src/users/users.service';
+import { User } from '../users/user.entity';
+import { GroupsService } from '../groups/groups.service';
+import { UsersGroupsService } from '../users-groups/users-groups.service';
+import { EmailsService } from '../emails/emails.service';
+import { UsersService } from '../users/users.service';
 
 @Injectable()
 export class InvitationsService {

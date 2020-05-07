@@ -14,8 +14,8 @@ import { AuthGuard } from '@nestjs/passport';
 
 import { ProjectsService } from './projects.service';
 import { CreateProjectDto } from './dto/create-project.dto';
-import { GetUser } from 'src/auth/get-user.decorator';
-import { User } from 'src/users/user.entity';
+import { GetUser } from '../auth/get-user.decorator';
+import { User } from '../users/user.entity';
 import { Project } from './project.entity';
 
 @Controller('projects')

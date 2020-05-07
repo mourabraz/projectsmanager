@@ -15,8 +15,8 @@ import {
 import { AuthGuard } from '@nestjs/passport';
 
 import { GroupsService } from './groups.service';
-import { GetUser } from 'src/auth/get-user.decorator';
-import { User } from 'src/users/user.entity';
+import { GetUser } from '../auth/get-user.decorator';
+import { User } from '../users/user.entity';
 import { CreateGroupDto } from './dto/create-group.dto';
 import { Group } from './group.entity';
 

@@ -13,8 +13,8 @@ import {
 import { AuthGuard } from '@nestjs/passport';
 
 import { InvitationsService } from './invitations.service';
-import { GetUser } from 'src/auth/get-user.decorator';
-import { User } from 'src/users/user.entity';
+import { GetUser } from '../auth/get-user.decorator';
+import { User } from '../users/user.entity';
 import { CreateInvitationDto } from './dto/create-invitation.dto';
 import { Invitation } from './invitation.entity';
 

@@ -11,10 +11,10 @@ import {
   Index,
 } from 'typeorm';
 
-import { User } from 'src/users/user.entity';
-import { Project } from 'src/projects/project.entity';
-import { UserGroup } from 'src/users-groups/user-group.entity';
-import { Invitation } from 'src/invitations/invitation.entity';
+import { User } from '../users/user.entity';
+import { Project } from '../projects/project.entity';
+import { UserGroup } from '../users-groups/user-group.entity';
+import { Invitation } from '../invitations/invitation.entity';
 
 @Entity('groups')
 @Index(['name', 'ownerId'], { unique: true })

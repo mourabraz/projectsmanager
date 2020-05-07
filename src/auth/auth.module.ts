@@ -7,9 +7,9 @@ import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { AuthRepository } from './auth.repository';
 import { JwtStrategy } from './jwt.strategy';
-import { AppConfigModule } from 'src/config/app/config.module';
-import { AppConfigService } from 'src/config/app/config.service';
-import { EmailsModule } from 'src/emails/emails.module';
+import { AppConfigModule } from '../config/app/config.module';
+import { AppConfigService } from '../config/app/config.service';
+import { EmailsModule } from '../emails/emails.module';
 
 @Module({
   imports: [

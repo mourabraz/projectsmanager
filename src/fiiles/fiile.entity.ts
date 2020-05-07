@@ -8,9 +8,10 @@ import {
   JoinColumn,
   Entity,
 } from 'typeorm';
-import { User } from 'src/users/user.entity';
-import { Project } from 'src/projects/project.entity';
-import { Task } from 'src/tasks/task.entity';
+
+import { User } from '../users/user.entity';
+import { Project } from '../projects/project.entity';
+import { Task } from '../tasks/task.entity';
 
 @Entity('fiiles')
 export class Fiile extends BaseEntity {

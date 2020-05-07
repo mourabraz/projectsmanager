@@ -1,8 +1,8 @@
-import { Repository, EntityRepository, UpdateResult } from 'typeorm';
+import { Repository, EntityRepository } from 'typeorm';
 import { Task } from './task.entity';
 //import { CreateTaskDto } from './dto/create-task.dto';
 
-import { Logger, InternalServerErrorException } from '@nestjs/common';
+import { Logger } from '@nestjs/common';
 
 @EntityRepository(Task)
 export class TaskRepository extends Repository<Task> {
