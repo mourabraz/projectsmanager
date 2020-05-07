@@ -41,6 +41,11 @@
 | PATCH  | /invitations/:id        |   N    | update the invitation to mark as accepted                                                           |
 | DELETE | /invitations/:id        |   N    | delete an invitation not accepted                                                                   |
 
+## Test
+
+This project is focused on integration tests.
+We performing the test sequentially, in order to do not mock the Database (Postgres).
+
 ## License
 
 MIT © mourabraz@hotmail.com
