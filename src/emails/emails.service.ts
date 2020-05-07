@@ -51,7 +51,7 @@ export class EmailsService {
         to: invitation.emailTo,
         subject:
           'Your invite to participate in a group on the Projects Manager App ',
-        template: 'NewInvite',
+        template: 'NewInvitation',
         context: {
           name: invitation.emailTo,
           owner: user.name || user.email,

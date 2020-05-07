@@ -8,6 +8,7 @@ import { AuthModule } from 'src/auth/auth.module';
 import { GroupsModule } from 'src/groups/groups.module';
 import { UsersGroupsModule } from 'src/users-groups/users-groups.module';
 import { EmailsModule } from 'src/emails/emails.module';
+import { GroupsInvitationsController } from './groups-invitations.controller';
 
 @Module({
   imports: [
@@ -18,6 +19,6 @@ import { EmailsModule } from 'src/emails/emails.module';
     EmailsModule,
   ],
   providers: [InvitationsService],
-  controllers: [InvitationsController],
+  controllers: [InvitationsController, GroupsInvitationsController],
 })
 export class InvitationsModule {}
