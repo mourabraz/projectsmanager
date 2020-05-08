@@ -5,7 +5,6 @@ import {
   InternalServerErrorException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import * as bcrypt from 'bcryptjs';
 
 import { UserRepository } from './user.repository';
 import { User } from './user.entity';
@@ -34,15 +33,7 @@ export class UsersService {
   }
 
   async updateUser(updateUserDto: UpdateUserDto, user: User): Promise<User> {
-    const { name, email, password } = updateUserDto;
-
-    if (password) {
-      user.password = await this.hashPassword(password);
-    }
-
-    if (name) {
-      user.name = name;
-    }
+    const { email } = updateUserDto;
 
     if (email && email !== user.email) {
       const emailExists = await this.userRepository.findOne({
@@ -52,23 +43,8 @@ export class UsersService {
       if (emailExists) {
         throw new BadRequestException('Email already used');
       }
-
-      user.email = email;
     }
 
-    try {
-      await user.save();
-      delete user.password;
-
-      return user;
-    } catch (error) {
-      this.logger.error(`Failed to update user "${user.email}".`, error.stack);
-
-      throw new InternalServerErrorException();
-    }
-  }
-
-  private async hashPassword(password: string): Promise<string> {
-    return bcrypt.hash(password, 10);
+    return await this.userRepository.updateUser(updateUserDto, user);
   }
 }
