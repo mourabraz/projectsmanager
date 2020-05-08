@@ -8,6 +8,7 @@ import * as bcrypt from 'bcryptjs';
 import { User } from '../users/user.entity';
 import { AuthCredentialsDto } from './dto/auth-credentials.dto';
 import { TypeOrmErrorCode } from '../util/TypeOrmErrorCode.enum';
+import { JwtPayload } from './jwt-payload.interface';
 
 @EntityRepository(User)
 export class AuthRepository extends Repository<User> {
@@ -33,12 +34,12 @@ export class AuthRepository extends Repository<User> {
 
   async validateUserPassword(
     authCredentialsDto: AuthCredentialsDto,
-  ): Promise<string> {
+  ): Promise<JwtPayload | null> {
     const { email, password } = authCredentialsDto;
     const user = await this.findOne({ email });
 
     if (user && (await user.validatePassword(password))) {
-      return user.email;
+      return { email: user.email, updatedAt: user.updatedAt };
     }
 
     return null;
