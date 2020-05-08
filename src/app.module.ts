@@ -33,8 +33,4 @@ import { InvitationsModule } from './invitations/invitations.module';
     InvitationsModule,
   ],
 })
-export class AppModule {
-  onModuleInit() {
-    console.log('MAIN ', process.pid);
-  }
-}
+export class AppModule {}
