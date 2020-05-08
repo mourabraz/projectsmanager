@@ -2,18 +2,17 @@
 
 ## Description
 
-- [] all users must be athenticated
-- [] each user can create, update, delete groups created by hilmself (group's owner)
-- [] each group can have several projects
-- [] the owner can invite other users (participants) to the group, the participant must accept the invite
-- [] the owner can delete an invitation before it has been accepted
-- [] the owner can expel any participant. And the participants can leave any group.
-- [] the owner can change the group's owner to another participant (the old owner becomes a participant)
-- [] the onwer can delete a group and all data (projects) associated will be lost
-
-- [] users (owner/participants of a group) can create, update, delete projects created by hilmself (projects's owner)
-- [] when the owner of a project does not belong anymore to the related group the project's owner will be the group's owner
-- [] each project can have several tasks
+- all users must be athenticated
+- each user can create, update, delete groups created by hilmself (group's owner)
+- each group can have several projects
+- the owner can invite other users (participants) to the group, the participant must accept the invite
+- the owner can delete an invitation before it has been accepted
+- the owner can expel any participant. And the participants can leave any group.
+- the owner can change the group's owner to another participant (the old owner becomes a participant)
+- the onwer can delete a group and all data (projects) associated will be lost
+- users (owner/participants of a group) can create, update, delete projects created by hilmself (projects's owner)
+- when the owner of a project does not belong anymore to the related group the project's owner will be the group's owner
+- each project can have several tasks
 
 ## API
 
