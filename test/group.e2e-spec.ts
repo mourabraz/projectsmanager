@@ -466,7 +466,7 @@ describe('Group (e2e)', () => {
   });
 
   describe('DELETE /groups/:id', () => {
-    it('should throw Unauthorized error for an authenticated user', async () => {
+    it('should throw Unauthorized error for a user not authenticated', async () => {
       const anotherUserResponse = await request(app.getHttpServer())
         .post('/auth/signup')
         .set('Accept', 'application/json')
