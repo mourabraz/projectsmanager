@@ -46,6 +46,17 @@
 This project is focused on integration tests.
 We performing the test sequentially, in order to do not mock the Database (Postgres).
 
+## Emails
+
+- Every new user (sign up) a welcome email will be sent
+- When a new invitation is created an email is sent to the participant
+
+All emails are added to a queue using [Redis](https://redis.io/) and [Bull](https://github.com/OptimalBits/bull#readme). The execution of the job will run in another process (different of the main app), to accomplish this feature we use the WebSocket feature to provide the communication between the main app and the Bull execution environment.
+
+For the templates of the email, we use the [handlebars](https://handlebarsjs.com/)
+
+For a more simple example see this repo: [nestjs-queue-email-example](https://github.com/mourabraz/nestjs-queue-email-example)
+
 ## License
 
 MIT © mourabraz@hotmail.com
