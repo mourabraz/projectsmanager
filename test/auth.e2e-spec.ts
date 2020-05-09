@@ -4,11 +4,14 @@ import { INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
 import { Repository } from 'typeorm';
 
+import { PostgresConfigModule } from '../src/config/database/postgres/config.module';
+import { PostgresConfigService } from '../src/config/database/postgres/config.service';
+
+import { EmailsService } from './../src/emails/emails.service';
+
 import { AuthModule } from './../src/auth/auth.module';
 import { UsersModule } from './../src/users/users.module';
 import { User } from './../src/users/user.entity';
-
-import { EmailsService } from './../src/emails/emails.service';
 
 describe('Auth (e2e)', () => {
   let app: INestApplication;
@@ -18,16 +21,11 @@ describe('Auth (e2e)', () => {
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [
-        TypeOrmModule.forRoot({
-          type: 'postgres',
-          host: 'localhost',
-          port: 5432,
-          username: 'postgres',
-          password: 'docker',
-          database: 'projectmanagerapp_tests',
-          entities: ['./**/*.entity.ts'],
-          //entities: [`./../src/**/*.entity{.ts,.js}`],
-          synchronize: true,
+        TypeOrmModule.forRootAsync({
+          imports: [PostgresConfigModule],
+          useFactory: async (configService: PostgresConfigService) =>
+            configService.typeOrmConfigTest,
+          inject: [PostgresConfigService],
         }),
         AuthModule,
         UsersModule,

@@ -37,6 +37,7 @@
 |  GET   | /groups/:id/invitations |   N    | List all invitations for a group (only the owner)                                                   | :heavy_check_mark: |
 |  POST  | /groups/:id/invitations |   N    | create a new invitation for a user to get into a group                                              | :heavy_check_mark: |
 |   -    | -                       |   -    | -                                                                                                   | -                  |
+|  GET   | /invitations            |   N    | List all invitations to participate in a group for the authenticated user                           | :heavy_check_mark: |
 | PATCH  | /invitations/:id        |   N    | update the invitation to mark as accepted                                                           | :thumbsdown:       |
 | DELETE | /invitations/:id        |   N    | delete an invitation not accepted                                                                   | :thumbsdown:       |
 

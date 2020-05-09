@@ -3,6 +3,7 @@ import { Logger, InternalServerErrorException } from '@nestjs/common';
 
 import { Invitation } from './invitation.entity';
 import { CreateInvitationDto } from './dto/create-invitation.dto';
+import { User } from '../users/user.entity';
 
 @EntityRepository(Invitation)
 export class InvitationRepository extends Repository<Invitation> {
@@ -14,6 +15,20 @@ export class InvitationRepository extends Repository<Invitation> {
     } catch (error) {
       this.logger.error(
         `Failed to get invitations for group id "${groupId}".`,
+        error.stack,
+      );
+      throw new InternalServerErrorException();
+    }
+  }
+
+  async getInvitationsToParticipate(user: User): Promise<Invitation[]> {
+    try {
+      return await this.find({
+        where: { emailTo: user.email, acceptedAt: null },
+      });
+    } catch (error) {
+      this.logger.error(
+        `Failed to get invitations to participate for user "${user.id}".`,
         error.stack,
       );
       throw new InternalServerErrorException();

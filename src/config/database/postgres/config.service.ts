@@ -34,6 +34,28 @@ export class PostgresConfigService {
     return Boolean(this.configService.get<boolean>('postgres.typeormSync'));
   }
 
+  get typeTest(): any {
+    return this.configService.get<string>('postgres.typeTest');
+  }
+  get hostTest(): string {
+    return this.configService.get<string>('postgres.hostTest');
+  }
+  get portTest(): number {
+    return Number(this.configService.get<number>('postgres.portTest'));
+  }
+  get usernameTest(): string {
+    return this.configService.get<string>('postgres.usernameTest');
+  }
+  get passwordTest(): string {
+    return this.configService.get<string>('postgres.passwordTest');
+  }
+  get nameTest(): string {
+    return this.configService.get<string>('postgres.nameTest');
+  }
+  get typeSyncTest(): boolean {
+    return Boolean(this.configService.get<boolean>('postgres.typeormSyncTest'));
+  }
+
   get typeOrmConfig(): TypeOrmModuleOptions {
     return {
       type: this.type,
@@ -44,6 +66,19 @@ export class PostgresConfigService {
       database: this.name,
       entities: [join(__dirname, '..', '..', '..', './**/*.entity{.ts,.js}')],
       synchronize: this.typeSync,
+    };
+  }
+
+  get typeOrmConfigTest(): TypeOrmModuleOptions {
+    return {
+      type: this.typeTest,
+      host: this.hostTest,
+      port: this.portTest,
+      username: this.usernameTest,
+      password: this.passwordTest,
+      database: this.nameTest,
+      entities: [join(__dirname, '..', '..', '..', './**/*.entity{.ts,.js}')],
+      synchronize: this.typeSyncTest,
     };
   }
 }

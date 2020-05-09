@@ -6,6 +6,7 @@ import {
   Delete,
   ParseUUIDPipe,
   Patch,
+  Get,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 
@@ -20,6 +21,14 @@ export class InvitationsController {
   private logger = new Logger(InvitationsController.name);
 
   constructor(private invitationsService: InvitationsService) {}
+
+  @Get()
+  index(@GetUser() user: User): Promise<Invitation[]> {
+    this.logger.verbose(
+      `User "${user.email}" retrieving all invitations to participate.`,
+    );
+    return this.invitationsService.getInvitationsToParticipate(user);
+  }
 
   @Patch('/:id')
   update(

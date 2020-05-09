@@ -5,6 +5,9 @@ import * as request from 'supertest';
 import { uuid } from 'uuidv4';
 import { Repository } from 'typeorm';
 
+import { PostgresConfigModule } from '../src/config/database/postgres/config.module';
+import { PostgresConfigService } from '../src/config/database/postgres/config.service';
+
 import { EmailsService } from './../src/emails/emails.service';
 
 import { AuthModule } from './../src/auth/auth.module';
@@ -83,15 +86,11 @@ describe('Project (e2e)', () => {
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [
-        TypeOrmModule.forRoot({
-          type: 'postgres',
-          host: 'localhost',
-          port: 5432,
-          username: 'postgres',
-          password: 'docker',
-          database: 'projectmanagerapp_tests',
-          entities: ['./**/*.entity.ts'],
-          synchronize: true,
+        TypeOrmModule.forRootAsync({
+          imports: [PostgresConfigModule],
+          useFactory: async (configService: PostgresConfigService) =>
+            configService.typeOrmConfigTest,
+          inject: [PostgresConfigService],
         }),
         AuthModule,
         UsersModule,

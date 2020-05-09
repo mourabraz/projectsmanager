@@ -20,28 +20,36 @@ import { Project } from './../src/projects/project.entity';
 import { AuthService } from './../src/auth/auth.service';
 import { UsersGroupsService } from './../src/users-groups/users-groups.service';
 import { UsersGroupsModule } from './../src/users-groups/users-groups.module';
+import { Invitation } from '../src/invitations/invitation.entity';
+import { InvitationsService } from '../src/invitations/invitations.service';
+import { InvitationsModule } from '../src/invitations/invitations.module';
 // import { ProjectsService } from './../src/projects/projects.service';
 
-describe('User (e2e)', () => {
+describe('Invitation (e2e)', () => {
   let app: INestApplication;
 
   let userRepository: Repository<User>;
   let groupRepository: Repository<Group>;
   let projectRepository: Repository<Project>;
+  let invitationRepository: Repository<Invitation>;
 
   let authService: AuthService;
   let groupsService: GroupsService;
   let usersGroupsService: UsersGroupsService;
-  // let projectsService: ProjectsService;
+  let invitationsService: InvitationsService;
 
   let user1: User;
   let user2: User;
   let user1Token: string;
+  let user2Token: string;
 
   const groupsOwnedByUser1: Group[] = [];
   const groupsOwnedByUser2: Group[] = [];
 
-  const emailsService = { addWelcomeEmailToQueue: () => ({}) };
+  const emailsService = {
+    addWelcomeEmailToQueue: jest.fn(),
+    addInvitationEmailToQueue: jest.fn(),
+  };
 
   const populateInitialData = async () => {
     user1 = await authService.signUp({
@@ -56,6 +64,13 @@ describe('User (e2e)', () => {
     user1Token = (
       await authService.signIn({
         email: user1.email,
+        password: '12345678',
+      })
+    ).accessToken;
+
+    user2Token = (
+      await authService.signIn({
+        email: user2.email,
         password: '12345678',
       })
     ).accessToken;
@@ -96,6 +111,7 @@ describe('User (e2e)', () => {
         GroupsModule,
         ProjectsModule,
         UsersGroupsModule,
+        InvitationsModule,
       ],
     })
       .overrideProvider(EmailsService)
@@ -107,11 +123,12 @@ describe('User (e2e)', () => {
     userRepository = moduleFixture.get('UserRepository');
     groupRepository = moduleFixture.get('GroupRepository');
     projectRepository = moduleFixture.get('ProjectRepository');
+    invitationRepository = moduleFixture.get('InvitationRepository');
 
     authService = moduleFixture.get(AuthService);
     groupsService = moduleFixture.get(GroupsService);
     usersGroupsService = moduleFixture.get(UsersGroupsService);
-    // projectsService = moduleFixture.get(ProjectsService);
+    invitationsService = moduleFixture.get(InvitationsService);
 
     await app.init();
 
@@ -119,6 +136,7 @@ describe('User (e2e)', () => {
   });
 
   afterAll(async () => {
+    await projectRepository.query(`DELETE FROM projects;`);
     await groupRepository.query(`DELETE FROM groups;`);
     await userRepository.query(`DELETE FROM users;`);
 
@@ -126,19 +144,21 @@ describe('User (e2e)', () => {
   });
 
   afterEach(async () => {
-    await projectRepository.query(`DELETE FROM projects;`);
+    await invitationRepository.query(`DELETE FROM invitations;`);
+
+    emailsService.addInvitationEmailToQueue.mockRestore();
   });
 
-  describe('UPDATE /users', () => {
+  describe('POST /groups/:groupId/invitations', () => {
     it('should throw Unauthorized for unauthenticated user', async () => {
       const token = '';
 
       const response = await request(app.getHttpServer())
-        .put('/users')
+        .post(`/groups/${groupsOwnedByUser1[0].id}/invitations`)
         .set('Accept', 'application/json')
         .set('Authorization', `Bearer ${token}`)
         .send({
-          name: 'My name is',
+          emailTo: 'fulano@fulano.com',
         });
 
       expect(response.status).toEqual(401);
@@ -148,186 +168,226 @@ describe('User (e2e)', () => {
       });
     });
 
-    it('should validate name input', async () => {
+    it('should throw Not Found when emailTo does not exists', async () => {
       const token = user1Token;
 
       const response = await request(app.getHttpServer())
-        .put('/users')
+        .post(`/groups/${groupsOwnedByUser1[0].id}/invitations`)
         .set('Accept', 'application/json')
         .set('Authorization', `Bearer ${token}`)
         .send({
-          name: '',
+          emailTo: 'fulano@fulano.com',
+        });
+
+      expect(response.status).toEqual(404);
+      expect(response.body).toMatchObject({
+        statusCode: 404,
+        message: 'Not Found',
+      });
+    });
+
+    it('should validate emailTo', async () => {
+      const token = user1Token;
+
+      const response = await request(app.getHttpServer())
+        .post(`/groups/${groupsOwnedByUser1[0].id}/invitations`)
+        .set('Accept', 'application/json')
+        .set('Authorization', `Bearer ${token}`)
+        .send({
+          emailTo: 'fulanofulano.com',
         });
 
       expect(response.status).toEqual(400);
       expect(response.body).toMatchObject({
         statusCode: 400,
-        message: ['name should not be empty'],
-        error: 'Bad Request',
+        message: ['emailTo must be an email'],
       });
     });
 
-    it('should validate email input', async () => {
+    it('should create an invitation', async () => {
       const token = user1Token;
 
       const response = await request(app.getHttpServer())
-        .put('/users')
+        .post(`/groups/${groupsOwnedByUser1[0].id}/invitations`)
         .set('Accept', 'application/json')
         .set('Authorization', `Bearer ${token}`)
         .send({
-          email: '',
+          emailTo: user2.email,
         });
 
-      expect(response.status).toEqual(400);
+      expect(response.status).toEqual(201);
       expect(response.body).toMatchObject({
-        statusCode: 400,
-        message: ['email must be an email'],
-        error: 'Bad Request',
+        userId: user1.id,
+        emailTo: user2.email,
+        groupId: groupsOwnedByUser1[0].id,
+        acceptedAt: null,
+        id: expect.any(String),
       });
     });
 
-    it('should validate password input', async () => {
-      const token = user1Token;
-
-      const response = await request(app.getHttpServer())
-        .put('/users')
-        .set('Accept', 'application/json')
-        .set('Authorization', `Bearer ${token}`)
-        .send({
-          password: '',
-        });
-
-      expect(response.status).toEqual(400);
-      expect(response.body).toMatchObject({
-        statusCode: 400,
-        message: ['password must be longer than or equal to 8 characters'],
-        error: 'Bad Request',
-      });
-    });
-
-    it('should update name of authenticated user', async () => {
-      const token = user1Token;
-
-      const response = await request(app.getHttpServer())
-        .put('/users')
-        .set('Accept', 'application/json')
-        .set('Authorization', `Bearer ${token}`)
-        .send({
-          name: 'My name is',
-        });
-
-      expect(response.status).toEqual(200);
-      expect(response.body).toMatchObject({
-        id: user1.id,
-        name: 'My name is',
-        email: user1.email,
-        createdAt: user1.createdAt.toISOString(),
-        updatedAt: expect.any(String),
-      });
-
-      user1.name = 'My name is';
-      user1Token = (
-        await authService.signIn({
-          email: user1.email,
-          password: '12345678',
-        })
-      ).accessToken;
-    });
-
-    it('should update email of authenticated user', async () => {
-      const token = user1Token;
-
-      const response = await request(app.getHttpServer())
-        .put('/users')
-        .set('Accept', 'application/json')
-        .set('Authorization', `Bearer ${token}`)
-        .send({
-          email: 'teste@teste.com',
-        });
-
-      expect(response.status).toEqual(200);
-      expect(response.body).toMatchObject({
-        id: user1.id,
-        name: user1.name,
-        email: 'teste@teste.com',
-        createdAt: user1.createdAt.toISOString(),
-        updatedAt: expect.any(String),
-      });
-
-      user1.email = 'teste@teste.com';
-      user1Token = (
-        await authService.signIn({
-          email: user1.email,
-          password: '12345678',
-        })
-      ).accessToken;
-    });
-
-    it('should update password of authenticated user', async () => {
-      const token = user1Token;
-
-      const response = await request(app.getHttpServer())
-        .put('/users')
-        .set('Accept', 'application/json')
-        .set('Authorization', `Bearer ${token}`)
-        .send({
-          password: '987654321',
-        });
-
-      expect(response.status).toEqual(200);
-      expect(response.body).toMatchObject({
-        id: user1.id,
-        name: user1.name,
-        email: user1.email,
-        createdAt: user1.createdAt.toISOString(),
-        updatedAt: expect.any(String),
-      });
-
-      user1.password = '987654321';
-      user1Token = (
-        await authService.signIn({
-          email: user1.email,
-          password: user1.password,
-        })
-      ).accessToken;
-    });
-
-    it('should invalidate token after any update', async () => {
+    it('should send email when create an invitation', async () => {
       const token = user1Token;
 
       await request(app.getHttpServer())
-        .put('/users')
+        .post(`/groups/${groupsOwnedByUser1[0].id}/invitations`)
         .set('Accept', 'application/json')
         .set('Authorization', `Bearer ${token}`)
         .send({
-          name: 'Now my name is',
-          email: 'user1@teste.teste',
-          password: '12345678',
+          emailTo: user2.email,
         });
 
+      expect(emailsService.addInvitationEmailToQueue).toBeCalledTimes(1);
+    });
+
+    it('should not create an invitation when a prev one has accept_at value null', async () => {
+      const token = user1Token;
+
+      await invitationsService.createInvitation(
+        {
+          userId: user1.id,
+          emailTo: user2.email,
+          groupId: groupsOwnedByUser1[0].id,
+        },
+        user1,
+      );
+
+      emailsService.addInvitationEmailToQueue.mockRestore();
+
       const response = await request(app.getHttpServer())
-        .put('/users')
+        .post(`/groups/${groupsOwnedByUser1[0].id}/invitations`)
         .set('Accept', 'application/json')
         .set('Authorization', `Bearer ${token}`)
         .send({
-          name: 'My name is',
+          emailTo: user2.email,
         });
+
+      expect(emailsService.addInvitationEmailToQueue).not.toBeCalled();
+
+      expect(response.status).toEqual(400);
+      expect(response.body).toMatchObject({
+        statusCode: 400,
+        message: 'A pending invitation already exists.',
+        error: 'Bad Request',
+      });
+    });
+
+    it('should not create an invitation when the user already is a participant', async () => {
+      const token = user2Token;
+
+      const response = await request(app.getHttpServer())
+        .post(`/groups/${groupsOwnedByUser2[1].id}/invitations`)
+        .set('Accept', 'application/json')
+        .set('Authorization', `Bearer ${token}`)
+        .send({
+          emailTo: user1.email,
+        });
+
+      expect(emailsService.addInvitationEmailToQueue).not.toBeCalled();
+
+      expect(response.status).toEqual(400);
+      expect(response.body).toMatchObject({
+        statusCode: 400,
+        message: 'User already participate on group.',
+        error: 'Bad Request',
+      });
+    });
+  });
+
+  describe('GET /groups/:groupId/invitations', () => {
+    it('should throw an Anauthorized error when try to list invitations for a user not authenticated', async () => {
+      const token = '';
+
+      const response = await request(app.getHttpServer())
+        .get(`/groups/${groupsOwnedByUser1[0]}/invitations`)
+        .set('Accept', 'application/json')
+        .set('Authorization', `Bearer ${token}`)
+        .send();
 
       expect(response.status).toEqual(401);
       expect(response.body).toMatchObject({
-        statusCode: 401,
         message: 'Unauthorized',
+        statusCode: 401,
       });
+    });
 
-      user1.name = 'Now my name is';
-      user1.email = 'user1@teste.teste';
-      user1.password = '12345678';
-      user1Token = (
-        await authService.signIn({
-          email: user1.email,
-          password: user1.password,
-        })
-      ).accessToken;
+    it('should list all invitations associated to authenticated user by group id for the owner', async () => {
+      const token = user1Token;
+
+      await invitationsService.createInvitation(
+        {
+          userId: user1.id,
+          emailTo: user2.email,
+          groupId: groupsOwnedByUser1[0].id,
+        },
+        user1,
+      );
+
+      await invitationsService.createInvitation(
+        {
+          userId: user2.id,
+          emailTo: user1.email,
+          groupId: groupsOwnedByUser2[0].id,
+        },
+        user2,
+      );
+
+      const response = await request(app.getHttpServer())
+        .get(`/groups/${groupsOwnedByUser1[0].id}/invitations`)
+        .set('Accept', 'application/json')
+        .set('Authorization', `Bearer ${token}`)
+        .send();
+
+      expect(response.status).toEqual(200);
+      expect(response.body.length).toBe(1);
+    });
+  });
+
+  describe('GET /invitations', () => {
+    it('should throw an Anauthorized error when try to list invitations for a user not authenticated', async () => {
+      const token = '';
+
+      const response = await request(app.getHttpServer())
+        .get('/invitations')
+        .set('Accept', 'application/json')
+        .set('Authorization', `Bearer ${token}`)
+        .send();
+
+      expect(response.status).toEqual(401);
+      expect(response.body).toMatchObject({
+        message: 'Unauthorized',
+        statusCode: 401,
+      });
+    });
+
+    it('should list all invitations associated to authenticated user when not the owner', async () => {
+      const token = user1Token;
+
+      await invitationsService.createInvitation(
+        {
+          userId: user1.id,
+          emailTo: user2.email,
+          groupId: groupsOwnedByUser1[0].id,
+        },
+        user1,
+      );
+
+      await invitationsService.createInvitation(
+        {
+          userId: user2.id,
+          emailTo: user1.email,
+          groupId: groupsOwnedByUser2[0].id,
+        },
+        user2,
+      );
+
+      const response = await request(app.getHttpServer())
+        .get('/invitations')
+        .set('Accept', 'application/json')
+        .set('Authorization', `Bearer ${token}`)
+        .send();
+
+      expect(response.status).toEqual(200);
+      expect(response.body.length).toBe(1);
     });
   });
 });
