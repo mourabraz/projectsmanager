@@ -30,7 +30,7 @@ export class InvitationsController {
     return this.invitationsService.getInvitationsToParticipate(user);
   }
 
-  @Patch('/:id')
+  @Patch('/:id/accept')
   update(
     @Param('id', new ParseUUIDPipe()) id: string,
     @GetUser() user: User,

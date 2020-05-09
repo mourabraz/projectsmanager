@@ -23,6 +23,7 @@ import { UsersGroupsModule } from './../src/users-groups/users-groups.module';
 import { Invitation } from '../src/invitations/invitation.entity';
 import { InvitationsService } from '../src/invitations/invitations.service';
 import { InvitationsModule } from '../src/invitations/invitations.module';
+import { uuid } from 'uuidv4';
 // import { ProjectsService } from './../src/projects/projects.service';
 
 describe('Invitation (e2e)', () => {
@@ -388,6 +389,52 @@ describe('Invitation (e2e)', () => {
 
       expect(response.status).toEqual(200);
       expect(response.body.length).toBe(1);
+    });
+  });
+
+  describe('UPDATE /invitations/:id/accept', () => {
+    it('should throw Not Found when accept an invitation that does not exists', async () => {
+      const token = user1Token;
+
+      const response = await request(app.getHttpServer())
+        .patch(`/invitations/${uuid()}/accept`)
+        .set('Accept', 'application/json')
+        .set('Authorization', `Bearer ${token}`)
+        .send();
+
+      expect(response.status).toEqual(404);
+      expect(response.body).toMatchObject({
+        statusCode: 404,
+        message: 'Not Found',
+      });
+    });
+
+    it('should accept an invitation', async () => {
+      const token = user1Token;
+
+      const invitation = await invitationsService.createInvitation(
+        {
+          userId: user2.id,
+          emailTo: user1.email,
+          groupId: groupsOwnedByUser2[0].id,
+        },
+        user2,
+      );
+
+      const response = await request(app.getHttpServer())
+        .patch(`/invitations/${invitation.id}/accept`)
+        .set('Accept', 'application/json')
+        .set('Authorization', `Bearer ${token}`)
+        .send();
+
+      expect(response.status).toEqual(200);
+      expect(response.body).toMatchObject({
+        id: expect.any(String),
+        emailTo: user1.email,
+        groupId: groupsOwnedByUser2[0].id,
+        userId: user2.id,
+        acceptedAt: expect.any(String),
+      });
     });
   });
 });
