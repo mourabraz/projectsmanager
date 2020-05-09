@@ -11,16 +11,20 @@ import { GroupsModule } from '../groups/groups.module';
 import { UsersController } from './users.controller';
 import { AuthModule } from '../auth/auth.module';
 import { UsersPhotosController } from './users-photos.controller';
+import { AppConfigModule } from '../config/app/config.module';
+import { PhotoRepository } from './photo.repository';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([UserRepository]),
+    TypeOrmModule.forFeature([UserRepository, PhotoRepository]),
     MulterModule.registerAsync({
       imports: [MulterConfigModule],
       useFactory: async (configService: MulterConfigService) =>
-        configService.multerConfig,
+        configService.multerPhotoConfig,
       inject: [MulterConfigService],
     }),
+    AppConfigModule,
+    MulterConfigModule,
     AuthModule,
     GroupsModule,
   ],

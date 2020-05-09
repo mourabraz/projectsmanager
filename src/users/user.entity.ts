@@ -7,6 +7,7 @@ import {
   UpdateDateColumn,
   OneToMany,
   Unique,
+  OneToOne,
 } from 'typeorm';
 import * as bcrypt from 'bcryptjs';
 
@@ -15,6 +16,7 @@ import { Fiile } from '../fiiles/fiile.entity';
 import { UserGroup } from '../users-groups/user-group.entity';
 import { Invitation } from '../invitations/invitation.entity';
 import { Project } from '../projects/project.entity';
+import { Photo } from './photo.entity';
 
 @Entity('users')
 @Unique(['email'])
@@ -31,14 +33,17 @@ export class User extends BaseEntity {
   @Column({ select: true })
   password: string;
 
-  @Column({ nullable: true })
-  photo: string;
-
   @CreateDateColumn({ name: 'created_at', type: 'timestamptz' })
   createdAt: Date;
 
   @UpdateDateColumn({ name: 'updated_at', type: 'timestamptz', precision: 3 })
   updatedAt: Date;
+
+  @OneToOne(
+    type => Photo,
+    photo => photo.user,
+  )
+  photo: Photo;
 
   @OneToMany(
     type => Group,
