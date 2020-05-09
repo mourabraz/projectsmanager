@@ -14,7 +14,7 @@ export class UserGroupRepository extends Repository<UserGroup> {
       userGroup.userId = user.id;
       userGroup.groupId = groupId;
 
-      await userGroup.save();
+      await this.save(userGroup);
       // delete userGroup.user;
 
       return userGroup;

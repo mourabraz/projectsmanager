@@ -32,7 +32,7 @@ export class ProjectRepository extends Repository<Project> {
       project.description = description;
       project.status = ProjectStatus.OPEN;
 
-      await project.save();
+      await this.save(project);
 
       return project;
     } catch (error) {

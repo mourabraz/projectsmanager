@@ -137,7 +137,7 @@ describe('Group (e2e)', () => {
       const anotherUser = new User();
       anotherUser.email = 'user@User.com';
       anotherUser.password = '123456';
-      await anotherUser.save();
+      await userRepository.save(anotherUser);
       await groupRepository.insert({
         id: uuid(),
         name: 'group_name',

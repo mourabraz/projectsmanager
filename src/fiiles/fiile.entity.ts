@@ -1,5 +1,4 @@
 import {
-  BaseEntity,
   PrimaryGeneratedColumn,
   Column,
   CreateDateColumn,
@@ -14,7 +13,7 @@ import { Project } from '../projects/project.entity';
 import { Task } from '../tasks/task.entity';
 
 @Entity('fiiles')
-export class Fiile extends BaseEntity {
+export class Fiile {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 

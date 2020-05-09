@@ -1,5 +1,4 @@
 import {
-  BaseEntity,
   Entity,
   Column,
   PrimaryGeneratedColumn,
@@ -18,7 +17,7 @@ import { Invitation } from '../invitations/invitation.entity';
 
 @Entity('groups')
 @Index(['name', 'ownerId'], { unique: true })
-export class Group extends BaseEntity {
+export class Group {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 

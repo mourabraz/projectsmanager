@@ -20,7 +20,7 @@ export class AuthRepository extends Repository<User> {
     user.password = await this.hashPassword(password);
 
     try {
-      await user.save();
+      await this.save(user);
 
       return user;
     } catch (error) {

@@ -9,12 +9,14 @@ import { GroupRepository } from './group.repository';
 import { User } from '../users/user.entity';
 import { Group } from './group.entity';
 import { CreateGroupDto } from './dto/create-group.dto';
+import { UsersGroupsService } from '../users-groups/users-groups.service';
 
 @Injectable()
 export class GroupsService {
   constructor(
     @InjectRepository(GroupRepository)
     private groupRepository: GroupRepository,
+    private usersGroupsService: UsersGroupsService,
   ) {}
 
   async getGroupsForUser(user: User) {
@@ -33,11 +35,11 @@ export class GroupsService {
     createGroupDto: CreateGroupDto,
     user: User,
   ): Promise<Group> {
-    const group = await this.groupRepository.findOne({
+    const groupExists = await this.groupRepository.findOne({
       where: { name: createGroupDto.name, ownerId: user.id },
     });
 
-    if (group) {
+    if (groupExists) {
       throw new BadRequestException(
         `This name "${createGroupDto.name}" is not available`,
       );
@@ -45,7 +47,13 @@ export class GroupsService {
 
     createGroupDto.ownerId = user.id;
 
-    return await this.groupRepository.createGroup(createGroupDto);
+    const group = await this.groupRepository.createGroup(createGroupDto);
+
+    if (group) {
+      await this.usersGroupsService.addParticipantToGroup(user, group.id);
+    }
+
+    return group;
   }
 
   async updateGroup(

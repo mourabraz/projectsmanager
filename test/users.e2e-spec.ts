@@ -223,7 +223,6 @@ describe('User (e2e)', () => {
         id: user1.id,
         name: 'My name is',
         email: user1.email,
-        photo: user1.photo,
         createdAt: user1.createdAt.toISOString(),
         updatedAt: expect.any(String),
       });
@@ -253,7 +252,6 @@ describe('User (e2e)', () => {
         id: user1.id,
         name: user1.name,
         email: 'teste@teste.com',
-        photo: user1.photo,
         createdAt: user1.createdAt.toISOString(),
         updatedAt: expect.any(String),
       });
@@ -283,7 +281,6 @@ describe('User (e2e)', () => {
         id: user1.id,
         name: user1.name,
         email: user1.email,
-        photo: user1.photo,
         createdAt: user1.createdAt.toISOString(),
         updatedAt: expect.any(String),
       });

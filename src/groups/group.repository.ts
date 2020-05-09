@@ -4,7 +4,6 @@ import { Logger, InternalServerErrorException } from '@nestjs/common';
 import { Group } from './group.entity';
 import { User } from '../users/user.entity';
 import { CreateGroupDto } from './dto/create-group.dto';
-import { UserGroup } from '../users-groups/user-group.entity';
 
 @EntityRepository(Group)
 export class GroupRepository extends Repository<Group> {
@@ -27,21 +26,6 @@ export class GroupRepository extends Repository<Group> {
       throw new InternalServerErrorException();
     }
   }
-
-  // async getOwnerGroups(user: User): Promise<Group[]> {
-  //   const query = this.createQueryBuilder('group');
-  //   query.where('group.ownerId = :ownerId', { ownerId: user.id });
-
-  //   try {
-  //     return await query.getMany();
-  //   } catch (error) {
-  //     this.logger.error(
-  //       `Failed to get own groups for user "${user.email}".`,
-  //       error.stack,
-  //     );
-  //     throw new InternalServerErrorException();
-  //   }
-  // }
 
   async getGroupByIdForUser(id: string, user: User): Promise<Group> {
     try {
@@ -86,13 +70,7 @@ export class GroupRepository extends Repository<Group> {
       group.ownerId = userId;
       group.name = name;
 
-      await group.save();
-
-      const userGroup = new UserGroup();
-      userGroup.userId = group.ownerId;
-      userGroup.groupId = group.id;
-
-      await userGroup.save();
+      await this.save(group);
 
       delete group.owner;
 

@@ -92,7 +92,6 @@ describe('Auth (e2e)', () => {
       expect(response.body).toMatchObject({
         email: 'email@email.teste',
         name: null,
-        photo: null,
         id: expect.any(String),
         createdAt: expect.any(String),
         updatedAt: expect.any(String),

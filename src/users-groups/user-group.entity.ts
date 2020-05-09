@@ -1,5 +1,4 @@
 import {
-  BaseEntity,
   Entity,
   PrimaryGeneratedColumn,
   Column,
@@ -15,7 +14,7 @@ import { User } from '../users/user.entity';
 
 @Entity('users_groups')
 @Index(['userId', 'groupId'], { unique: true })
-export class UserGroup extends BaseEntity {
+export class UserGroup {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 

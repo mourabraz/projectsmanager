@@ -1,5 +1,4 @@
 import {
-  BaseEntity,
   Entity,
   PrimaryGeneratedColumn,
   Column,
@@ -20,7 +19,7 @@ import { Photo } from './photo.entity';
 
 @Entity('users')
 @Unique(['email'])
-export class User extends BaseEntity {
+export class User {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
