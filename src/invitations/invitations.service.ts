@@ -127,7 +127,7 @@ export class InvitationsService {
     invitation.acceptedAt = new Date();
 
     try {
-      await invitation.save();
+      await this.invitationRepository.save(invitation);
 
       //update table users_groups
       await this.usersGroupsService.addParticipantToGroup(

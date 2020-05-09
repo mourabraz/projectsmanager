@@ -31,7 +31,7 @@ export class InvitationRepository extends Repository<Invitation> {
       invitation.emailTo = emailTo;
       invitation.groupId = groupId;
 
-      await invitation.save();
+      await this.save(invitation);
       delete invitation.user;
 
       return invitation;
