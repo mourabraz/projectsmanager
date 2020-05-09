@@ -240,6 +240,40 @@ describe('Invitation (e2e)', () => {
       expect(emailsService.addInvitationEmailToQueue).toBeCalledTimes(1);
     });
 
+    it('should throw error with a group that does not exits or does not belongs to authenticated user', async () => {
+      const token = user1Token;
+
+      const response = await request(app.getHttpServer())
+        .post(`/groups/${uuid()}/invitations`)
+        .set('Accept', 'application/json')
+        .set('Authorization', `Bearer ${token}`)
+        .send({
+          emailTo: user2.email,
+        });
+
+      const response1 = await request(app.getHttpServer())
+        .post(`/groups/${groupsOwnedByUser2[0].id}/invitations`)
+        .set('Accept', 'application/json')
+        .set('Authorization', `Bearer ${token}`)
+        .send({
+          emailTo: user2.email,
+        });
+
+      expect(emailsService.addInvitationEmailToQueue).not.toBeCalled();
+
+      expect(response.status).toEqual(404);
+      expect(response.body).toMatchObject({
+        statusCode: 404,
+        message: 'Not Found',
+      });
+
+      expect(response1.status).toEqual(404);
+      expect(response1.body).toMatchObject({
+        statusCode: 404,
+        message: 'Not Found',
+      });
+    });
+
     it('should not create an invitation when a prev one has accept_at value null', async () => {
       const token = user1Token;
 
@@ -270,6 +304,34 @@ describe('Invitation (e2e)', () => {
         message: 'A pending invitation already exists.',
         error: 'Bad Request',
       });
+    });
+
+    it('should not create an invitation to himself', async () => {
+      const token = user1Token;
+
+      let group = new Group();
+      group.ownerId = user1.id;
+      group.name = 'TESTE';
+      group = await groupRepository.save(group);
+
+      const response = await request(app.getHttpServer())
+        .post(`/groups/${group.id}/invitations`)
+        .set('Accept', 'application/json')
+        .set('Authorization', `Bearer ${token}`)
+        .send({
+          emailTo: user1.email,
+        });
+
+      expect(emailsService.addInvitationEmailToQueue).not.toBeCalled();
+
+      expect(response.status).toEqual(400);
+      expect(response.body).toMatchObject({
+        statusCode: 400,
+        message: 'Create an invite to himself is not allowed',
+        error: 'Bad Request',
+      });
+
+      await groupRepository.remove(group);
     });
 
     it('should not create an invitation when the user already is a participant', async () => {
@@ -435,6 +497,46 @@ describe('Invitation (e2e)', () => {
         userId: user2.id,
         acceptedAt: expect.any(String),
       });
+    });
+  });
+
+  describe('DELETE /invitations/:id', () => {
+    it('should throw Not Found when accept an invitation that does not exists', async () => {
+      const token = user1Token;
+
+      const response = await request(app.getHttpServer())
+        .delete(`/invitations/${uuid()}`)
+        .set('Accept', 'application/json')
+        .set('Authorization', `Bearer ${token}`)
+        .send();
+
+      expect(response.status).toEqual(404);
+      expect(response.body).toMatchObject({
+        statusCode: 404,
+        message: 'Not Found',
+      });
+    });
+
+    it('should delete an invitation by the owner if it has not been accepted', async () => {
+      const token = user1Token;
+
+      const invitation = await invitationsService.createInvitation(
+        {
+          userId: user1.id,
+          emailTo: user2.email,
+          groupId: groupsOwnedByUser1[0].id,
+        },
+        user1,
+      );
+
+      const response = await request(app.getHttpServer())
+        .delete(`/invitations/${invitation.id}`)
+        .set('Accept', 'application/json')
+        .set('Authorization', `Bearer ${token}`)
+        .send();
+
+      expect(response.status).toEqual(200);
+      expect(response.body).toMatchObject({ total: 1 });
     });
   });
 });

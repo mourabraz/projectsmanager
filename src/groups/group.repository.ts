@@ -48,18 +48,16 @@ export class GroupRepository extends Repository<Group> {
   }
 
   async getGroupByIdForOwner(id: string, user: User): Promise<Group> {
-    const found = await this.findOne({
-      where: { id, ownerId: user.id },
-    });
-
-    if (!found) {
+    try {
+      return await this.findOne({
+        where: { id, ownerId: user.id },
+      });
+    } catch (error) {
       this.logger.error(
         `Failed to find group by id: "${id}" for owner "${user.email}".`,
       );
       throw new InternalServerErrorException();
     }
-
-    return found;
   }
 
   async createGroup(createGroupDto: CreateGroupDto): Promise<Group> {

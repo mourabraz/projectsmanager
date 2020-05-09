@@ -61,6 +61,12 @@ export class InvitationsService {
     );
 
     if (!group) {
+      this.logger.error(
+        `Failed to create invitation to authenticated user"${
+          user.email
+        }", gropu not found. Data: ${JSON.stringify(createInvitationDto)}`,
+      );
+
       throw new NotFoundException();
     }
 
@@ -150,7 +156,7 @@ export class InvitationsService {
     return invitation;
   }
 
-  async deleteInvitation(id: string, user: User): Promise<number> {
+  async deleteInvitation(id: string, user: User): Promise<{ total: number }> {
     const result = await this.invitationRepository.delete({
       id,
       userId: user.id,
@@ -162,6 +168,6 @@ export class InvitationsService {
       throw new NotFoundException();
     }
 
-    return result.affected;
+    return { total: result.affected };
   }
 }

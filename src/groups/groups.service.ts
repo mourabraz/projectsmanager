@@ -24,7 +24,13 @@ export class GroupsService {
   }
 
   async getGroupByIdForUser(id: string, user: User): Promise<Group> {
-    return await this.groupRepository.getGroupByIdForUser(id, user);
+    const found = await this.groupRepository.getGroupByIdForUser(id, user);
+
+    if (!found) {
+      throw new NotFoundException();
+    }
+
+    return found;
   }
 
   async getGroupByIdForOwner(id: string, user: User): Promise<Group> {

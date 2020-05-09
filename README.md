@@ -23,6 +23,11 @@
 |  POST  | /auth/signup            |   Y    | register a new user                                                                                 | :heavy_check_mark: |
 |  GET   | /autj/signin            |   Y    | login                                                                                               | :heavy_check_mark: |
 |   -    | -                       |   -    | -                                                                                                   | -                  |
+|  GET   | /users/photo/:id        |   N    | get user's photo                                                                                    | 👎                 |
+|  POST  | /users/photo/           |   N    | upload user's photo (<= 2mb, png/jpeg/jpg/gif)                                                      | 👎                 |
+|   -    | -                       |   -    | -                                                                                                   | -                  |
+|  PUT   | /users                  |   N    | update user's name and/or email and/or password                                                     | 👎                 |
+|   -    | -                       |   -    | -                                                                                                   | -                  |
 |  GET   | /groups                 |   N    | List all groups for the authenticated user (as onwer or participant)                                | :heavy_check_mark: |
 |  POST  | /groups                 |   N    | create a new group (the authenticated user as owner)                                                | :heavy_check_mark: |
 | PATCH  | /groups/:id             |   N    | update the group's name, the authenticated user must be the owner                                   | :heavy_check_mark: |
@@ -38,8 +43,8 @@
 |  POST  | /groups/:id/invitations |   N    | create a new invitation for a user to get into a group                                              | :heavy_check_mark: |
 |   -    | -                       |   -    | -                                                                                                   | -                  |
 |  GET   | /invitations            |   N    | List all invitations to participate in a group for the authenticated user                           | :heavy_check_mark: |
-| PATCH  | /invitations/:id        |   N    | update the invitation to mark as accepted                                                           | :thumbsdown:       |
-| DELETE | /invitations/:id        |   N    | delete an invitation not accepted                                                                   | :thumbsdown:       |
+| PATCH  | /invitations/:id/accept |   N    | update the invitation to mark as accepted                                                           | :heavy_check_mark: |
+| DELETE | /invitations/:id        |   N    | delete an invitation not accepted                                                                   | :heavy_check_mark: |
 
 ## Test
 
