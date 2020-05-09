@@ -664,7 +664,7 @@
   resolved "https://registry.yarnpkg.com/@nestjs/passport/-/passport-7.0.0.tgz#c59617779b7e5888a0c72039a6980e28fd659518"
   integrity sha512-ZJk08zqLxSXY1rXIt9dAK7tcCos3DETQ88Nn/UGmA136SHMG5P0sbw+PU1zfLQyEsU5uHyr7MTD+/S+aOxXS6w==
 
-"@nestjs/platform-express@^7.0.0":
+"@nestjs/platform-express@^7.0.9":
   version "7.0.9"
   resolved "https://registry.yarnpkg.com/@nestjs/platform-express/-/platform-express-7.0.9.tgz#abfa9ae8855ddc889f644d4c4664682a4b11ff29"
   integrity sha512-Ba6xuHOyc1iSZBGvNPfe66wetMadDO139xbIMkdnkHvTCxSxSLRPRwLUFQX4MFtGFQrllglrttqZjXXmZ8ZIZw==
@@ -931,6 +931,13 @@
   version "2.0.1"
   resolved "https://registry.yarnpkg.com/@types/mime/-/mime-2.0.1.tgz#dc488842312a7f075149312905b5e3c0b054c79d"
   integrity sha512-FwI9gX75FgVBJ7ywgnq/P7tw+/o1GUbtP0KzbtusLigAOgIgNISRK0ZPl4qertvXSIE8YbsVJueQ90cDt9YYyw==
+
+"@types/multer@^1.4.3":
+  version "1.4.3"
+  resolved "https://registry.yarnpkg.com/@types/multer/-/multer-1.4.3.tgz#bdff74b334c38a8ee1de9fbedb5d1d3dbc377422"
+  integrity sha512-tWsKbF5LYtXrJ7eOfI0aLBgEv9B7fnJe1JRXTj5+Z6EMfX0yHVsRFsNGnKyN8Bs0gtDv+JR37xAqsPnALyVTqg==
+  dependencies:
+    "@types/express" "*"
 
 "@types/node@*", "@types/node@^13.9.1":
   version "13.13.4"
@@ -5875,7 +5882,7 @@ ms@^2.1.1:
   resolved "https://registry.yarnpkg.com/ms/-/ms-2.1.2.tgz#d09d1f357b443f493382a8eb3ccd183872ae6009"
   integrity sha512-sGkPx+VjMtmA6MX27oA4FBFELFCZZ4S4XqeGOXCv68tT+jb3vk/RyaKWP0PTKyWtmLSM0b+adUTEvbs1PEaH2w==
 
-multer@1.4.2:
+multer@1.4.2, multer@^1.4.2:
   version "1.4.2"
   resolved "https://registry.yarnpkg.com/multer/-/multer-1.4.2.tgz#2f1f4d12dbaeeba74cb37e623f234bf4d3d2057a"
   integrity sha512-xY8pX7V+ybyUpbYMxtjM9KAiD9ixtg5/JkeKUTD6xilfDv0vzzOFcCp4Ljb1UU3tSOM3VTZtKo63OmzOrGi3Cg==
