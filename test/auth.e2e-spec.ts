@@ -7,16 +7,23 @@ import { Repository } from 'typeorm';
 import { PostgresConfigModule } from '../src/config/database/postgres/config.module';
 import { PostgresConfigService } from '../src/config/database/postgres/config.service';
 
-import { EmailsService } from './../src/emails/emails.service';
+import { EmailsService } from '../src/emails/emails.service';
 
-import { AuthModule } from './../src/auth/auth.module';
-import { UsersModule } from './../src/users/users.module';
-import { User } from './../src/users/user.entity';
+import { AuthModule } from '../src/auth/auth.module';
+import { UsersModule } from '../src/users/users.module';
+import { User } from '../src/users/user.entity';
+import { ForgotPassword } from '../src/auth/forgotpassword.entity';
 
 describe('Auth (e2e)', () => {
   let app: INestApplication;
-  let repository: Repository<User>;
-  const emailsService = { addWelcomeEmailToQueue: () => ({}) };
+  let authRepository: Repository<User>;
+  let forgotPasswordRepository: Repository<ForgotPassword>;
+
+  const emailsService = {
+    addWelcomeEmailToQueue: jest.fn(),
+    addInvitationEmailToQueue: jest.fn(),
+    addForgotPasswordEmailToQueue: jest.fn(),
+  };
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -36,7 +43,8 @@ describe('Auth (e2e)', () => {
       .compile();
 
     app = moduleFixture.createNestApplication();
-    repository = moduleFixture.get('AuthRepository');
+    authRepository = moduleFixture.get('AuthRepository');
+    forgotPasswordRepository = moduleFixture.get('ForgotPasswordRepository');
     await app.init();
   });
 
@@ -45,10 +53,13 @@ describe('Auth (e2e)', () => {
   });
 
   afterEach(async () => {
-    await repository.query(`DELETE FROM users;`);
+    await authRepository.query(`DELETE FROM users;`);
+    await forgotPasswordRepository.query(`DELETE FROM forgot_passwords;`);
+
+    emailsService.addForgotPasswordEmailToQueue.mockRestore();
   });
 
-  describe('POST /signup', () => {
+  describe('POST /auth/signup', () => {
     it('should validate email input', async () => {
       const response = await request(app.getHttpServer())
         .post('/auth/signup')
@@ -96,7 +107,7 @@ describe('Auth (e2e)', () => {
       });
     });
 
-    it('should return error when try to creat a new user with an email already used', async () => {
+    it('should return error when try to create a new user with an email already used', async () => {
       await request(app.getHttpServer())
         .post('/auth/signup')
         .set('Accept', 'application/json')
@@ -116,7 +127,7 @@ describe('Auth (e2e)', () => {
     });
   });
 
-  describe('POST /signin', () => {
+  describe('POST /auth/signin', () => {
     it('should return Unauthorized when try to sign in with a user that not exists', async () => {
       const response = await request(app.getHttpServer())
         .post('/auth/signin')
@@ -165,6 +176,44 @@ describe('Auth (e2e)', () => {
       expect(response.body).toMatchObject({
         accessToken: expect.any(String),
       });
+    });
+  });
+
+  describe('POST /auth/forgot_password', () => {
+    it('should return Not Found with an invalid email', async () => {
+      const response = await request(app.getHttpServer())
+        .post('/auth/forgot_password')
+        .set('Accept', 'application/json')
+        .send({ email: 'email@email.teste' });
+
+      expect(response.status).toEqual(404);
+      expect(response.body).toMatchObject({
+        statusCode: 404,
+        message: 'Not Found',
+      });
+    });
+
+    it('should create recovery token and send to email queue', async () => {
+      await request(app.getHttpServer())
+        .post('/auth/signup')
+        .set('Accept', 'application/json')
+        .send({ email: 'email@email.teste', password: '12345678' });
+
+      const response = await request(app.getHttpServer())
+        .post('/auth/forgot_password')
+        .set('Accept', 'application/json')
+        .send({ email: 'email@email.teste' });
+
+      const forgotPassword = await forgotPasswordRepository.findOne({
+        where: {
+          email: 'email@email.teste',
+        },
+      });
+
+      expect(forgotPassword).not.toBeNull();
+
+      expect(emailsService.addForgotPasswordEmailToQueue).toBeCalledTimes(1);
+      expect(response.status).toEqual(201);
     });
   });
 });
