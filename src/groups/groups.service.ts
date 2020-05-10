@@ -2,6 +2,7 @@ import {
   Injectable,
   BadRequestException,
   NotFoundException,
+  Logger,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 
@@ -13,6 +14,8 @@ import { UsersGroupsService } from '../users-groups/users-groups.service';
 
 @Injectable()
 export class GroupsService {
+  private logger = new Logger(GroupsService.name);
+
   constructor(
     @InjectRepository(GroupRepository)
     private groupRepository: GroupRepository,
@@ -27,6 +30,10 @@ export class GroupsService {
     const found = await this.groupRepository.getGroupByIdForUser(id, user);
 
     if (!found) {
+      this.logger.verbose(
+        `Group with id "${id}" not found for user: "${user.email}".`,
+      );
+
       throw new NotFoundException();
     }
 
@@ -34,7 +41,17 @@ export class GroupsService {
   }
 
   async getGroupByIdForOwner(id: string, user: User): Promise<Group> {
-    return await this.groupRepository.getGroupByIdForOwner(id, user);
+    const found = await this.groupRepository.getGroupByIdForOwner(id, user);
+
+    if (!found) {
+      this.logger.verbose(
+        `Group with id "${id}" not found for owner: "${user.email}".`,
+      );
+
+      throw new NotFoundException();
+    }
+
+    return found;
   }
 
   async createGroup(
@@ -75,6 +92,10 @@ export class GroupsService {
     });
 
     if (!found) {
+      this.logger.verbose(
+        `Group with id "${id}" not found for owner: "${user.email}".`,
+      );
+
       throw new NotFoundException();
     }
 
@@ -89,6 +110,10 @@ export class GroupsService {
     });
 
     if (!found) {
+      this.logger.verbose(
+        `Group with id "${id}" not found for owner: "${user.email}".`,
+      );
+
       throw new NotFoundException();
     }
 

@@ -19,28 +19,17 @@ export class ProjectsService {
 
   async getProjectsByGroupId(groupId: string, user: User): Promise<Project[]> {
     // check if groupId exists and is related to authenticated user
-    const foundGroup = await this.groupsService.getGroupByIdForUser(
-      groupId,
-      user,
-    );
-
-    if (!foundGroup) {
-      throw new NotFoundException();
-    }
+    await this.groupsService.getGroupByIdForUser(groupId, user);
 
     return this.projectRepository.getProjectsByGroupId(groupId);
   }
 
   async createProjectForUser(createProjectDto: CreateProjectDto, user: User) {
     // check if groupId exists and is related to authenticated user
-    const foundGroup = await this.groupsService.getGroupByIdForUser(
+    await this.groupsService.getGroupByIdForUser(
       createProjectDto.groupId,
       user,
     );
-
-    if (!foundGroup) {
-      throw new NotFoundException();
-    }
 
     return this.projectRepository.createProject(createProjectDto);
   }
@@ -55,6 +44,10 @@ export class ProjectsService {
     });
 
     if (!found) {
+      this.logger.verbose(
+        `Project with id "${id}" not found for owner id: "${createProjectDto.ownerId}".`,
+      );
+
       throw new NotFoundException();
     }
 
@@ -69,6 +62,7 @@ export class ProjectsService {
 
     if (result.affected === 0) {
       this.logger.error(`Failed to delete project with id: "${id}".`);
+
       throw new NotFoundException();
     }
 

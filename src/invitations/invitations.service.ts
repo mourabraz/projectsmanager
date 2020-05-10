@@ -34,14 +34,7 @@ export class InvitationsService {
     user: User,
   ): Promise<Invitation[]> {
     // check if groupId exists and is owned by authenticated user
-    const foundGroup = await this.groupsService.getGroupByIdForOwner(
-      groupId,
-      user,
-    );
-
-    if (!foundGroup) {
-      throw new NotFoundException();
-    }
+    await this.groupsService.getGroupByIdForOwner(groupId, user);
 
     return this.invitationRepository.getInvitationsByGroupId(groupId);
   }
@@ -60,23 +53,10 @@ export class InvitationsService {
       user,
     );
 
-    if (!group) {
-      this.logger.error(
-        `Failed to create invitation to authenticated user"${
-          user.email
-        }", gropu not found. Data: ${JSON.stringify(createInvitationDto)}`,
-      );
-
-      throw new NotFoundException();
-    }
-
     // check if emailTo belongs to a valid user
     const participant = await this.usersService.getUserByEmail(
       createInvitationDto.emailTo,
     );
-    if (!participant) {
-      throw new NotFoundException();
-    }
 
     // check if invited is not already a participant
     const usersGroups = await this.usersGroupsService.isUserByIdInGroupById(
@@ -88,12 +68,6 @@ export class InvitationsService {
     }
 
     if (createInvitationDto.emailTo === user.email) {
-      this.logger.error(
-        `Failed to create invitation to authenticated user"${
-          user.email
-        }". Data: ${JSON.stringify(createInvitationDto)}`,
-      );
-
       throw new BadRequestException(
         'Create an invite to himself is not allowed',
       );
@@ -115,7 +89,7 @@ export class InvitationsService {
       createInvitationDto,
     );
 
-    this.logger.verbose(`Call invitation email service "${user.email}".`);
+    this.logger.verbose(`Send invitation email to "${user.email}".`);
     this.emailsService.addInvitationEmailToQueue(invitation, user, group);
 
     return invitation;
@@ -165,6 +139,7 @@ export class InvitationsService {
 
     if (result.affected === 0) {
       this.logger.error(`Failed to delete invitation with id: "${id}".`);
+
       throw new NotFoundException();
     }
 

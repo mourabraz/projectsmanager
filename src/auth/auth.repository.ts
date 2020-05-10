@@ -2,6 +2,7 @@ import { Repository, EntityRepository } from 'typeorm';
 import {
   ConflictException,
   InternalServerErrorException,
+  Logger,
 } from '@nestjs/common';
 import * as bcrypt from 'bcryptjs';
 
@@ -12,18 +13,24 @@ import { JwtPayload } from './jwt-payload.interface';
 
 @EntityRepository(User)
 export class AuthRepository extends Repository<User> {
+  private logger = new Logger(AuthRepository.name);
+
   async signUp(authCredentialsDto: AuthCredentialsDto): Promise<User> {
     const { email, password } = authCredentialsDto;
 
-    const user = new User();
-    user.email = email;
-    user.password = await this.hashPassword(password);
-
     try {
+      const user = new User();
+      user.email = email;
+      user.password = await this.hashPassword(password);
       await this.save(user);
 
       return user;
     } catch (error) {
+      this.logger.error(
+        `Failed to create user. Data: ${JSON.stringify(authCredentialsDto)}`,
+        error.stack,
+      );
+
       if (error.code === TypeOrmErrorCode.DUPLICATE_UNIQUE) {
         throw new ConflictException('Email already exists');
       }

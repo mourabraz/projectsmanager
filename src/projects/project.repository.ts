@@ -17,6 +17,7 @@ export class ProjectRepository extends Repository<Project> {
         `Failed to get projects for group id "${groupId}".`,
         error.stack,
       );
+
       throw new InternalServerErrorException();
     }
   }
@@ -42,6 +43,7 @@ export class ProjectRepository extends Repository<Project> {
         )}`,
         error.stack,
       );
+
       throw new InternalServerErrorException();
     }
   }

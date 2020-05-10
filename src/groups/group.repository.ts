@@ -7,7 +7,7 @@ import { CreateGroupDto } from './dto/create-group.dto';
 
 @EntityRepository(Group)
 export class GroupRepository extends Repository<Group> {
-  private logger = new Logger('GroupRepository');
+  private logger = new Logger(GroupRepository.name);
 
   async getGroupsForUser(user: User): Promise<Group[]> {
     try {
@@ -23,6 +23,7 @@ export class GroupRepository extends Repository<Group> {
         `Failed to get groups for user "${user.email}".`,
         error.stack,
       );
+
       throw new InternalServerErrorException();
     }
   }
@@ -40,9 +41,10 @@ export class GroupRepository extends Repository<Group> {
       return groups[0];
     } catch (error) {
       this.logger.error(
-        `Failed to get groups for user "${user.email}".`,
+        `Failed to get group with id: "${id}" for user "${user.email}".`,
         error.stack,
       );
+
       throw new InternalServerErrorException();
     }
   }
@@ -55,7 +57,9 @@ export class GroupRepository extends Repository<Group> {
     } catch (error) {
       this.logger.error(
         `Failed to find group by id: "${id}" for owner "${user.email}".`,
+        error.stack,
       );
+
       throw new InternalServerErrorException();
     }
   }
@@ -110,6 +114,7 @@ export class GroupRepository extends Repository<Group> {
 
     if (result.affected === 0) {
       this.logger.error(`Failed to delete group with id: "${id}".`);
+
       throw new InternalServerErrorException();
     }
 

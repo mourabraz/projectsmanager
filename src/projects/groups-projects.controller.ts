@@ -31,6 +31,7 @@ export class GroupsProjectsController {
     @GetUser() user: User,
   ): Promise<Project[]> {
     this.logger.verbose(`User "${user.email}" retrieving all projects.`);
+
     return this.projectsService.getProjectsByGroupId(groupId, user);
   }
 

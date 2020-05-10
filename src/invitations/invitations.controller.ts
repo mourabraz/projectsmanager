@@ -36,7 +36,7 @@ export class InvitationsController {
     @GetUser() user: User,
   ): Promise<Invitation> {
     this.logger.verbose(
-      `User "${user.email}" update invitation with id: "${id}".`,
+      `User "${user.email}" (update) accept invitation with id: "${id}".`,
     );
 
     return this.invitationsService.acceptInvitation(id, user);
@@ -46,7 +46,7 @@ export class InvitationsController {
   destroy(
     @Param('id', new ParseUUIDPipe()) id: string,
     @GetUser() user: User,
-  ): Promise<number> {
+  ): Promise<{ total: number }> {
     this.logger.verbose(`User "${user.email}" delete invitation id: "${id}".`);
 
     return this.invitationsService.deleteInvitation(id, user);

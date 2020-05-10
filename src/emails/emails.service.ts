@@ -14,10 +14,6 @@ export class EmailsService {
   constructor(private appConfigService: AppConfigService) {}
 
   async addWelcomeEmailToQueue(user: User) {
-    this.logger.verbose(
-      `addWelcomeEmailToQueue. Data: ${JSON.stringify(user)}`,
-    );
-
     const queue = new Bull(EmailConsumer.channelName);
 
     queue.add({
@@ -30,7 +26,10 @@ export class EmailsService {
         },
       },
     });
-    //await queue.close();
+
+    this.logger.verbose(
+      `addWelcomeEmailToQueue. Data: ${JSON.stringify(user)}`,
+    );
   }
 
   async addInvitationEmailToQueue(
@@ -38,10 +37,6 @@ export class EmailsService {
     user: User,
     group: Group,
   ) {
-    this.logger.verbose(
-      `addInvitationEmailToQueue. Data: ${JSON.stringify(invitation)}`,
-    );
-
     const queue = new Bull(EmailConsumer.channelName);
 
     const link = `${this.appConfigService.url}/invitations/${invitation.id}`;
@@ -60,5 +55,9 @@ export class EmailsService {
         },
       },
     });
+
+    this.logger.verbose(
+      `addInvitationEmailToQueue. Data: ${JSON.stringify(invitation)}`,
+    );
   }
 }

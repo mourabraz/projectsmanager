@@ -10,7 +10,7 @@ import { EmailsService } from '../emails/emails.service';
 
 @Injectable()
 export class AuthService {
-  private logger = new Logger('AuthService');
+  private logger = new Logger(AuthService.name);
 
   constructor(
     @InjectRepository(AuthRepository)
@@ -23,8 +23,7 @@ export class AuthService {
     const user = await this.userRepository.signUp(authCredentialsDto);
     delete user.password;
 
-    this.logger.verbose(`Call welcome email service "${user.email}".`);
-
+    this.logger.verbose(`Send a welcome email to "${user.email}".`);
     this.emailsService.addWelcomeEmailToQueue(user);
 
     return user;
@@ -38,6 +37,10 @@ export class AuthService {
     );
 
     if (!result || !result.email || !result.updatedAt) {
+      this.logger.error(
+        `Failed sign in for user". Data: ${JSON.stringify(authCredentialsDto)}`,
+      );
+
       throw new UnauthorizedException('Invalid credentials');
     }
 

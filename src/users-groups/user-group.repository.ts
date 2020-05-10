@@ -6,7 +6,7 @@ import { User } from '../users/user.entity';
 
 @EntityRepository(UserGroup)
 export class UserGroupRepository extends Repository<UserGroup> {
-  private logger = new Logger('UserGroupRepository');
+  private logger = new Logger(UserGroupRepository.name);
 
   async createUserGroup(user: User, groupId: string): Promise<UserGroup> {
     try {
@@ -23,6 +23,7 @@ export class UserGroupRepository extends Repository<UserGroup> {
         `Failed to add participante "${user.email}" in group id: "${groupId}".`,
         error.stack,
       );
+
       throw new InternalServerErrorException();
     }
   }

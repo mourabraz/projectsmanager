@@ -21,7 +21,7 @@ import { Project } from './project.entity';
 @Controller('projects')
 @UseGuards(AuthGuard())
 export class ProjectsController {
-  private logger = new Logger('ProjectsController');
+  private logger = new Logger(ProjectsController.name);
 
   constructor(private projectsService: ProjectsService) {}
 

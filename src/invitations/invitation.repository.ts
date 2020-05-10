@@ -17,6 +17,7 @@ export class InvitationRepository extends Repository<Invitation> {
         `Failed to get invitations for group id "${groupId}".`,
         error.stack,
       );
+
       throw new InternalServerErrorException();
     }
   }
@@ -31,6 +32,7 @@ export class InvitationRepository extends Repository<Invitation> {
         `Failed to get invitations to participate for user "${user.id}".`,
         error.stack,
       );
+
       throw new InternalServerErrorException();
     }
   }
@@ -57,6 +59,7 @@ export class InvitationRepository extends Repository<Invitation> {
         )}`,
         error.stack,
       );
+
       throw new InternalServerErrorException();
     }
   }

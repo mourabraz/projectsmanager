@@ -33,6 +33,7 @@ export class GroupsInvitationsController {
     this.logger.verbose(
       `User "${user.email}" retrieving all invitations for group id ${groupId}.`,
     );
+
     return this.invitationsService.getInvitationsByGroupId(groupId, user);
   }
 

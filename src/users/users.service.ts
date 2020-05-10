@@ -40,13 +40,23 @@ export class UsersService {
   }
 
   async getUserByEmail(email: string): Promise<User> {
-    return await this.userRepository.findOne({ where: { email } });
+    const found = await this.userRepository.findOne({ where: { email } });
+
+    if (!found) {
+      this.logger.verbose(`User with email "${email}" not found.`);
+
+      throw new NotFoundException();
+    }
+
+    return found;
   }
 
   async getPhotoFilename(id: string): Promise<string> {
     const photo = await this.photoRepository.findOne(id);
 
     if (!photo) {
+      this.logger.verbose(`Photo with id "${id}" not found.`);
+
       throw new NotFoundException();
     }
 

@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable, UnauthorizedException, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { PassportStrategy } from '@nestjs/passport';
 import { Strategy, ExtractJwt } from 'passport-jwt';
@@ -9,6 +9,8 @@ import { User } from '../users/user.entity';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
+  private logger = new Logger(JwtStrategy.name);
+
   constructor(
     @InjectRepository(AuthRepository) private authRepository: AuthRepository,
   ) {
@@ -23,6 +25,10 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     const user = await this.authRepository.findOne({ email, updatedAt });
 
     if (!user) {
+      this.logger.error(
+        `Failed validate user". Data: ${JSON.stringify(payload)}`,
+      );
+
       throw new UnauthorizedException();
     }
 

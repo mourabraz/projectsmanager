@@ -30,6 +30,7 @@ export class GroupsController {
   @Get()
   index(@GetUser() user: User) {
     this.logger.verbose(`User "${user.email}" retrieving all groups.`);
+
     return this.groupsService.getGroupsForUser(user);
   }
 
@@ -44,6 +45,7 @@ export class GroupsController {
         createGroupDto,
       )}`,
     );
+
     return this.groupsService.createGroup(createGroupDto, user);
   }
 

@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 
 import { TaskRepository } from './task.repository';
@@ -9,6 +9,8 @@ import { Task } from './task.entity';
 
 @Injectable()
 export class TasksService {
+  private logger = new Logger(TasksService.name);
+
   constructor(
     @InjectRepository(TaskRepository)
     private taskRepository: TaskRepository,
@@ -20,8 +22,13 @@ export class TasksService {
     });
 
     if (!found) {
+      this.logger.verbose(
+        `Task with id "${id}" not found for owner id: "${user.id}".`,
+      );
+
       throw new NotFoundException();
     }
+
     return found;
   }
 

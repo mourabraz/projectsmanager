@@ -34,6 +34,8 @@ export class UsersPhotosController {
     @Param('id', new ParseUUIDPipe()) id: string,
     @Res() res: Response,
   ): Promise<void> {
+    this.logger.verbose(`Get photo with id "${id}"`);
+
     const filename = await this.usersService.getPhotoFilename(id);
 
     res.sendFile(filename, { root: this.multerConfigService.uploadPhotoDest });
