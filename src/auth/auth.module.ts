@@ -10,6 +10,7 @@ import { JwtStrategy } from './jwt.strategy';
 import { AppConfigModule } from '../config/app/config.module';
 import { AppConfigService } from '../config/app/config.service';
 import { EmailsModule } from '../emails/emails.module';
+import { ForgotPasswordRepository } from './forgot-password.repository';
 
 @Module({
   imports: [
@@ -24,7 +25,7 @@ import { EmailsModule } from '../emails/emails.module';
       }),
       inject: [AppConfigService],
     }),
-    TypeOrmModule.forFeature([AuthRepository]),
+    TypeOrmModule.forFeature([AuthRepository, ForgotPasswordRepository]),
     EmailsModule,
   ],
   controllers: [AuthController],

@@ -1,11 +1,13 @@
 import { Injectable, Logger } from '@nestjs/common';
 import * as Bull from 'bull';
+import { addHours } from 'date-fns';
 
 import { EmailConsumer } from '../queue/email.consumer';
 import { Invitation } from '../invitations/invitation.entity';
 import { User } from '../users/user.entity';
 import { Group } from '../groups/group.entity';
 import { AppConfigService } from '../config/app/config.service';
+import { ForgotPassword } from '../auth/forgotpassword.entity';
 
 @Injectable()
 export class EmailsService {
@@ -58,6 +60,32 @@ export class EmailsService {
 
     this.logger.verbose(
       `addInvitationEmailToQueue. Data: ${JSON.stringify(invitation)}`,
+    );
+  }
+
+  async addForgotPasswordEmailToQueue(
+    forgotPassword: ForgotPassword,
+    user: User,
+  ) {
+    const queue = new Bull(EmailConsumer.channelName);
+
+    const link = `${this.appConfigService.url}/auth/recovery/${forgotPassword.token}`;
+
+    queue.add({
+      payload: {
+        to: user.email,
+        subject: 'Your recovery password link on the Projects Manager App',
+        template: 'ForgotPassword',
+        context: {
+          name: user.name || user.email,
+          link,
+          validDate: addHours(forgotPassword.updatedAt, 2).toISOString(),
+        },
+      },
+    });
+
+    this.logger.verbose(
+      `addForgotPasswordEmailToQueue. Data: ${JSON.stringify(forgotPassword)}`,
     );
   }
 }

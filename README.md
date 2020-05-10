@@ -21,7 +21,8 @@
 | Method | Path                    | Public | Description                                                                                         | Tests              |
 | :----: | :---------------------- | :----: | --------------------------------------------------------------------------------------------------- | ------------------ |
 |  POST  | /auth/signup            |   Y    | register a new user                                                                                 | :heavy_check_mark: |
-|  GET   | /autj/signin            |   Y    | login                                                                                               | :heavy_check_mark: |
+|  GET   | /auth/signin            |   Y    | login                                                                                               | :heavy_check_mark: |
+|  POST  | /auth/forgot_password   |   Y    | request recovery token                                                                              | 👎                 |
 |   -    | -                       |   -    | -                                                                                                   | -                  |
 |  GET   | /users/photo/:id        |   N    | get user's photo                                                                                    | 👎                 |
 |  POST  | /users/photo/           |   N    | upload user's photo (<= 2mb, png/jpeg/jpg/gif)                                                      | 👎                 |
