@@ -26,6 +26,7 @@ import { ForgotPasswordRepository } from './forgot-password.repository';
       inject: [AppConfigService],
     }),
     TypeOrmModule.forFeature([AuthRepository, ForgotPasswordRepository]),
+    AppConfigModule,
     EmailsModule,
   ],
   controllers: [AuthController],
