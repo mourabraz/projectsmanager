@@ -56,6 +56,7 @@ We performing the test sequentially, in order to do not mock the Database (Postg
 
 - Every new user (sign up) a welcome email will be sent
 - When a new invitation is created an email is sent to the participant
+- When request a forgot password a link to get a recovery token is send by email
 
 All emails are added to a queue using [Redis](https://redis.io/) and [Bull](https://github.com/OptimalBits/bull#readme). The execution of the job will run in another process (different of the main app), to accomplish this feature we use the WebSocket feature to provide the communication between the main app and the Bull execution environment.
 
