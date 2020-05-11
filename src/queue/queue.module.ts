@@ -1,7 +1,8 @@
 import { resolve } from 'path';
 import { Module } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
-import { HandlebarsAdapter, MailerModule } from '@nestjs-modules/mailer';
+import { MailerModule } from '@nestjs-modules/mailer';
+import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
 
 import { EmailConfigModule } from '../config/email/config.module';
 import { EmailConfigService } from '../config/email/config.service';
