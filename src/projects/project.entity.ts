@@ -25,13 +25,17 @@ export class Project {
   @Column({ nullable: true, default: '' })
   description: string;
 
-  @Column('timestamptz', {
+  @Column({
+    type: 'timestamptz',
+    precision: 3,
     name: 'started_at',
     default: () => 'NOW()',
   })
   startedAt: Date;
 
-  @Column('timestamptz', {
+  @Column({
+    type: 'timestamptz',
+    precision: 3,
     name: 'completed_at',
     nullable: true,
     default: null,
@@ -56,33 +60,23 @@ export class Project {
   @UpdateDateColumn({ name: 'updated_at', type: 'timestamptz' })
   updatedAt: Date;
 
-  @ManyToOne(
-    type => Group,
-    group => group.projects,
-    { eager: false, onDelete: 'CASCADE' },
-  )
+  @ManyToOne((type) => Group, (group) => group.projects, {
+    eager: false,
+    onDelete: 'CASCADE',
+  })
   @JoinColumn({ name: 'group_id' })
   group: Group;
 
-  @ManyToOne(
-    type => User,
-    user => user.projects,
-    { eager: false, onDelete: 'SET NULL' },
-  )
+  @ManyToOne((type) => User, (user) => user.projects, {
+    eager: false,
+    onDelete: 'SET NULL',
+  })
   @JoinColumn({ name: 'user_id' })
   owner: User;
 
-  @OneToMany(
-    type => Task,
-    task => task.project,
-    { eager: false },
-  )
+  @OneToMany((type) => Task, (task) => task.project, { eager: false })
   tasks: Task[];
 
-  @OneToMany(
-    type => Fiile,
-    fiile => fiile.project,
-    { eager: false },
-  )
+  @OneToMany((type) => Fiile, (fiile) => fiile.project, { eager: false })
   fiiles: Fiile[];
 }

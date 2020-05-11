@@ -23,10 +23,10 @@ export class Task {
   @Column('text')
   description: string;
 
-  @Column('timestamptz', { name: 'started_at' })
+  @Column({ type: 'timestamptz', precision: 3, name: 'started_at' })
   startedAt: Date;
 
-  @Column('timestamptz', { name: 'completed_at' })
+  @Column({ type: 'timestamptz', precision: 3, name: 'completed_at' })
   completedAt: Date;
 
   @Column({ name: 'project_id' })
@@ -38,18 +38,13 @@ export class Task {
   @UpdateDateColumn({ name: 'updated_at', type: 'timestamptz' })
   updatedAt: Date;
 
-  @ManyToOne(
-    type => Project,
-    project => project.tasks,
-    { eager: false, onDelete: 'CASCADE' },
-  )
+  @ManyToOne((type) => Project, (project) => project.tasks, {
+    eager: false,
+    onDelete: 'CASCADE',
+  })
   @JoinColumn({ name: 'project_id' })
   project: Project;
 
-  @OneToMany(
-    type => Fiile,
-    fiile => fiile.task,
-    { eager: false },
-  )
+  @OneToMany((type) => Fiile, (fiile) => fiile.task, { eager: false })
   fiiles: Fiile[];
 }
