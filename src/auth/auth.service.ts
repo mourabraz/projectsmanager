@@ -42,12 +42,12 @@ export class AuthService {
 
   async signIn(
     authCredentialsDto: AuthCredentialsDto,
-  ): Promise<{ accessToken: string }> {
-    const result = await this.authRepository.validateUserPassword(
+  ): Promise<{ user: User; accessToken: string }> {
+    const user = await this.authRepository.validateUserPassword(
       authCredentialsDto,
     );
 
-    if (!result || !result.email || !result.updatedAt) {
+    if (!user || !user.email || !user.updatedAt) {
       this.logger.verbose(
         `Failed sign in for user". Data: ${JSON.stringify(authCredentialsDto)}`,
       );
@@ -56,12 +56,12 @@ export class AuthService {
     }
 
     const payload: JwtPayload = {
-      email: result.email,
-      updatedAt: result.updatedAt,
+      email: user.email,
+      updatedAt: user.updatedAt,
     };
     const accessToken = this.jwtService.sign(payload);
 
-    return { accessToken };
+    return { user, accessToken };
   }
 
   async forgotPassword(forgotPasswordDto: ForgotPasswordDto): Promise<void> {

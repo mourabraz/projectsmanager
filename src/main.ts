@@ -11,6 +11,8 @@ async function bootstrap() {
 
   app.useWebSocketAdapter(new RedisIoAdapter(app));
 
+  app.enableCors();
+
   await app.listen(appConfig.port);
 }
 bootstrap();
