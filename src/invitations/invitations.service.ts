@@ -11,8 +11,8 @@ import { InvitationRepository } from './invitation.repository';
 import { Invitation } from './invitation.entity';
 import { CreateInvitationDto } from './dto/create-invitation.dto';
 import { User } from '../users/user.entity';
-import { GroupsService } from '../groups/groups.service';
-import { UsersGroupsService } from '../users-groups/users-groups.service';
+import { ProjectsService } from '../projects/projects.service';
+import { UsersProjectsService } from '../users-projects/users-projects.service';
 import { EmailsService } from '../emails/emails.service';
 import { UsersService } from '../users/users.service';
 
@@ -23,20 +23,20 @@ export class InvitationsService {
   constructor(
     @InjectRepository(InvitationRepository)
     private invitationRepository: InvitationRepository,
-    private groupsService: GroupsService,
-    private usersGroupsService: UsersGroupsService,
+    private projectsService: ProjectsService,
+    private usersProjectsService: UsersProjectsService,
     private emailsService: EmailsService,
     private usersService: UsersService,
   ) {}
 
-  async getInvitationsByGroupId(
-    groupId: string,
+  async getInvitationsByProjectId(
+    projectId: string,
     user: User,
   ): Promise<Invitation[]> {
-    // check if groupId exists and is owned by authenticated user
-    await this.groupsService.getGroupByIdForOwner(groupId, user);
+    // check if projectId exists and is owned by authenticated user
+    await this.projectsService.getProjectByIdForOwner(projectId, user);
 
-    return this.invitationRepository.getInvitationsByGroupId(groupId);
+    return this.invitationRepository.getInvitationsByProjectId(projectId);
   }
 
   async getInvitationsToParticipate(user: User): Promise<Invitation[]> {
@@ -47,9 +47,9 @@ export class InvitationsService {
     createInvitationDto: CreateInvitationDto,
     user: User,
   ): Promise<Invitation> {
-    // check if groupId exists and is owned by the authenticated user
-    const group = await this.groupsService.getGroupByIdForOwner(
-      createInvitationDto.groupId,
+    // check if projectId exists and is owned by the authenticated user
+    const project = await this.projectsService.getProjectByIdForOwner(
+      createInvitationDto.projectId,
       user,
     );
 
@@ -59,12 +59,12 @@ export class InvitationsService {
     );
 
     // check if invited is not already a participant
-    const usersGroups = await this.usersGroupsService.isUserByIdInGroupById(
+    const usersProjects = await this.usersProjectsService.isUserByIdInProjectById(
       participant.id,
-      createInvitationDto.groupId,
+      createInvitationDto.projectId,
     );
-    if (usersGroups) {
-      throw new BadRequestException('User already participate on group.');
+    if (usersProjects) {
+      throw new BadRequestException('User already participate on project.');
     }
 
     if (createInvitationDto.emailTo === user.email) {
@@ -76,7 +76,7 @@ export class InvitationsService {
     const prevValidInvitation = await this.invitationRepository.findOne({
       where: {
         emailTo: createInvitationDto.emailTo,
-        groupId: createInvitationDto.groupId,
+        projectId: createInvitationDto.projectId,
         acceptedAt: null,
       },
     });
@@ -90,7 +90,7 @@ export class InvitationsService {
     );
 
     this.logger.verbose(`Send invitation email to "${user.email}".`);
-    this.emailsService.addInvitationEmailToQueue(invitation, user, group);
+    this.emailsService.addInvitationEmailToQueue(invitation, user, project);
 
     return invitation;
   }
@@ -113,10 +113,10 @@ export class InvitationsService {
     try {
       await this.invitationRepository.save(invitation);
 
-      //update table users_groups
-      await this.usersGroupsService.addParticipantToGroup(
+      //update table users_projects
+      await this.usersProjectsService.addParticipantToProject(
         user,
-        invitation.groupId,
+        invitation.projectId,
       );
     } catch (error) {
       this.logger.error(

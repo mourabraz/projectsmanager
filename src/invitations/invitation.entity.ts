@@ -9,10 +9,10 @@ import {
   Index,
 } from 'typeorm';
 import { User } from '../users/user.entity';
-import { Group } from '../groups/group.entity';
+import { Project } from '../projects/project.entity';
 
 @Entity('invitations')
-@Index(['emailTo', 'groupId'], { unique: true })
+@Index(['emailTo', 'projectId'], { unique: true })
 export class Invitation {
   @PrimaryGeneratedColumn('uuid')
   id: string;
@@ -20,8 +20,8 @@ export class Invitation {
   @Column({ name: 'email_to' })
   emailTo: string;
 
-  @Column({ name: 'group_id' })
-  groupId: string;
+  @Column({ name: 'project_id' })
+  projectId: string;
 
   @Column({ name: 'user_id' })
   userId: string;
@@ -35,19 +35,17 @@ export class Invitation {
   @UpdateDateColumn({ name: 'updated_at', type: 'timestamptz' })
   updatedAt: Date;
 
-  @ManyToOne(
-    type => User,
-    user => user.invitations,
-    { eager: false, onDelete: 'CASCADE' },
-  )
+  @ManyToOne((type) => User, (user) => user.invitations, {
+    eager: false,
+    onDelete: 'CASCADE',
+  })
   @JoinColumn({ name: 'user_id' })
   user: User;
 
-  @ManyToOne(
-    type => Group,
-    group => group.invitations,
-    { eager: false, onDelete: 'CASCADE' },
-  )
-  @JoinColumn({ name: 'group_id' })
-  group: Group;
+  @ManyToOne((type) => Project, (project) => project.invitations, {
+    eager: false,
+    onDelete: 'CASCADE',
+  })
+  @JoinColumn({ name: 'project_id' })
+  project: Project;
 }

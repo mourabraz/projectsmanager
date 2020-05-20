@@ -11,5 +11,5 @@ export class CreateInvitationDto {
 
   @IsUUID()
   @IsOptional()
-  groupId: string;
+  projectId: string;
 }

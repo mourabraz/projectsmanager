@@ -9,12 +9,12 @@ import { User } from '../users/user.entity';
 export class InvitationRepository extends Repository<Invitation> {
   private logger = new Logger(InvitationRepository.name);
 
-  async getInvitationsByGroupId(groupId: string): Promise<Invitation[]> {
+  async getInvitationsByProjectId(projectId: string): Promise<Invitation[]> {
     try {
-      return await this.find({ where: { groupId } });
+      return await this.find({ where: { projectId } });
     } catch (error) {
       this.logger.error(
-        `Failed to get invitations for group id "${groupId}".`,
+        `Failed to get invitations for project id "${projectId}".`,
         error.stack,
       );
 
@@ -40,13 +40,13 @@ export class InvitationRepository extends Repository<Invitation> {
   async createInvitation(
     createInvitationDto: CreateInvitationDto,
   ): Promise<Invitation> {
-    const { emailTo, userId, groupId } = createInvitationDto;
+    const { emailTo, userId, projectId } = createInvitationDto;
 
     try {
       const invitation = new Invitation();
       invitation.userId = userId;
       invitation.emailTo = emailTo;
-      invitation.groupId = groupId;
+      invitation.projectId = projectId;
 
       await this.save(invitation);
       delete invitation.user;

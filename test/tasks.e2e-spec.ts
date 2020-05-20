@@ -13,34 +13,34 @@ import { EmailsService } from './../src/emails/emails.service';
 import { AuthModule } from './../src/auth/auth.module';
 import { UsersModule } from './../src/users/users.module';
 import { User } from './../src/users/user.entity';
-import { GroupsModule } from './../src/groups/groups.module';
-import { Group } from './../src/groups/group.entity';
-import { GroupsService } from './../src/groups/groups.service';
 import { ProjectsModule } from './../src/projects/projects.module';
 import { Project } from './../src/projects/project.entity';
-import { AuthService } from './../src/auth/auth.service';
-import { UsersGroupsService } from './../src/users-groups/users-groups.service';
-import { UsersGroupsModule } from './../src/users-groups/users-groups.module';
 import { ProjectsService } from './../src/projects/projects.service';
+import { TasksModule } from './../src/tasks/tasks.module';
+import { Task } from './../src/tasks/task.entity';
+import { AuthService } from './../src/auth/auth.service';
+import { UsersProjectsService } from './../src/users-projects/users-projects.service';
+import { UsersProjectsModule } from './../src/users-projects/users-projects.module';
+import { TasksService } from './../src/tasks/tasks.service';
 
-describe('Project (e2e)', () => {
+describe('Task (e2e)', () => {
   let app: INestApplication;
 
   let userRepository: Repository<User>;
-  let groupRepository: Repository<Group>;
   let projectRepository: Repository<Project>;
+  let taskRepository: Repository<Task>;
 
   let authService: AuthService;
-  let groupsService: GroupsService;
-  let usersGroupsService: UsersGroupsService;
   let projectsService: ProjectsService;
+  let usersProjectsService: UsersProjectsService;
+  let tasksService: TasksService;
 
   let user1: User;
   let user2: User;
   let user1Token: string;
 
-  const groupsOwnedByUser1: Group[] = [];
-  const groupsOwnedByUser2: Group[] = [];
+  const projectsOwnedByUser1: Project[] = [];
+  const projectsOwnedByUser2: Project[] = [];
 
   const emailsService = { addWelcomeEmailToQueue: () => ({}) };
 
@@ -61,25 +61,25 @@ describe('Project (e2e)', () => {
       })
     ).accessToken;
 
-    groupsOwnedByUser1.push(
-      await groupsService.createGroup({ name: 'grupo 1.1' }, user1),
+    projectsOwnedByUser1.push(
+      await projectsService.createProject({ name: 'grupo 1.1' }, user1),
     );
-    groupsOwnedByUser1.push(
-      await groupsService.createGroup({ name: 'grupo 1.2' }, user1),
+    projectsOwnedByUser1.push(
+      await projectsService.createProject({ name: 'grupo 1.2' }, user1),
     );
-    groupsOwnedByUser1.push(
-      await groupsService.createGroup({ name: 'grupo 1.3' }, user1),
+    projectsOwnedByUser1.push(
+      await projectsService.createProject({ name: 'grupo 1.3' }, user1),
     );
-    groupsOwnedByUser2.push(
-      await groupsService.createGroup({ name: 'grupo 2.1' }, user2),
+    projectsOwnedByUser2.push(
+      await projectsService.createProject({ name: 'grupo 2.1' }, user2),
     );
-    groupsOwnedByUser2.push(
-      await groupsService.createGroup({ name: 'grupo 2.2' }, user2),
+    projectsOwnedByUser2.push(
+      await projectsService.createProject({ name: 'grupo 2.2' }, user2),
     );
 
-    await usersGroupsService.addParticipantToGroup(
+    await usersProjectsService.addParticipantToProject(
       user1,
-      groupsOwnedByUser2[1].id,
+      projectsOwnedByUser2[1].id,
     );
   };
 
@@ -94,9 +94,9 @@ describe('Project (e2e)', () => {
         }),
         AuthModule,
         UsersModule,
-        GroupsModule,
         ProjectsModule,
-        UsersGroupsModule,
+        TasksModule,
+        UsersProjectsModule,
       ],
     })
       .overrideProvider(EmailsService)
@@ -106,13 +106,13 @@ describe('Project (e2e)', () => {
     app = moduleFixture.createNestApplication();
 
     userRepository = moduleFixture.get('UserRepository');
-    groupRepository = moduleFixture.get('GroupRepository');
     projectRepository = moduleFixture.get('ProjectRepository');
+    taskRepository = moduleFixture.get('TaskRepository');
 
     authService = moduleFixture.get(AuthService);
-    groupsService = moduleFixture.get(GroupsService);
-    usersGroupsService = moduleFixture.get(UsersGroupsService);
     projectsService = moduleFixture.get(ProjectsService);
+    usersProjectsService = moduleFixture.get(UsersProjectsService);
+    tasksService = moduleFixture.get(TasksService);
 
     await app.init();
 
@@ -120,27 +120,27 @@ describe('Project (e2e)', () => {
   });
 
   afterAll(async () => {
-    await groupRepository.query(`DELETE FROM groups;`);
+    await projectRepository.query(`DELETE FROM projects;`);
     await userRepository.query(`DELETE FROM users;`);
 
     await app.close();
   });
 
   afterEach(async () => {
-    await projectRepository.query(`DELETE FROM projects;`);
+    await taskRepository.query(`DELETE FROM tasks;`);
   });
 
-  describe('POST /groups/:groupId/projects', () => {
-    it('should throw an Anauthorized error when try to create a project not authenticated', async () => {
+  describe('POST /projects/:projectId/tasks', () => {
+    it('should throw an Anauthorized error when try to create a task not authenticated', async () => {
       const token = '';
 
       const response = await request(app.getHttpServer())
-        .post(`/groups/${groupsOwnedByUser1[0].id}/projects`)
+        .post(`/projects/${projectsOwnedByUser1[0].id}/tasks`)
         .set('Accept', 'application/json')
         .set('Authorization', `Bearer ${token}`)
         .send({
-          title: 'my first project',
-          description: 'description of project 1',
+          title: 'my first task',
+          description: 'description of task 1',
         });
 
       expect(response.status).toEqual(401);
@@ -154,12 +154,12 @@ describe('Project (e2e)', () => {
       const token = user1Token;
 
       const response = await request(app.getHttpServer())
-        .post(`/groups/${groupsOwnedByUser1[0].id}/projects`)
+        .post(`/projects/${projectsOwnedByUser1[0].id}/tasks`)
         .set('Accept', 'application/json')
         .set('Authorization', `Bearer ${token}`)
         .send({
           title: '',
-          description: 'description of project 1',
+          description: 'description of task 1',
         });
 
       expect(response.status).toEqual(400);
@@ -170,24 +170,24 @@ describe('Project (e2e)', () => {
       });
     });
 
-    it('should create a project on a group owned by the authenticated user', async () => {
+    it('should create a task on a project owned by the authenticated user', async () => {
       const token = user1Token;
 
       const response = await request(app.getHttpServer())
-        .post(`/groups/${groupsOwnedByUser1[0].id}/projects`)
+        .post(`/projects/${projectsOwnedByUser1[0].id}/tasks`)
         .set('Accept', 'application/json')
         .set('Authorization', `Bearer ${token}`)
         .send({
-          title: 'my first project',
-          description: 'description of project 1',
+          title: 'my first task',
+          description: 'description of task 1',
         });
 
       expect(response.status).toEqual(201);
       expect(response.body).toMatchObject({
-        groupId: groupsOwnedByUser1[0].id,
+        projectId: projectsOwnedByUser1[0].id,
         ownerId: user1.id,
-        title: 'my first project',
-        description: 'description of project 1',
+        title: 'my first task',
+        description: 'description of task 1',
         status: 'OPEN',
         completedAt: null,
         id: expect.any(String),
@@ -197,24 +197,24 @@ describe('Project (e2e)', () => {
       });
     });
 
-    it('should create a project on a group where the authenticated user is a participant', async () => {
+    it('should create a task on a project where the authenticated user is a participant', async () => {
       const token = user1Token;
 
       const response = await request(app.getHttpServer())
-        .post(`/groups/${groupsOwnedByUser2[1].id}/projects`)
+        .post(`/projects/${projectsOwnedByUser2[1].id}/tasks`)
         .set('Accept', 'application/json')
         .set('Authorization', `Bearer ${token}`)
         .send({
-          title: 'my first project',
-          description: 'description of project 1',
+          title: 'my first task',
+          description: 'description of task 1',
         });
 
       expect(response.status).toEqual(201);
       expect(response.body).toMatchObject({
-        groupId: groupsOwnedByUser2[1].id,
+        projectId: projectsOwnedByUser2[1].id,
         ownerId: user1.id,
-        title: 'my first project',
-        description: 'description of project 1',
+        title: 'my first task',
+        description: 'description of task 1',
         status: 'OPEN',
         completedAt: null,
         id: expect.any(String),
@@ -224,16 +224,16 @@ describe('Project (e2e)', () => {
       });
     });
 
-    it('should throw Not Found Error when create a project on a group owned by another user where the authenticated user is not participating', async () => {
+    it('should throw Not Found Error when create a task on a project owned by another user where the authenticated user is not participating', async () => {
       const token = user1Token;
 
       const response = await request(app.getHttpServer())
-        .post(`/groups/${groupsOwnedByUser2[0].id}/projects`)
+        .post(`/projects/${projectsOwnedByUser2[0].id}/tasks`)
         .set('Accept', 'application/json')
         .set('Authorization', `Bearer ${token}`)
         .send({
-          title: 'my first project',
-          description: 'description of project 1',
+          title: 'my first task',
+          description: 'description of task 1',
         });
 
       expect(response.status).toEqual(404);
@@ -243,16 +243,16 @@ describe('Project (e2e)', () => {
       });
     });
 
-    it('should throw Not Found Error when create a project on a group that does not exists', async () => {
+    it('should throw Not Found Error when create a task on a project that does not exists', async () => {
       const token = user1Token;
 
       const response = await request(app.getHttpServer())
-        .post(`/groups/${uuid()}/projects`)
+        .post(`/projects/${uuid()}/tasks`)
         .set('Accept', 'application/json')
         .set('Authorization', `Bearer ${token}`)
         .send({
-          title: 'my first project',
-          description: 'description of project 1',
+          title: 'my first task',
+          description: 'description of task 1',
         });
 
       expect(response.status).toEqual(404);
@@ -263,12 +263,12 @@ describe('Project (e2e)', () => {
     });
   });
 
-  describe('GET /groups/:groupId/projects', () => {
-    it('should throw an Anauthorized error when try to list projects for a user not authenticated', async () => {
+  describe('GET /projects/:projectId/tasks', () => {
+    it('should throw an Anauthorized error when try to list tasks for a user not authenticated', async () => {
       const token = '';
 
       const response = await request(app.getHttpServer())
-        .get(`/groups/${groupsOwnedByUser1[0]}/projects`)
+        .get(`/projects/${projectsOwnedByUser1[0]}/tasks`)
         .set('Accept', 'application/json')
         .set('Authorization', `Bearer ${token}`)
         .send();
@@ -280,64 +280,64 @@ describe('Project (e2e)', () => {
       });
     });
 
-    it('should list all projects associated to authenticated user', async () => {
+    it('should list all tasks associated to authenticated user', async () => {
       const token = user1Token;
 
-      await projectsService.createProjectForUser(
+      await tasksService.createTaskForUser(
         {
           title: 'ttile1',
           description: '',
-          groupId: groupsOwnedByUser1[0].id,
+          projectId: projectsOwnedByUser1[0].id,
           ownerId: user1.id,
         },
         user1,
       );
-      await projectsService.createProjectForUser(
+      await tasksService.createTaskForUser(
         {
           title: 'ttile2',
           description: '',
-          groupId: groupsOwnedByUser1[0].id,
+          projectId: projectsOwnedByUser1[0].id,
           ownerId: user1.id,
         },
         user1,
       );
 
-      await projectsService.createProjectForUser(
+      await tasksService.createTaskForUser(
         {
           title: 'ttile2',
           description: '',
-          groupId: groupsOwnedByUser2[1].id,
+          projectId: projectsOwnedByUser2[1].id,
           ownerId: user2.id,
         },
         user1,
       );
-      await projectsService.createProjectForUser(
+      await tasksService.createTaskForUser(
         {
           title: 'ttile3',
           description: '',
-          groupId: groupsOwnedByUser2[1].id,
+          projectId: projectsOwnedByUser2[1].id,
           ownerId: user2.id,
         },
         user2,
       );
-      await projectsService.createProjectForUser(
+      await tasksService.createTaskForUser(
         {
           title: 'ttile4',
           description: '',
-          groupId: groupsOwnedByUser2[1].id,
+          projectId: projectsOwnedByUser2[1].id,
           ownerId: user2.id,
         },
         user2,
       );
 
       const response1 = await request(app.getHttpServer())
-        .get(`/groups/${groupsOwnedByUser1[0].id}/projects`)
+        .get(`/projects/${projectsOwnedByUser1[0].id}/tasks`)
         .set('Accept', 'application/json')
         .set('Authorization', `Bearer ${token}`)
         .send();
 
       const response2 = await request(app.getHttpServer())
-        .get(`/groups/${groupsOwnedByUser2[1].id}/projects`)
+        .get(`/projects/${projectsOwnedByUser2[1].id}/tasks`)
         .set('Accept', 'application/json')
         .set('Authorization', `Bearer ${token}`)
         .send();
@@ -350,25 +350,25 @@ describe('Project (e2e)', () => {
     });
   });
 
-  describe('UPDATE /projects/:id', () => {
-    it('should throw Not Found when update a project owned by another user', async () => {
+  describe('UPDATE /tasks/:id', () => {
+    it('should throw Not Found when update a task owned by another user', async () => {
       const token = user1Token;
 
-      const project = await projectsService.createProjectForUser(
+      const task = await tasksService.createTaskForUser(
         {
           title: 'title1',
           description: 'teste de descrição',
-          groupId: groupsOwnedByUser2[1].id,
+          projectId: projectsOwnedByUser2[1].id,
         },
         user2,
       );
       const response = await request(app.getHttpServer())
-        .put(`/projects/${project.id}`)
+        .put(`/tasks/${task.id}`)
         .set('Accept', 'application/json')
         .set('Authorization', `Bearer ${token}`)
         .send({
-          title: 'my updated project',
-          description: 'description of project 1',
+          title: 'my updated task',
+          description: 'description of task 1',
         });
 
       expect(response.status).toEqual(404);
@@ -378,34 +378,34 @@ describe('Project (e2e)', () => {
       });
     });
 
-    it('should update a project owned by the authenticated user', async () => {
+    it('should update a task owned by the authenticated user', async () => {
       const token = user1Token;
 
-      const project = await projectsService.createProjectForUser(
+      const task = await tasksService.createTaskForUser(
         {
           title: 'title1',
           description: 'teste de descrição',
-          groupId: groupsOwnedByUser1[0].id,
+          projectId: projectsOwnedByUser1[0].id,
           ownerId: user1.id,
         },
         user1,
       );
 
       const response = await request(app.getHttpServer())
-        .put(`/projects/${project.id}`)
+        .put(`/tasks/${task.id}`)
         .set('Accept', 'application/json')
         .set('Authorization', `Bearer ${token}`)
         .send({
-          title: 'my updated project',
-          description: 'description of project 1',
+          title: 'my updated task',
+          description: 'description of task 1',
         });
 
       expect(response.status).toEqual(200);
       expect(response.body).toMatchObject({
-        groupId: groupsOwnedByUser1[0].id,
+        projectId: projectsOwnedByUser1[0].id,
         ownerId: user1.id,
-        title: 'my updated project',
-        description: 'description of project 1',
+        title: 'my updated task',
+        description: 'description of task 1',
         status: 'OPEN',
         completedAt: null,
         id: expect.any(String),
@@ -416,20 +416,20 @@ describe('Project (e2e)', () => {
     });
   });
 
-  describe('DELETE /projects/:id', () => {
-    it('should throw Not Found when delete a project owned by another user', async () => {
+  describe('DELETE /tasks/:id', () => {
+    it('should throw Not Found when delete a task owned by another user', async () => {
       const token = user1Token;
 
-      const project = await projectsService.createProjectForUser(
+      const task = await tasksService.createTaskForUser(
         {
           title: 'title1',
           description: 'teste de descrição',
-          groupId: groupsOwnedByUser2[1].id,
+          projectId: projectsOwnedByUser2[1].id,
         },
         user2,
       );
       const response = await request(app.getHttpServer())
-        .delete(`/projects/${project.id}`)
+        .delete(`/tasks/${task.id}`)
         .set('Accept', 'application/json')
         .set('Authorization', `Bearer ${token}`)
         .send();
@@ -441,21 +441,21 @@ describe('Project (e2e)', () => {
       });
     });
 
-    it('should delete a project owned by the authenticated user', async () => {
+    it('should delete a task owned by the authenticated user', async () => {
       const token = user1Token;
 
-      const project = await projectsService.createProjectForUser(
+      const task = await tasksService.createTaskForUser(
         {
           title: 'title1',
           description: 'teste de descrição',
-          groupId: groupsOwnedByUser1[0].id,
+          projectId: projectsOwnedByUser1[0].id,
           ownerId: user1.id,
         },
         user1,
       );
 
       const response = await request(app.getHttpServer())
-        .delete(`/projects/${project.id}`)
+        .delete(`/tasks/${task.id}`)
         .set('Accept', 'application/json')
         .set('Authorization', `Bearer ${token}`)
         .send();

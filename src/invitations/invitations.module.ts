@@ -5,22 +5,22 @@ import { InvitationsService } from './invitations.service';
 import { InvitationsController } from './invitations.controller';
 import { InvitationRepository } from './invitation.repository';
 import { AuthModule } from '../auth/auth.module';
-import { GroupsModule } from '../groups/groups.module';
-import { UsersGroupsModule } from '../users-groups/users-groups.module';
+import { ProjectsModule } from '../projects/projects.module';
+import { UsersProjectsModule } from '../users-projects/users-projects.module';
 import { EmailsModule } from '../emails/emails.module';
-import { GroupsInvitationsController } from './groups-invitations.controller';
+import { ProjectsInvitationsController } from './projects-invitations.controller';
 import { UsersModule } from '../users/users.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([InvitationRepository]),
     AuthModule,
-    GroupsModule,
+    ProjectsModule,
     UsersModule,
-    UsersGroupsModule,
+    UsersProjectsModule,
     EmailsModule,
   ],
   providers: [InvitationsService],
-  controllers: [InvitationsController, GroupsInvitationsController],
+  controllers: [InvitationsController, ProjectsInvitationsController],
 })
 export class InvitationsModule {}

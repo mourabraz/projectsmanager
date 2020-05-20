@@ -18,29 +18,29 @@ import { User } from '../users/user.entity';
 import { CreateInvitationDto } from './dto/create-invitation.dto';
 import { Invitation } from './invitation.entity';
 
-@Controller('/groups/:groupId/invitations')
+@Controller('/projects/:projectId/invitations')
 @UseGuards(AuthGuard())
-export class GroupsInvitationsController {
-  private logger = new Logger(GroupsInvitationsController.name);
+export class ProjectsInvitationsController {
+  private logger = new Logger(ProjectsInvitationsController.name);
 
   constructor(private invitationsService: InvitationsService) {}
 
   @Get()
   index(
-    @Param('groupId', new ParseUUIDPipe()) groupId: string,
+    @Param('projectId', new ParseUUIDPipe()) projectId: string,
     @GetUser() user: User,
   ): Promise<Invitation[]> {
     this.logger.verbose(
-      `User "${user.email}" retrieving all invitations for group id ${groupId}.`,
+      `User "${user.email}" retrieving all invitations for project id ${projectId}.`,
     );
 
-    return this.invitationsService.getInvitationsByGroupId(groupId, user);
+    return this.invitationsService.getInvitationsByProjectId(projectId, user);
   }
 
   @Post()
   @UsePipes(ValidationPipe)
   store(
-    @Param('groupId', new ParseUUIDPipe()) id: string,
+    @Param('projectId', new ParseUUIDPipe()) id: string,
     @Body() createInvitationDto: CreateInvitationDto,
     @GetUser() user: User,
   ): Promise<Invitation> {
@@ -50,7 +50,7 @@ export class GroupsInvitationsController {
       )}`,
     );
 
-    createInvitationDto.groupId = id;
+    createInvitationDto.projectId = id;
     createInvitationDto.userId = user.id;
 
     return this.invitationsService.createInvitation(createInvitationDto, user);

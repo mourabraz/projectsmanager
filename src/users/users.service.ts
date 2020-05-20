@@ -11,8 +11,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 
 import { UserRepository } from './user.repository';
 import { User } from './user.entity';
-import { Group } from '../groups/group.entity';
-import { GroupsService } from '../groups/groups.service';
+import { Project } from '../projects/project.entity';
+import { ProjectsService } from '../projects/projects.service';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { AppConfigService } from '../config/app/config.service';
 import { PhotoRepository } from './photo.repository';
@@ -28,15 +28,15 @@ export class UsersService {
     private userRepository: UserRepository,
     @InjectRepository(PhotoRepository)
     private photoRepository: PhotoRepository,
-    private groupsService: GroupsService,
+    private projectsService: ProjectsService,
     private appConfigService: AppConfigService,
     private multerConfigService: MulterConfigService,
   ) {}
 
-  async isUserInGroup(user: User, group: Group): Promise<boolean> {
-    const groups = await this.groupsService.getGroupsForUser(user);
+  async isUserInProject(user: User, project: Project): Promise<boolean> {
+    const projects = await this.projectsService.getProjectsForUser(user);
 
-    return groups.findIndex(i => i.id === group.id) !== -1;
+    return projects.findIndex((i) => i.id === project.id) !== -1;
   }
 
   async getUserByEmail(email: string): Promise<User> {
@@ -101,7 +101,7 @@ export class UsersService {
 
       fs.unlink(
         resolve(this.multerConfigService.uploadPhotoDest, prevFilename),
-        async err => {
+        async (err) => {
           if (err) {
             this.logger.error(
               `Failed to remove file: "${prevFilename}"`,

@@ -13,13 +13,13 @@ import { EmailsService } from './../src/emails/emails.service';
 import { AuthModule } from './../src/auth/auth.module';
 import { UsersModule } from './../src/users/users.module';
 import { User } from './../src/users/user.entity';
-import { GroupsModule } from './../src/groups/groups.module';
-import { Group } from './../src/groups/group.entity';
+import { ProjectsModule } from './../src/projects/projects.module';
+import { Project } from './../src/projects/project.entity';
 
-describe('Group (e2e)', () => {
+describe('Project (e2e)', () => {
   let app: INestApplication;
   let userRepository: Repository<User>;
-  let groupRepository: Repository<Group>;
+  let projectRepository: Repository<Project>;
   const emailsService = { addWelcomeEmailToQueue: () => ({}) };
 
   beforeAll(async () => {
@@ -33,7 +33,7 @@ describe('Group (e2e)', () => {
         }),
         AuthModule,
         UsersModule,
-        GroupsModule,
+        ProjectsModule,
       ],
     })
       .overrideProvider(EmailsService)
@@ -42,7 +42,7 @@ describe('Group (e2e)', () => {
 
     app = moduleFixture.createNestApplication();
     userRepository = moduleFixture.get('UserRepository');
-    groupRepository = moduleFixture.get('GroupRepository');
+    projectRepository = moduleFixture.get('ProjectRepository');
     await app.init();
   });
 
@@ -52,18 +52,18 @@ describe('Group (e2e)', () => {
 
   afterEach(async () => {
     await userRepository.query(`DELETE FROM users;`);
-    await groupRepository.query(`DELETE FROM groups;`);
+    await projectRepository.query(`DELETE FROM projects;`);
   });
 
-  describe('POST /groups', () => {
+  describe('POST /projects', () => {
     it('should throw an Anauthorized error when try to create a user not authenticated', async () => {
       const token = '';
 
       const response = await request(app.getHttpServer())
-        .post('/groups')
+        .post('/projects')
         .set('Accept', 'application/json')
         .set('Authorization', `Bearer ${token}`)
-        .send({ name: 'my first group' });
+        .send({ name: 'my first project' });
 
       expect(response.status).toEqual(401);
       expect(response.body).toMatchObject({
@@ -88,7 +88,7 @@ describe('Group (e2e)', () => {
       const token = singInResponse.body.accessToken;
 
       const response = await request(app.getHttpServer())
-        .post('/groups')
+        .post('/projects')
         .set('Accept', 'application/json')
         .set('Authorization', `Bearer ${token}`)
         .send({ name: '' });
@@ -101,7 +101,7 @@ describe('Group (e2e)', () => {
       });
     });
 
-    it('should create a new group for an authenticated user', async () => {
+    it('should create a new project for an authenticated user', async () => {
       const createUserResponse = await request(app.getHttpServer())
         .post('/auth/signup')
         .set('Accept', 'application/json')
@@ -117,29 +117,29 @@ describe('Group (e2e)', () => {
       const token = singInResponse.body.accessToken;
 
       const response = await request(app.getHttpServer())
-        .post('/groups')
+        .post('/projects')
         .set('Accept', 'application/json')
         .set('Authorization', `Bearer ${token}`)
-        .send({ name: 'my first group' });
+        .send({ name: 'my first project' });
 
       expect(response.status).toEqual(201);
       expect(response.body).toMatchObject({
         ownerId: user.id,
-        name: 'my first group',
+        name: 'my first project',
         id: expect.any(String),
         createdAt: expect.any(String),
         updatedAt: expect.any(String),
       });
     });
 
-    it('should create a new group with duplicated name for another user', async () => {
+    it('should create a new project with duplicated name for another user', async () => {
       const anotherUser = new User();
       anotherUser.email = 'user@User.com';
       anotherUser.password = '123456';
       await userRepository.save(anotherUser);
-      await groupRepository.insert({
+      await projectRepository.insert({
         id: uuid(),
-        name: 'group_name',
+        name: 'project_name',
         ownerId: anotherUser.id,
       });
 
@@ -158,22 +158,22 @@ describe('Group (e2e)', () => {
       const token = singInResponse.body.accessToken;
 
       const response = await request(app.getHttpServer())
-        .post('/groups')
+        .post('/projects')
         .set('Accept', 'application/json')
         .set('Authorization', `Bearer ${token}`)
-        .send({ name: 'my first group' });
+        .send({ name: 'my first project' });
 
       expect(response.status).toEqual(201);
       expect(response.body).toMatchObject({
         ownerId: user.id,
-        name: 'my first group',
+        name: 'my first project',
         id: expect.any(String),
         createdAt: expect.any(String),
         updatedAt: expect.any(String),
       });
     });
 
-    it('should not create a new group with duplicated name for the same user', async () => {
+    it('should not create a new project with duplicated name for the same user', async () => {
       const createUserResponse = await request(app.getHttpServer())
         .post('/auth/signup')
         .set('Accept', 'application/json')
@@ -189,32 +189,32 @@ describe('Group (e2e)', () => {
       const token = singInResponse.body.accessToken;
 
       await request(app.getHttpServer())
-        .post('/groups')
+        .post('/projects')
         .set('Accept', 'application/json')
         .set('Authorization', `Bearer ${token}`)
-        .send({ name: 'my first group' });
+        .send({ name: 'my first project' });
 
       const response = await request(app.getHttpServer())
-        .post('/groups')
+        .post('/projects')
         .set('Accept', 'application/json')
         .set('Authorization', `Bearer ${token}`)
-        .send({ name: 'my first group' });
+        .send({ name: 'my first project' });
 
       expect(response.status).toEqual(400);
       expect(response.body).toMatchObject({
         statusCode: 400,
-        message: 'This name "my first group" is not available',
+        message: 'This name "my first project" is not available',
         error: 'Bad Request',
       });
     });
   });
 
-  describe('GET /groups', () => {
-    it('should throw an Anauthorized error when try to list groups for a user not authenticated', async () => {
+  describe('GET /projects', () => {
+    it('should throw an Anauthorized error when try to list projects for a user not authenticated', async () => {
       const token = '';
 
       const response = await request(app.getHttpServer())
-        .get('/groups')
+        .get('/projects')
         .set('Accept', 'application/json')
         .set('Authorization', `Bearer ${token}`)
         .send();
@@ -226,7 +226,7 @@ describe('Group (e2e)', () => {
       });
     });
 
-    it('should list all groups for an authenticated user', async () => {
+    it('should list all projects for an authenticated user', async () => {
       const anotherUserResponse = await request(app.getHttpServer())
         .post('/auth/signup')
         .set('Accept', 'application/json')
@@ -242,16 +242,16 @@ describe('Group (e2e)', () => {
       const anotherToken = anotherSingInResponse.body.accessToken;
 
       await request(app.getHttpServer())
-        .post('/groups')
+        .post('/projects')
         .set('Accept', 'application/json')
         .set('Authorization', `Bearer ${anotherToken}`)
-        .send({ name: 'my first group' });
+        .send({ name: 'my first project' });
 
       await request(app.getHttpServer())
-        .post('/groups')
+        .post('/projects')
         .set('Accept', 'application/json')
         .set('Authorization', `Bearer ${anotherToken}`)
-        .send({ name: 'my first group 1' });
+        .send({ name: 'my first project 1' });
 
       const createUserResponse = await request(app.getHttpServer())
         .post('/auth/signup')
@@ -268,40 +268,40 @@ describe('Group (e2e)', () => {
       const token = singInResponse.body.accessToken;
 
       await request(app.getHttpServer())
-        .post('/groups')
+        .post('/projects')
         .set('Accept', 'application/json')
         .set('Authorization', `Bearer ${token}`)
-        .send({ name: 'my first group 2' });
+        .send({ name: 'my first project 2' });
 
       await request(app.getHttpServer())
-        .post('/groups')
+        .post('/projects')
         .set('Accept', 'application/json')
         .set('Authorization', `Bearer ${token}`)
-        .send({ name: 'my first group 3' });
+        .send({ name: 'my first project 3' });
 
       const response = await request(app.getHttpServer())
-        .get('/groups')
+        .get('/projects')
         .set('Authorization', `Bearer ${token}`)
         .send();
 
-      const totalGroups = await groupRepository.count();
+      const totalProjects = await projectRepository.count();
 
       expect(response.status).toEqual(200);
-      expect(response.body.length).not.toBe(totalGroups);
+      expect(response.body.length).not.toBe(totalProjects);
       expect(response.body).toMatchObject([
         {
           id: expect.any(String),
-          name: 'my first group 2',
+          name: 'my first project 2',
         },
         {
           id: expect.any(String),
-          name: 'my first group 3',
+          name: 'my first project 3',
         },
       ]);
     });
   });
 
-  describe('UPDATE /groups/:id', () => {
+  describe('UPDATE /projects/:id', () => {
     it('should throw Unauthorized error for an authenticated user', async () => {
       const anotherUserResponse = await request(app.getHttpServer())
         .post('/auth/signup')
@@ -317,21 +317,21 @@ describe('Group (e2e)', () => {
 
       const anotherToken = anotherSingInResponse.body.accessToken;
 
-      const groupResponse = await request(app.getHttpServer())
-        .post('/groups')
+      const projectResponse = await request(app.getHttpServer())
+        .post('/projects')
         .set('Accept', 'application/json')
         .set('Authorization', `Bearer ${anotherToken}`)
-        .send({ name: 'my first group' });
+        .send({ name: 'my first project' });
 
-      const group = groupResponse.body;
+      const project = projectResponse.body;
 
       const token = '';
 
       const response = await request(app.getHttpServer())
-        .patch(`/groups/${group.id}`)
+        .patch(`/projects/${project.id}`)
         .set('Accept', 'application/json')
         .set('Authorization', `Bearer ${token}`)
-        .send({ name: 'my first group updated' });
+        .send({ name: 'my first project updated' });
 
       expect(response.status).toEqual(401);
       expect(response.body).toMatchObject({
@@ -355,16 +355,16 @@ describe('Group (e2e)', () => {
 
       const anotherToken = anotherSingInResponse.body.accessToken;
 
-      const groupResponse = await request(app.getHttpServer())
-        .post('/groups')
+      const projectResponse = await request(app.getHttpServer())
+        .post('/projects')
         .set('Accept', 'application/json')
         .set('Authorization', `Bearer ${anotherToken}`)
-        .send({ name: 'my first group' });
+        .send({ name: 'my first project' });
 
-      const group = groupResponse.body;
+      const project = projectResponse.body;
 
       const response = await request(app.getHttpServer())
-        .patch(`/groups/${group.id}`)
+        .patch(`/projects/${project.id}`)
         .set('Accept', 'application/json')
         .set('Authorization', `Bearer ${anotherToken}`)
         .send({ name: '' });
@@ -377,7 +377,7 @@ describe('Group (e2e)', () => {
       });
     });
 
-    it('should throw Not Found error an authenticated user not owner the group', async () => {
+    it('should throw Not Found error an authenticated user not owner the project', async () => {
       const anotherUserResponse = await request(app.getHttpServer())
         .post('/auth/signup')
         .set('Accept', 'application/json')
@@ -392,13 +392,13 @@ describe('Group (e2e)', () => {
 
       const anotherToken = anotherSingInResponse.body.accessToken;
 
-      const groupResponse = await request(app.getHttpServer())
-        .post('/groups')
+      const projectResponse = await request(app.getHttpServer())
+        .post('/projects')
         .set('Accept', 'application/json')
         .set('Authorization', `Bearer ${anotherToken}`)
-        .send({ name: 'my first group' });
+        .send({ name: 'my first project' });
 
-      const group = groupResponse.body;
+      const project = projectResponse.body;
 
       const createUserResponse = await request(app.getHttpServer())
         .post('/auth/signup')
@@ -415,10 +415,10 @@ describe('Group (e2e)', () => {
       const token = singInResponse.body.accessToken;
 
       const response = await request(app.getHttpServer())
-        .patch(`/groups/${group.id}`)
+        .patch(`/projects/${project.id}`)
         .set('Accept', 'application/json')
         .set('Authorization', `Bearer ${token}`)
-        .send({ name: 'my first group updated' });
+        .send({ name: 'my first project updated' });
 
       expect(response.status).toEqual(404);
       expect(response.body).toMatchObject({
@@ -427,7 +427,7 @@ describe('Group (e2e)', () => {
       });
     });
 
-    it("should update name's group if authenticated user is the owner", async () => {
+    it("should update name's project if authenticated user is the owner", async () => {
       const userResponse = await request(app.getHttpServer())
         .post('/auth/signup')
         .set('Accept', 'application/json')
@@ -442,29 +442,29 @@ describe('Group (e2e)', () => {
 
       const token = singInResponse.body.accessToken;
 
-      const groupResponse = await request(app.getHttpServer())
-        .post('/groups')
+      const projectResponse = await request(app.getHttpServer())
+        .post('/projects')
         .set('Accept', 'application/json')
         .set('Authorization', `Bearer ${token}`)
-        .send({ name: 'my first group' });
+        .send({ name: 'my first project' });
 
-      const group = groupResponse.body;
+      const project = projectResponse.body;
 
       const response = await request(app.getHttpServer())
-        .patch(`/groups/${group.id}`)
+        .patch(`/projects/${project.id}`)
         .set('Accept', 'application/json')
         .set('Authorization', `Bearer ${token}`)
         .send({ name: 'updated name' });
 
       expect(response.status).toEqual(200);
       expect(response.body).toMatchObject({
-        id: group.id,
+        id: project.id,
         name: 'updated name',
       });
     });
   });
 
-  describe('DELETE /groups/:id', () => {
+  describe('DELETE /projects/:id', () => {
     it('should throw Unauthorized error for a user not authenticated', async () => {
       const anotherUserResponse = await request(app.getHttpServer())
         .post('/auth/signup')
@@ -480,18 +480,18 @@ describe('Group (e2e)', () => {
 
       const anotherToken = anotherSingInResponse.body.accessToken;
 
-      const groupResponse = await request(app.getHttpServer())
-        .post('/groups')
+      const projectResponse = await request(app.getHttpServer())
+        .post('/projects')
         .set('Accept', 'application/json')
         .set('Authorization', `Bearer ${anotherToken}`)
-        .send({ name: 'my first group' });
+        .send({ name: 'my first project' });
 
-      const group = groupResponse.body;
+      const project = projectResponse.body;
 
       const token = '';
 
       const response = await request(app.getHttpServer())
-        .delete(`/groups/${group.id}`)
+        .delete(`/projects/${project.id}`)
         .set('Accept', 'application/json')
         .set('Authorization', `Bearer ${token}`)
         .send();
@@ -503,7 +503,7 @@ describe('Group (e2e)', () => {
       });
     });
 
-    it('should throw Not Found error an authenticated user not owner the group', async () => {
+    it('should throw Not Found error an authenticated user not owner the project', async () => {
       const anotherUserResponse = await request(app.getHttpServer())
         .post('/auth/signup')
         .set('Accept', 'application/json')
@@ -518,13 +518,13 @@ describe('Group (e2e)', () => {
 
       const anotherToken = anotherSingInResponse.body.accessToken;
 
-      const groupResponse = await request(app.getHttpServer())
-        .post('/groups')
+      const projectResponse = await request(app.getHttpServer())
+        .post('/projects')
         .set('Accept', 'application/json')
         .set('Authorization', `Bearer ${anotherToken}`)
-        .send({ name: 'my first group' });
+        .send({ name: 'my first project' });
 
-      const group = groupResponse.body;
+      const project = projectResponse.body;
 
       const createUserResponse = await request(app.getHttpServer())
         .post('/auth/signup')
@@ -541,7 +541,7 @@ describe('Group (e2e)', () => {
       const token = singInResponse.body.accessToken;
 
       const response = await request(app.getHttpServer())
-        .delete(`/groups/${group.id}`)
+        .delete(`/projects/${project.id}`)
         .set('Accept', 'application/json')
         .set('Authorization', `Bearer ${token}`)
         .send();
@@ -553,7 +553,7 @@ describe('Group (e2e)', () => {
       });
     });
 
-    it('should delete group if authenticated user is the owner', async () => {
+    it('should delete project if authenticated user is the owner', async () => {
       const userResponse = await request(app.getHttpServer())
         .post('/auth/signup')
         .set('Accept', 'application/json')
@@ -568,24 +568,24 @@ describe('Group (e2e)', () => {
 
       const token = singInResponse.body.accessToken;
 
-      const groupResponse = await request(app.getHttpServer())
-        .post('/groups')
+      const projectResponse = await request(app.getHttpServer())
+        .post('/projects')
         .set('Accept', 'application/json')
         .set('Authorization', `Bearer ${token}`)
-        .send({ name: 'my first group' });
+        .send({ name: 'my first project' });
 
-      const group = groupResponse.body;
+      const project = projectResponse.body;
 
       const response = await request(app.getHttpServer())
-        .delete(`/groups/${group.id}`)
+        .delete(`/projects/${project.id}`)
         .set('Authorization', `Bearer ${token}`)
         .send();
 
-      const totalGroups = await groupRepository.count();
+      const totalProjects = await projectRepository.count();
 
       expect(response.status).toEqual(200);
       expect(response.body.total).toBe(1);
-      expect(totalGroups).toBe(0);
+      expect(totalProjects).toBe(0);
     });
   });
 });

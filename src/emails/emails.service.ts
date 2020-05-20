@@ -5,7 +5,7 @@ import { addHours } from 'date-fns';
 import { EmailConsumer } from '../queue/email.consumer';
 import { Invitation } from '../invitations/invitation.entity';
 import { User } from '../users/user.entity';
-import { Group } from '../groups/group.entity';
+import { Project } from '../projects/project.entity';
 import { AppConfigService } from '../config/app/config.service';
 import { ForgotPassword } from '../auth/forgotpassword.entity';
 
@@ -37,7 +37,7 @@ export class EmailsService {
   async addInvitationEmailToQueue(
     invitation: Invitation,
     user: User,
-    group: Group,
+    project: Project,
   ) {
     const queue = new Bull(EmailConsumer.channelName);
 
@@ -47,12 +47,12 @@ export class EmailsService {
       payload: {
         to: invitation.emailTo,
         subject:
-          'Your invite to participate in a group on the Projects Manager App ',
+          'Your invite to participate in a project on the Projects Manager App ',
         template: 'NewInvitation',
         context: {
           name: invitation.emailTo,
           owner: user.name || user.email,
-          groupName: group.name,
+          projectName: project.name,
           link,
         },
       },

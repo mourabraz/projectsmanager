@@ -1,20 +1,62 @@
-import { Repository, EntityRepository } from 'typeorm';
+import { Repository, EntityRepository, DeleteResult } from 'typeorm';
 import { Logger, InternalServerErrorException } from '@nestjs/common';
 
 import { Project } from './project.entity';
+import { User } from '../users/user.entity';
 import { CreateProjectDto } from './dto/create-project.dto';
-import { ProjectStatus } from './project-status.enum';
 
 @EntityRepository(Project)
 export class ProjectRepository extends Repository<Project> {
-  private logger = new Logger('ProjectRepository');
+  private logger = new Logger(ProjectRepository.name);
 
-  async getProjectsByGroupId(groupId: string): Promise<Project[]> {
+  async getProjectsForUser(user: User): Promise<Project[]> {
     try {
-      return await this.find({ where: { groupId } });
+      return await this.query(
+        `SELECT projects.id, projects.name FROM projects
+      INNER JOIN users_projects ON projects.id = users_projects.project_id 
+      INNER JOIN users ON users_projects.user_id = users.id
+      WHERE users.id = $1`,
+        [user.id],
+      );
     } catch (error) {
       this.logger.error(
-        `Failed to get projects for group id "${groupId}".`,
+        `Failed to get projects for user "${user.email}".`,
+        error.stack,
+      );
+
+      throw new InternalServerErrorException();
+    }
+  }
+
+  async getProjectByIdForUser(id: string, user: User): Promise<Project> {
+    try {
+      const projects = await this.query(
+        `SELECT projects.id FROM projects
+      INNER JOIN users_projects ON users_projects.project_id = projects.id
+      INNER JOIN users ON users_projects.user_id = users.id
+      WHERE users.id = $1 AND projects.id = $2 LIMIT 1`,
+        [user.id, id],
+      );
+
+      return projects[0];
+    } catch (error) {
+      this.logger.error(
+        `Failed to get project with id: "${id}" for user "${user.email}".`,
+        error.stack,
+      );
+
+      throw new InternalServerErrorException();
+    }
+  }
+
+  async getProjectByIdForOwner(id: string, user: User): Promise<Project> {
+    try {
+      return await this.findOne({
+        where: { id, ownerId: user.id },
+      });
+    } catch (error) {
+      this.logger.error(
+        `Failed to find project by id: "${id}" for owner "${user.email}".`,
         error.stack,
       );
 
@@ -23,22 +65,21 @@ export class ProjectRepository extends Repository<Project> {
   }
 
   async createProject(createProjectDto: CreateProjectDto): Promise<Project> {
-    const { title, description, groupId, ownerId } = createProjectDto;
+    const { name, ownerId: userId } = createProjectDto;
 
     try {
       const project = new Project();
-      project.groupId = groupId;
-      project.ownerId = ownerId;
-      project.title = title;
-      project.description = description;
-      project.status = ProjectStatus.OPEN;
+      project.ownerId = userId;
+      project.name = name;
 
       await this.save(project);
+
+      delete project.owner;
 
       return project;
     } catch (error) {
       this.logger.error(
-        `Failed to create project for group. Data: ${JSON.stringify(
+        `Failed to create project for user id "${userId}". Data: ${JSON.stringify(
           createProjectDto,
         )}`,
         error.stack,
@@ -53,21 +94,30 @@ export class ProjectRepository extends Repository<Project> {
     createProjectDto: CreateProjectDto,
   ): Promise<Project> {
     try {
-      await this.update(id, {
-        title: createProjectDto.title,
-        description: createProjectDto.description,
-      });
+      await this.update(id, { name: createProjectDto.name });
 
       return await this.findOne(id);
     } catch (error) {
       this.logger.error(
-        `Failed to update project with id: "${id}". Data: ${JSON.stringify(
-          createProjectDto,
-        )}`,
+        `Failed to update project with id: "${id}" for owner id "${
+          createProjectDto.ownerId
+        }". Data: ${JSON.stringify(createProjectDto)}`,
         error.stack,
       );
 
       throw new InternalServerErrorException();
     }
+  }
+
+  async deleteProject(id: string): Promise<DeleteResult> {
+    const result = await this.delete({ id });
+
+    if (result.affected === 0) {
+      this.logger.error(`Failed to delete project with id: "${id}".`);
+
+      throw new InternalServerErrorException();
+    }
+
+    return result;
   }
 }

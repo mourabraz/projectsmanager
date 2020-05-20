@@ -1,21 +1,23 @@
 import {
   Controller,
-  UseGuards,
   Logger,
+  UseGuards,
+  Get,
+  Post,
+  Body,
   UsePipes,
   ValidationPipe,
-  Body,
-  Param,
-  Put,
   Delete,
+  Param,
+  Patch,
   ParseUUIDPipe,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 
 import { ProjectsService } from './projects.service';
-import { CreateProjectDto } from './dto/create-project.dto';
 import { GetUser } from '../auth/get-user.decorator';
 import { User } from '../users/user.entity';
+import { CreateProjectDto } from './dto/create-project.dto';
 import { Project } from './project.entity';
 
 @Controller('projects')
@@ -25,7 +27,29 @@ export class ProjectsController {
 
   constructor(private projectsService: ProjectsService) {}
 
-  @Put('/:id')
+  @Get()
+  index(@GetUser() user: User) {
+    this.logger.verbose(`User "${user.email}" retrieving all projects.`);
+
+    return this.projectsService.getProjectsForUser(user);
+  }
+
+  @Post()
+  @UsePipes(ValidationPipe)
+  store(
+    @Body() createProjectDto: CreateProjectDto,
+    @GetUser() user: User,
+  ): Promise<Project> {
+    this.logger.verbose(
+      `User "${user.email}" creating a new project. Data: ${JSON.stringify(
+        createProjectDto,
+      )}`,
+    );
+
+    return this.projectsService.createProject(createProjectDto, user);
+  }
+
+  @Patch('/:id')
   @UsePipes(ValidationPipe)
   update(
     @Param('id', new ParseUUIDPipe()) id: string,
@@ -33,14 +57,14 @@ export class ProjectsController {
     @GetUser() user: User,
   ): Promise<Project> {
     this.logger.verbose(
-      `User "${user.email}" update project id: "${id}". Data: ${JSON.stringify(
+      `User "${
+        user.email
+      }" update project with id: "${id}". Data: ${JSON.stringify(
         createProjectDto,
       )}`,
     );
 
-    createProjectDto.ownerId = user.id;
-
-    return this.projectsService.updateProject(id, createProjectDto);
+    return this.projectsService.updateProject(id, createProjectDto, user);
   }
 
   @Delete('/:id')
@@ -48,7 +72,9 @@ export class ProjectsController {
     @Param('id', new ParseUUIDPipe()) id: string,
     @GetUser() user: User,
   ): Promise<{ total: number }> {
-    this.logger.verbose(`User "${user.email}" delete project id: "${id}".`);
+    this.logger.verbose(
+      `User "${user.email}" delete project with id: "${id}".`,
+    );
 
     return this.projectsService.deleteProject(id, user);
   }

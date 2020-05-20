@@ -5,18 +5,16 @@ import { ProjectsService } from './projects.service';
 import { ProjectsController } from './projects.controller';
 import { ProjectRepository } from './project.repository';
 import { AuthModule } from '../auth/auth.module';
-import { UsersModule } from '../users/users.module';
-import { GroupsModule } from '../groups/groups.module';
-import { GroupsProjectsController } from './groups-projects.controller';
+import { UsersProjectsModule } from '../users-projects/users-projects.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([ProjectRepository]),
     AuthModule,
-    UsersModule,
-    GroupsModule,
+    UsersProjectsModule,
   ],
   providers: [ProjectsService],
-  controllers: [ProjectsController, GroupsProjectsController],
+  controllers: [ProjectsController],
+  exports: [ProjectsService],
 })
 export class ProjectsModule {}

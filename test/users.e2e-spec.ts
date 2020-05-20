@@ -12,34 +12,34 @@ import { EmailsService } from './../src/emails/emails.service';
 import { AuthModule } from './../src/auth/auth.module';
 import { UsersModule } from './../src/users/users.module';
 import { User } from './../src/users/user.entity';
-import { GroupsModule } from './../src/groups/groups.module';
-import { Group } from './../src/groups/group.entity';
-import { GroupsService } from './../src/groups/groups.service';
 import { ProjectsModule } from './../src/projects/projects.module';
 import { Project } from './../src/projects/project.entity';
+import { ProjectsService } from './../src/projects/projects.service';
+import { TasksModule } from './../src/tasks/tasks.module';
+import { Task } from './../src/tasks/task.entity';
 import { AuthService } from './../src/auth/auth.service';
-import { UsersGroupsService } from './../src/users-groups/users-groups.service';
-import { UsersGroupsModule } from './../src/users-groups/users-groups.module';
-// import { ProjectsService } from './../src/projects/projects.service';
+import { UsersProjectsService } from './../src/users-projects/users-projects.service';
+import { UsersProjectsModule } from './../src/users-projects/users-projects.module';
+// import { TasksService } from './../src/tasks/tasks.service';
 
 describe('User (e2e)', () => {
   let app: INestApplication;
 
   let userRepository: Repository<User>;
-  let groupRepository: Repository<Group>;
   let projectRepository: Repository<Project>;
+  let taskRepository: Repository<Task>;
 
   let authService: AuthService;
-  let groupsService: GroupsService;
-  let usersGroupsService: UsersGroupsService;
-  // let projectsService: ProjectsService;
+  let projectsService: ProjectsService;
+  let usersProjectsService: UsersProjectsService;
+  // let tasksService: TasksService;
 
   let user1: User;
   let user2: User;
   let user1Token: string;
 
-  const groupsOwnedByUser1: Group[] = [];
-  const groupsOwnedByUser2: Group[] = [];
+  const projectsOwnedByUser1: Project[] = [];
+  const projectsOwnedByUser2: Project[] = [];
 
   const emailsService = { addWelcomeEmailToQueue: () => ({}) };
 
@@ -60,25 +60,25 @@ describe('User (e2e)', () => {
       })
     ).accessToken;
 
-    groupsOwnedByUser1.push(
-      await groupsService.createGroup({ name: 'grupo 1.1' }, user1),
+    projectsOwnedByUser1.push(
+      await projectsService.createProject({ name: 'grupo 1.1' }, user1),
     );
-    groupsOwnedByUser1.push(
-      await groupsService.createGroup({ name: 'grupo 1.2' }, user1),
+    projectsOwnedByUser1.push(
+      await projectsService.createProject({ name: 'grupo 1.2' }, user1),
     );
-    groupsOwnedByUser1.push(
-      await groupsService.createGroup({ name: 'grupo 1.3' }, user1),
+    projectsOwnedByUser1.push(
+      await projectsService.createProject({ name: 'grupo 1.3' }, user1),
     );
-    groupsOwnedByUser2.push(
-      await groupsService.createGroup({ name: 'grupo 2.1' }, user2),
+    projectsOwnedByUser2.push(
+      await projectsService.createProject({ name: 'grupo 2.1' }, user2),
     );
-    groupsOwnedByUser2.push(
-      await groupsService.createGroup({ name: 'grupo 2.2' }, user2),
+    projectsOwnedByUser2.push(
+      await projectsService.createProject({ name: 'grupo 2.2' }, user2),
     );
 
-    await usersGroupsService.addParticipantToGroup(
+    await usersProjectsService.addParticipantToProject(
       user1,
-      groupsOwnedByUser2[1].id,
+      projectsOwnedByUser2[1].id,
     );
   };
 
@@ -93,9 +93,9 @@ describe('User (e2e)', () => {
         }),
         AuthModule,
         UsersModule,
-        GroupsModule,
         ProjectsModule,
-        UsersGroupsModule,
+        TasksModule,
+        UsersProjectsModule,
       ],
     })
       .overrideProvider(EmailsService)
@@ -105,13 +105,13 @@ describe('User (e2e)', () => {
     app = moduleFixture.createNestApplication();
 
     userRepository = moduleFixture.get('UserRepository');
-    groupRepository = moduleFixture.get('GroupRepository');
     projectRepository = moduleFixture.get('ProjectRepository');
+    taskRepository = moduleFixture.get('TaskRepository');
 
     authService = moduleFixture.get(AuthService);
-    groupsService = moduleFixture.get(GroupsService);
-    usersGroupsService = moduleFixture.get(UsersGroupsService);
-    // projectsService = moduleFixture.get(ProjectsService);
+    projectsService = moduleFixture.get(ProjectsService);
+    usersProjectsService = moduleFixture.get(UsersProjectsService);
+    // tasksService = moduleFixture.get(TasksService);
 
     await app.init();
 
@@ -119,14 +119,14 @@ describe('User (e2e)', () => {
   });
 
   afterAll(async () => {
-    await groupRepository.query(`DELETE FROM groups;`);
+    await projectRepository.query(`DELETE FROM projects;`);
     await userRepository.query(`DELETE FROM users;`);
 
     await app.close();
   });
 
   afterEach(async () => {
-    await projectRepository.query(`DELETE FROM projects;`);
+    await taskRepository.query(`DELETE FROM tasks;`);
   });
 
   describe('UPDATE /users', () => {

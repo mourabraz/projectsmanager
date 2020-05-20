@@ -1,64 +1,70 @@
 import { Repository, EntityRepository } from 'typeorm';
-import { Task } from './task.entity';
-//import { CreateTaskDto } from './dto/create-task.dto';
+import { Logger, InternalServerErrorException } from '@nestjs/common';
 
-import { Logger } from '@nestjs/common';
+import { Task } from './task.entity';
+import { CreateTaskDto } from './dto/create-task.dto';
+import { TaskStatus } from './task-status.enum';
 
 @EntityRepository(Task)
 export class TaskRepository extends Repository<Task> {
   private logger = new Logger(TaskRepository.name);
 
-  // async getTasks(filterDto: GetTasksFilterDto, user: User): Promise<Task[]> {
-  //   const { status, search } = filterDto;
-  //   const query = this.createQueryBuilder('task');
-  //   query.where('task.userId = :userId', { userId: user.id });
+  async getTasksByProjectId(projectId: string): Promise<Task[]> {
+    try {
+      return await this.find({ where: { projectId } });
+    } catch (error) {
+      this.logger.error(
+        `Failed to get tasks for project id "${projectId}".`,
+        error.stack,
+      );
 
-  //   if (status) {
-  //     query.andWhere('task.status = :status', { status });
-  //   }
+      throw new InternalServerErrorException();
+    }
+  }
 
-  //   if (search) {
-  //     query.andWhere(
-  //       '(task.title LIKE :search OR task.description LIKE :search)',
-  //       { search: `%${search}%` },
-  //     );
-  //   }
+  async createTask(createTaskDto: CreateTaskDto): Promise<Task> {
+    const { title, description, projectId, ownerId } = createTaskDto;
 
-  //   try {
-  //     const tasks = await query.getMany();
-  //     return tasks;
-  //   } catch (error) {
-  //     this.logger.error(
-  //       `Failed to get tasks for user "${
-  //         user.username
-  //       }". Filters: ${JSON.stringify(filterDto)}`,
-  //       error.stack,
-  //     );
-  //     throw new InternalServerErrorException();
-  //   }
-  // }
+    try {
+      const task = new Task();
+      task.projectId = projectId;
+      task.ownerId = ownerId;
+      task.title = title;
+      task.description = description;
+      task.status = TaskStatus.OPEN;
 
-  // async createTask(createTaskDto: CreateTaskDto, user: User): Promise<Task> {
-  //   const { title, description } = createTaskDto;
+      await this.save(task);
 
-  //   const task = new Task();
-  //   task.user = user;
-  //   task.title = title;
-  //   task.description = description;
-  //   task.status = TaskStatus.OPEN;
+      return task;
+    } catch (error) {
+      this.logger.error(
+        `Failed to create task for project. Data: ${JSON.stringify(
+          createTaskDto,
+        )}`,
+        error.stack,
+      );
 
-  //   try {
-  //     await task.save();
-  //     delete task.user;
-  //     return task;
-  //   } catch (error) {
-  //     this.logger.error(
-  //       `Failed to create task for user "${
-  //         user.username
-  //       }". Data: ${JSON.stringify(createTaskDto)}`,
-  //       error.stack,
-  //     );
-  //     throw new InternalServerErrorException();
-  //   }
-  // }
+      throw new InternalServerErrorException();
+    }
+  }
+
+  async updateTask(id: string, createTaskDto: CreateTaskDto): Promise<Task> {
+    try {
+      await this.update(id, {
+        title: createTaskDto.title,
+        description: createTaskDto.description,
+      });
+
+      return await this.findOne(id);
+    } catch (error) {
+      this.logger.error(
+        `Failed to update task with id: "${id}". Data: ${JSON.stringify(
+          createTaskDto,
+        )}`,
+        error.stack,
+      );
+
+      throw new InternalServerErrorException();
+    }
+  }
 }

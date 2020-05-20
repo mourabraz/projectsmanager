@@ -1,57 +1,30 @@
 import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
   CreateDateColumn,
   UpdateDateColumn,
-  PrimaryGeneratedColumn,
-  Column,
-  Entity,
   ManyToOne,
   JoinColumn,
   OneToMany,
+  Index,
 } from 'typeorm';
 
-import { Group } from '../groups/group.entity';
-import { Task } from '../tasks/task.entity';
-import { Fiile } from '../fiiles/fiile.entity';
 import { User } from '../users/user.entity';
+import { Task } from '../tasks/task.entity';
+import { UserProject } from '../users-projects/user-project.entity';
+import { Invitation } from '../invitations/invitation.entity';
 
 @Entity('projects')
+@Index(['name', 'ownerId'], { unique: true })
 export class Project {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
   @Column()
-  title: string;
+  name: string;
 
-  @Column({ nullable: true, default: '' })
-  description: string;
-
-  @Column({
-    type: 'timestamptz',
-    precision: 3,
-    name: 'started_at',
-    default: () => 'NOW()',
-  })
-  startedAt: Date;
-
-  @Column({
-    type: 'timestamptz',
-    precision: 3,
-    name: 'completed_at',
-    nullable: true,
-    default: null,
-  })
-  completedAt: Date;
-
-  @Column('enum', {
-    enum: ['OPEN', 'IN_PROGRESS', 'CLOSE', 'ABANDONED'],
-    default: 'OPEN',
-  })
-  status: 'OPEN' | 'IN_PROGRESS' | 'CLOSE' | 'ABANDONED';
-
-  @Column({ name: 'group_id' })
-  groupId: string;
-
-  @Column({ name: 'user_id', nullable: true })
+  @Column({ name: 'user_id' })
   ownerId: string;
 
   @CreateDateColumn({ name: 'created_at', type: 'timestamptz' })
@@ -60,23 +33,24 @@ export class Project {
   @UpdateDateColumn({ name: 'updated_at', type: 'timestamptz' })
   updatedAt: Date;
 
-  @ManyToOne((type) => Group, (group) => group.projects, {
+  @ManyToOne((type) => User, (user) => user.ownerProjects, {
     eager: false,
     onDelete: 'CASCADE',
-  })
-  @JoinColumn({ name: 'group_id' })
-  group: Group;
-
-  @ManyToOne((type) => User, (user) => user.projects, {
-    eager: false,
-    onDelete: 'SET NULL',
   })
   @JoinColumn({ name: 'user_id' })
   owner: User;
 
+  @OneToMany((type) => UserProject, (userProject) => userProject.user, {
+    eager: false,
+  })
+  usersProjects: UserProject[];
+  //participants: UserProject[];
+
   @OneToMany((type) => Task, (task) => task.project, { eager: false })
   tasks: Task[];
 
-  @OneToMany((type) => Fiile, (fiile) => fiile.project, { eager: false })
-  fiiles: Fiile[];
+  @OneToMany((type) => Invitation, (invitation) => invitation.project, {
+    eager: false,
+  })
+  invitations: Invitation[];
 }

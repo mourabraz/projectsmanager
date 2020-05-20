@@ -12,31 +12,31 @@ import { EmailsService } from './../src/emails/emails.service';
 import { AuthModule } from './../src/auth/auth.module';
 import { UsersModule } from './../src/users/users.module';
 import { User } from './../src/users/user.entity';
-import { GroupsModule } from './../src/groups/groups.module';
-import { Group } from './../src/groups/group.entity';
-import { GroupsService } from './../src/groups/groups.service';
 import { ProjectsModule } from './../src/projects/projects.module';
 import { Project } from './../src/projects/project.entity';
+import { ProjectsService } from './../src/projects/projects.service';
+import { TasksModule } from './../src/tasks/tasks.module';
+import { Task } from './../src/tasks/task.entity';
 import { AuthService } from './../src/auth/auth.service';
-import { UsersGroupsService } from './../src/users-groups/users-groups.service';
-import { UsersGroupsModule } from './../src/users-groups/users-groups.module';
+import { UsersProjectsService } from './../src/users-projects/users-projects.service';
+import { UsersProjectsModule } from './../src/users-projects/users-projects.module';
 import { Invitation } from '../src/invitations/invitation.entity';
 import { InvitationsService } from '../src/invitations/invitations.service';
 import { InvitationsModule } from '../src/invitations/invitations.module';
 import { uuid } from 'uuidv4';
-// import { ProjectsService } from './../src/projects/projects.service';
+// import { TasksService } from './../src/tasks/tasks.service';
 
 describe('Invitation (e2e)', () => {
   let app: INestApplication;
 
   let userRepository: Repository<User>;
-  let groupRepository: Repository<Group>;
   let projectRepository: Repository<Project>;
+  let taskRepository: Repository<Task>;
   let invitationRepository: Repository<Invitation>;
 
   let authService: AuthService;
-  let groupsService: GroupsService;
-  let usersGroupsService: UsersGroupsService;
+  let projectsService: ProjectsService;
+  let usersProjectsService: UsersProjectsService;
   let invitationsService: InvitationsService;
 
   let user1: User;
@@ -44,8 +44,8 @@ describe('Invitation (e2e)', () => {
   let user1Token: string;
   let user2Token: string;
 
-  const groupsOwnedByUser1: Group[] = [];
-  const groupsOwnedByUser2: Group[] = [];
+  const projectsOwnedByUser1: Project[] = [];
+  const projectsOwnedByUser2: Project[] = [];
 
   const emailsService = {
     addWelcomeEmailToQueue: jest.fn(),
@@ -76,25 +76,25 @@ describe('Invitation (e2e)', () => {
       })
     ).accessToken;
 
-    groupsOwnedByUser1.push(
-      await groupsService.createGroup({ name: 'grupo 1.1' }, user1),
+    projectsOwnedByUser1.push(
+      await projectsService.createProject({ name: 'grupo 1.1' }, user1),
     );
-    groupsOwnedByUser1.push(
-      await groupsService.createGroup({ name: 'grupo 1.2' }, user1),
+    projectsOwnedByUser1.push(
+      await projectsService.createProject({ name: 'grupo 1.2' }, user1),
     );
-    groupsOwnedByUser1.push(
-      await groupsService.createGroup({ name: 'grupo 1.3' }, user1),
+    projectsOwnedByUser1.push(
+      await projectsService.createProject({ name: 'grupo 1.3' }, user1),
     );
-    groupsOwnedByUser2.push(
-      await groupsService.createGroup({ name: 'grupo 2.1' }, user2),
+    projectsOwnedByUser2.push(
+      await projectsService.createProject({ name: 'grupo 2.1' }, user2),
     );
-    groupsOwnedByUser2.push(
-      await groupsService.createGroup({ name: 'grupo 2.2' }, user2),
+    projectsOwnedByUser2.push(
+      await projectsService.createProject({ name: 'grupo 2.2' }, user2),
     );
 
-    await usersGroupsService.addParticipantToGroup(
+    await usersProjectsService.addParticipantToProject(
       user1,
-      groupsOwnedByUser2[1].id,
+      projectsOwnedByUser2[1].id,
     );
   };
 
@@ -109,9 +109,9 @@ describe('Invitation (e2e)', () => {
         }),
         AuthModule,
         UsersModule,
-        GroupsModule,
         ProjectsModule,
-        UsersGroupsModule,
+        TasksModule,
+        UsersProjectsModule,
         InvitationsModule,
       ],
     })
@@ -122,13 +122,13 @@ describe('Invitation (e2e)', () => {
     app = moduleFixture.createNestApplication();
 
     userRepository = moduleFixture.get('UserRepository');
-    groupRepository = moduleFixture.get('GroupRepository');
     projectRepository = moduleFixture.get('ProjectRepository');
+    taskRepository = moduleFixture.get('TaskRepository');
     invitationRepository = moduleFixture.get('InvitationRepository');
 
     authService = moduleFixture.get(AuthService);
-    groupsService = moduleFixture.get(GroupsService);
-    usersGroupsService = moduleFixture.get(UsersGroupsService);
+    projectsService = moduleFixture.get(ProjectsService);
+    usersProjectsService = moduleFixture.get(UsersProjectsService);
     invitationsService = moduleFixture.get(InvitationsService);
 
     await app.init();
@@ -137,8 +137,8 @@ describe('Invitation (e2e)', () => {
   });
 
   afterAll(async () => {
+    await taskRepository.query(`DELETE FROM tasks;`);
     await projectRepository.query(`DELETE FROM projects;`);
-    await groupRepository.query(`DELETE FROM groups;`);
     await userRepository.query(`DELETE FROM users;`);
 
     await app.close();
@@ -150,12 +150,12 @@ describe('Invitation (e2e)', () => {
     emailsService.addInvitationEmailToQueue.mockRestore();
   });
 
-  describe('POST /groups/:groupId/invitations', () => {
+  describe('POST /projects/:projectId/invitations', () => {
     it('should throw Unauthorized for unauthenticated user', async () => {
       const token = '';
 
       const response = await request(app.getHttpServer())
-        .post(`/groups/${groupsOwnedByUser1[0].id}/invitations`)
+        .post(`/projects/${projectsOwnedByUser1[0].id}/invitations`)
         .set('Accept', 'application/json')
         .set('Authorization', `Bearer ${token}`)
         .send({
@@ -173,7 +173,7 @@ describe('Invitation (e2e)', () => {
       const token = user1Token;
 
       const response = await request(app.getHttpServer())
-        .post(`/groups/${groupsOwnedByUser1[0].id}/invitations`)
+        .post(`/projects/${projectsOwnedByUser1[0].id}/invitations`)
         .set('Accept', 'application/json')
         .set('Authorization', `Bearer ${token}`)
         .send({
@@ -191,7 +191,7 @@ describe('Invitation (e2e)', () => {
       const token = user1Token;
 
       const response = await request(app.getHttpServer())
-        .post(`/groups/${groupsOwnedByUser1[0].id}/invitations`)
+        .post(`/projects/${projectsOwnedByUser1[0].id}/invitations`)
         .set('Accept', 'application/json')
         .set('Authorization', `Bearer ${token}`)
         .send({
@@ -209,7 +209,7 @@ describe('Invitation (e2e)', () => {
       const token = user1Token;
 
       const response = await request(app.getHttpServer())
-        .post(`/groups/${groupsOwnedByUser1[0].id}/invitations`)
+        .post(`/projects/${projectsOwnedByUser1[0].id}/invitations`)
         .set('Accept', 'application/json')
         .set('Authorization', `Bearer ${token}`)
         .send({
@@ -220,7 +220,7 @@ describe('Invitation (e2e)', () => {
       expect(response.body).toMatchObject({
         userId: user1.id,
         emailTo: user2.email,
-        groupId: groupsOwnedByUser1[0].id,
+        projectId: projectsOwnedByUser1[0].id,
         acceptedAt: null,
         id: expect.any(String),
       });
@@ -230,7 +230,7 @@ describe('Invitation (e2e)', () => {
       const token = user1Token;
 
       await request(app.getHttpServer())
-        .post(`/groups/${groupsOwnedByUser1[0].id}/invitations`)
+        .post(`/projects/${projectsOwnedByUser1[0].id}/invitations`)
         .set('Accept', 'application/json')
         .set('Authorization', `Bearer ${token}`)
         .send({
@@ -240,11 +240,11 @@ describe('Invitation (e2e)', () => {
       expect(emailsService.addInvitationEmailToQueue).toBeCalledTimes(1);
     });
 
-    it('should throw error with a group that does not exits or does not belongs to authenticated user', async () => {
+    it('should throw error with a project that does not exits or does not belongs to authenticated user', async () => {
       const token = user1Token;
 
       const response = await request(app.getHttpServer())
-        .post(`/groups/${uuid()}/invitations`)
+        .post(`/projects/${uuid()}/invitations`)
         .set('Accept', 'application/json')
         .set('Authorization', `Bearer ${token}`)
         .send({
@@ -252,7 +252,7 @@ describe('Invitation (e2e)', () => {
         });
 
       const response1 = await request(app.getHttpServer())
-        .post(`/groups/${groupsOwnedByUser2[0].id}/invitations`)
+        .post(`/projects/${projectsOwnedByUser2[0].id}/invitations`)
         .set('Accept', 'application/json')
         .set('Authorization', `Bearer ${token}`)
         .send({
@@ -281,7 +281,7 @@ describe('Invitation (e2e)', () => {
         {
           userId: user1.id,
           emailTo: user2.email,
-          groupId: groupsOwnedByUser1[0].id,
+          projectId: projectsOwnedByUser1[0].id,
         },
         user1,
       );
@@ -289,7 +289,7 @@ describe('Invitation (e2e)', () => {
       emailsService.addInvitationEmailToQueue.mockRestore();
 
       const response = await request(app.getHttpServer())
-        .post(`/groups/${groupsOwnedByUser1[0].id}/invitations`)
+        .post(`/projects/${projectsOwnedByUser1[0].id}/invitations`)
         .set('Accept', 'application/json')
         .set('Authorization', `Bearer ${token}`)
         .send({
@@ -309,13 +309,13 @@ describe('Invitation (e2e)', () => {
     it('should not create an invitation to himself', async () => {
       const token = user1Token;
 
-      let group = new Group();
-      group.ownerId = user1.id;
-      group.name = 'TESTE';
-      group = await groupRepository.save(group);
+      let project = new Project();
+      project.ownerId = user1.id;
+      project.name = 'TESTE';
+      project = await projectRepository.save(project);
 
       const response = await request(app.getHttpServer())
-        .post(`/groups/${group.id}/invitations`)
+        .post(`/projects/${project.id}/invitations`)
         .set('Accept', 'application/json')
         .set('Authorization', `Bearer ${token}`)
         .send({
@@ -331,14 +331,14 @@ describe('Invitation (e2e)', () => {
         error: 'Bad Request',
       });
 
-      await groupRepository.remove(group);
+      await projectRepository.remove(project);
     });
 
     it('should not create an invitation when the user already is a participant', async () => {
       const token = user2Token;
 
       const response = await request(app.getHttpServer())
-        .post(`/groups/${groupsOwnedByUser2[1].id}/invitations`)
+        .post(`/projects/${projectsOwnedByUser2[1].id}/invitations`)
         .set('Accept', 'application/json')
         .set('Authorization', `Bearer ${token}`)
         .send({
@@ -350,18 +350,18 @@ describe('Invitation (e2e)', () => {
       expect(response.status).toEqual(400);
       expect(response.body).toMatchObject({
         statusCode: 400,
-        message: 'User already participate on group.',
+        message: 'User already participate on project.',
         error: 'Bad Request',
       });
     });
   });
 
-  describe('GET /groups/:groupId/invitations', () => {
+  describe('GET /projects/:projectId/invitations', () => {
     it('should throw an Anauthorized error when try to list invitations for a user not authenticated', async () => {
       const token = '';
 
       const response = await request(app.getHttpServer())
-        .get(`/groups/${groupsOwnedByUser1[0]}/invitations`)
+        .get(`/projects/${projectsOwnedByUser1[0]}/invitations`)
         .set('Accept', 'application/json')
         .set('Authorization', `Bearer ${token}`)
         .send();
@@ -373,14 +373,14 @@ describe('Invitation (e2e)', () => {
       });
     });
 
-    it('should list all invitations associated to authenticated user by group id for the owner', async () => {
+    it('should list all invitations associated to authenticated user by project id for the owner', async () => {
       const token = user1Token;
 
       await invitationsService.createInvitation(
         {
           userId: user1.id,
           emailTo: user2.email,
-          groupId: groupsOwnedByUser1[0].id,
+          projectId: projectsOwnedByUser1[0].id,
         },
         user1,
       );
@@ -389,13 +389,13 @@ describe('Invitation (e2e)', () => {
         {
           userId: user2.id,
           emailTo: user1.email,
-          groupId: groupsOwnedByUser2[0].id,
+          projectId: projectsOwnedByUser2[0].id,
         },
         user2,
       );
 
       const response = await request(app.getHttpServer())
-        .get(`/groups/${groupsOwnedByUser1[0].id}/invitations`)
+        .get(`/projects/${projectsOwnedByUser1[0].id}/invitations`)
         .set('Accept', 'application/json')
         .set('Authorization', `Bearer ${token}`)
         .send();
@@ -429,7 +429,7 @@ describe('Invitation (e2e)', () => {
         {
           userId: user1.id,
           emailTo: user2.email,
-          groupId: groupsOwnedByUser1[0].id,
+          projectId: projectsOwnedByUser1[0].id,
         },
         user1,
       );
@@ -438,7 +438,7 @@ describe('Invitation (e2e)', () => {
         {
           userId: user2.id,
           emailTo: user1.email,
-          groupId: groupsOwnedByUser2[0].id,
+          projectId: projectsOwnedByUser2[0].id,
         },
         user2,
       );
@@ -478,7 +478,7 @@ describe('Invitation (e2e)', () => {
         {
           userId: user2.id,
           emailTo: user1.email,
-          groupId: groupsOwnedByUser2[0].id,
+          projectId: projectsOwnedByUser2[0].id,
         },
         user2,
       );
@@ -493,7 +493,7 @@ describe('Invitation (e2e)', () => {
       expect(response.body).toMatchObject({
         id: expect.any(String),
         emailTo: user1.email,
-        groupId: groupsOwnedByUser2[0].id,
+        projectId: projectsOwnedByUser2[0].id,
         userId: user2.id,
         acceptedAt: expect.any(String),
       });
@@ -524,7 +524,7 @@ describe('Invitation (e2e)', () => {
         {
           userId: user1.id,
           emailTo: user2.email,
-          groupId: groupsOwnedByUser1[0].id,
+          projectId: projectsOwnedByUser1[0].id,
         },
         user1,
       );
