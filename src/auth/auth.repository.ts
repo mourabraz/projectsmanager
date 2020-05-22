@@ -42,7 +42,18 @@ export class AuthRepository extends Repository<User> {
     authCredentialsDto: AuthCredentialsDto,
   ): Promise<User | null> {
     const { email, password } = authCredentialsDto;
-    const user = await this.findOne({ where: { email }, relations: ['photo'] });
+    const user = await this.createQueryBuilder('user')
+      .leftJoinAndSelect('user.photo', 'photo')
+      .where('user.email = :email', { email })
+      .select([
+        'user.id',
+        'user.name',
+        'user.email',
+        'user.password',
+        'user.updatedAt',
+        'photo.filename',
+      ])
+      .getOne();
 
     if (user && (await user.validatePassword(password))) {
       delete user.password;
