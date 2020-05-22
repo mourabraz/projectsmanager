@@ -56,6 +56,27 @@ export class PostgresConfigService {
     return Boolean(this.configService.get<boolean>('postgres.typeormSyncTest'));
   }
 
+  get hostDevelopment(): string {
+    return this.configService.get<string>('postgres.hostDevelopment');
+  }
+  get portDevelopment(): number {
+    return Number(this.configService.get<number>('postgres.portDevelopment'));
+  }
+  get usernameDevelopment(): string {
+    return this.configService.get<string>('postgres.usernameDevelopment');
+  }
+  get passwordDevelopment(): string {
+    return this.configService.get<string>('postgres.passwordDevelopment');
+  }
+  get nameDevelopment(): string {
+    return this.configService.get<string>('postgres.nameDevelopment');
+  }
+  get typeSyncDevelopment(): boolean {
+    return Boolean(
+      this.configService.get<boolean>('postgres.typeormSyncDevelopment'),
+    );
+  }
+
   get typeOrmConfig(): TypeOrmModuleOptions {
     return {
       type: this.type,
@@ -79,6 +100,19 @@ export class PostgresConfigService {
       database: this.nameTest,
       entities: [join(__dirname, '..', '..', '..', './**/*.entity{.ts,.js}')],
       synchronize: this.typeSyncTest,
+    };
+  }
+
+  get typeOrmConfigDevelopment(): TypeOrmModuleOptions {
+    return {
+      type: this.type,
+      host: this.hostDevelopment,
+      port: this.portDevelopment,
+      username: this.usernameDevelopment,
+      password: this.passwordDevelopment,
+      database: this.nameDevelopment,
+      entities: [join(__dirname, '..', '..', '..', './**/*.entity{.ts,.js}')],
+      synchronize: this.typeSyncDevelopment,
     };
   }
 }

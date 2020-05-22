@@ -37,3 +37,5 @@ lerna-debug.log*
 
 /tmp/upload/*
 !/tmp/upload/.gitkeep
+
+/src/seed

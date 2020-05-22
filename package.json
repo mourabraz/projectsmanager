@@ -21,7 +21,8 @@
     "test:e2e": "jest --config ./jest-e2e.json --runInBand",
     "test:e2e:cov": "yarn test:e2e --coverage",
     "typeorm": "ts-node-dev ./node_modules/typeorm/cli.js",
-    "queue": "ts-node -r tsconfig-paths/register src/queue/queue.module.ts"
+    "queue": "ts-node -r tsconfig-paths/register src/queue/queue.module.ts",
+    "seed": "ts-node -r tsconfig-paths/register src/seed/seed.module.ts"
   },
   "dependencies": {
     "@hapi/joi": "^17.1.1",
@@ -42,6 +43,7 @@
     "class-validator": "^0.12.2",
     "date-fns": "^2.13.0",
     "handlebars": "^4.7.6",
+    "logger-timer-decorator-for-nestjs": "/home/mourabraz/Documentos/Javascript exercicios/logger-timer-decorator-for-nestjs",
     "multer": "^1.4.2",
     "nodemailer": "^6.4.6",
     "passport": "^0.4.1",
