@@ -161,7 +161,7 @@ describe('Auth (e2e)', () => {
       });
     });
 
-    it('should return token', async () => {
+    it('should return user data and access token', async () => {
       await request(app.getHttpServer())
         .post('/auth/signup')
         .set('Accept', 'application/json')
@@ -174,8 +174,13 @@ describe('Auth (e2e)', () => {
 
       expect(response.status).toEqual(201);
       expect(response.body).toMatchObject({
+        user: {
+          id: expect.any(String),
+          email: 'email@email.teste',
+        },
         accessToken: expect.any(String),
       });
+      expect(response.body.user).toHaveProperty('photo');
     });
   });
 
