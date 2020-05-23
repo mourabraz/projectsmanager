@@ -43,10 +43,10 @@ export class Task {
   completedAt: Date;
 
   @Column('enum', {
-    enum: ['OPEN', 'IN_PROGRESS', 'DONE', 'ABANDONED', 'CREATED'],
+    enum: ['OPEN', 'IN_PROGRESS', 'DONE', 'ABANDONED'],
     default: 'OPEN',
   })
-  status: 'OPEN' | 'IN_PROGRESS' | 'DONE' | 'ABANDONED' | 'CREATED';
+  status: 'OPEN' | 'IN_PROGRESS' | 'DONE' | 'ABANDONED';
 
   @Column({ name: 'project_id' })
   projectId: string;
