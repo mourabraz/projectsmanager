@@ -12,7 +12,10 @@ export class TaskRepository extends Repository<Task> {
 
   async getTasksByProjectId(projectId: string): Promise<Task[]> {
     try {
-      return await this.find({ where: { projectId } });
+      return await this.find({
+        where: { projectId },
+        order: { order: 'ASC' },
+      });
     } catch (error) {
       this.logger.error(
         `Failed to get tasks for project id "${projectId}".`,
@@ -78,30 +81,56 @@ export class TaskRepository extends Repository<Task> {
   }
 
   async updateStatusTask(
-    id: string,
+    task: Task,
     statusTaskDto: StatusTaskDto,
   ): Promise<Task> {
     try {
-      const task = await this.findOne(id);
-      const openTasks = await this.find({
+      let tasks = await this.find({
         where: { projectId: task.projectId, status: statusTaskDto.status },
-        order: { order: 'DESC' },
+        order: { order: 'ASC' },
       });
 
-      const order =
-        openTasks && openTasks[0]
-          ? openTasks[0].order + (statusTaskDto.status === 'OPEN' ? 1 : 0)
-          : 1;
+      const endIndex = statusTaskDto.order - 1;
 
-      await this.update(id, {
-        status: statusTaskDto.status,
-        order: order,
-      });
+      if (task.status === statusTaskDto.status) {
+        const startIndex = tasks.findIndex((t) => t.id === task.id);
 
-      return await this.findOne(id);
+        const [removed] = tasks.splice(startIndex, 1);
+        tasks.splice(endIndex, 0, removed);
+
+        // eslint-disable-next-line no-param-reassign
+        tasks = tasks.map((item, _index) => ({
+          ...item,
+          order: _index + 1,
+        }));
+      } else {
+        let tasksChange = await this.find({
+          where: { projectId: task.projectId, status: task.status },
+          order: { order: 'ASC' },
+        });
+
+        task.status = statusTaskDto.status;
+        tasks.splice(endIndex, 0, task);
+
+        tasks = tasks.map((item, _index) => ({
+          ...item,
+          order: _index + 1,
+        }));
+
+        tasksChange = tasks.map((item, _index) => ({
+          ...item,
+          order: _index + 1,
+        }));
+
+        await this.save(tasksChange);
+      }
+
+      await this.save(tasks);
+
+      return await this.findOne(task.id);
     } catch (error) {
       this.logger.error(
-        `Failed to update task with id: "${id}". Data: ${JSON.stringify(
+        `Failed to update task with id: "${task.id}". Data: ${JSON.stringify(
           statusTaskDto,
         )}`,
         error.stack,

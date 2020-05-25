@@ -9,7 +9,6 @@ import {
   Put,
   Delete,
   ParseUUIDPipe,
-  Patch,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 
@@ -45,7 +44,7 @@ export class TasksController {
     return this.tasksService.updateTask(id, createTaskDto);
   }
 
-  @Patch('/:id')
+  @Put('/:id/statusorder')
   @UsePipes(ValidationPipe)
   updateStatus(
     @Param('id', new ParseUUIDPipe()) id: string,

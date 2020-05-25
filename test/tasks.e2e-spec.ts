@@ -287,6 +287,7 @@ describe('Task (e2e)', () => {
         task1.id,
         {
           status: 'IN_PROGRESS',
+          order: 1,
         },
         user1,
       );
@@ -294,6 +295,7 @@ describe('Task (e2e)', () => {
         task1.id,
         {
           status: 'OPEN',
+          order: 1,
         },
         user1,
       );
@@ -316,10 +318,10 @@ describe('Task (e2e)', () => {
         status: 'OPEN',
         completedAt: null,
         id: expect.any(String),
-        order: 4,
+        order: 3,
       });
 
-      expect(task2.order).toBe(3);
+      expect(task2.order).toBe(1);
     });
   });
 

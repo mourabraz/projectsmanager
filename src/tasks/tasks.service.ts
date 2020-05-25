@@ -70,7 +70,7 @@ export class TasksService {
     // check if projectId exists and is related to authenticated user
     await this.projectsService.getProjectByIdForUser(found.projectId, user);
 
-    return await this.taskRepository.updateStatusTask(id, statusTaskDto);
+    return await this.taskRepository.updateStatusTask(found, statusTaskDto);
   }
 
   async deleteTask(id: string, user: User): Promise<{ total: number }> {
