@@ -261,6 +261,66 @@ describe('Task (e2e)', () => {
         message: 'Not Found',
       });
     });
+
+    it('should create a task on a project with right order', async () => {
+      const token = user1Token;
+
+      const task1 = await tasksService.createTaskForUser(
+        {
+          title: 'ttile1',
+          description: '',
+          projectId: projectsOwnedByUser1[0].id,
+          ownerId: user1.id,
+        },
+        user1,
+      );
+      await tasksService.createTaskForUser(
+        {
+          title: 'ttile2',
+          description: '',
+          projectId: projectsOwnedByUser1[0].id,
+          ownerId: user1.id,
+        },
+        user1,
+      );
+      await tasksService.updateStatusTask(
+        task1.id,
+        {
+          status: 'IN_PROGRESS',
+        },
+        user1,
+      );
+      const task2 = await tasksService.updateStatusTask(
+        task1.id,
+        {
+          status: 'OPEN',
+        },
+        user1,
+      );
+
+      const response = await request(app.getHttpServer())
+        .post(`/projects/${projectsOwnedByUser1[0].id}/tasks`)
+        .set('Accept', 'application/json')
+        .set('Authorization', `Bearer ${token}`)
+        .send({
+          title: 'my first task',
+          description: 'description of task 1',
+        });
+
+      expect(response.status).toEqual(201);
+      expect(response.body).toMatchObject({
+        projectId: projectsOwnedByUser1[0].id,
+        ownerId: user1.id,
+        title: 'my first task',
+        description: 'description of task 1',
+        status: 'OPEN',
+        completedAt: null,
+        id: expect.any(String),
+        order: 4,
+      });
+
+      expect(task2.order).toBe(3);
+    });
   });
 
   describe('GET /projects/:projectId/tasks', () => {

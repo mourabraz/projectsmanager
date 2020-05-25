@@ -24,15 +24,23 @@ export class TaskRepository extends Repository<Task> {
   }
 
   async createTask(createTaskDto: CreateTaskDto): Promise<Task> {
-    const { title, description, projectId, ownerId } = createTaskDto;
-
     try {
+      const { title, description, projectId, ownerId } = createTaskDto;
+
+      const openTasks = await this.find({
+        where: { projectId, status: 'OPEN' },
+        order: { order: 'DESC' },
+      });
+
+      const order = openTasks && openTasks[0] ? openTasks[0].order + 1 : 1;
+
       const task = new Task();
       task.projectId = projectId;
       task.ownerId = ownerId;
       task.title = title;
       task.description = description;
       task.status = TaskStatus.OPEN;
+      task.order = order;
 
       await this.save(task);
 
@@ -74,8 +82,20 @@ export class TaskRepository extends Repository<Task> {
     statusTaskDto: StatusTaskDto,
   ): Promise<Task> {
     try {
+      const task = await this.findOne(id);
+      const openTasks = await this.find({
+        where: { projectId: task.projectId, status: statusTaskDto.status },
+        order: { order: 'DESC' },
+      });
+
+      const order =
+        openTasks && openTasks[0]
+          ? openTasks[0].order + (statusTaskDto.status === 'OPEN' ? 1 : 0)
+          : 1;
+
       await this.update(id, {
         status: statusTaskDto.status,
+        order: order,
       });
 
       return await this.findOne(id);

@@ -22,6 +22,9 @@ export class Task {
   @Column()
   title: string;
 
+  @Column()
+  order: number;
+
   @Column({ nullable: true, default: '' })
   description: string;
 
