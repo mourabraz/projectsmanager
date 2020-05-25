@@ -3,6 +3,7 @@ import { Logger, InternalServerErrorException } from '@nestjs/common';
 
 import { Task } from './task.entity';
 import { CreateTaskDto } from './dto/create-task.dto';
+import { StatusTaskDto } from './dto/status-task.dto';
 import { TaskStatus } from './task-status.enum';
 
 @EntityRepository(Task)
@@ -60,6 +61,28 @@ export class TaskRepository extends Repository<Task> {
       this.logger.error(
         `Failed to update task with id: "${id}". Data: ${JSON.stringify(
           createTaskDto,
+        )}`,
+        error.stack,
+      );
+
+      throw new InternalServerErrorException();
+    }
+  }
+
+  async updateStatusTask(
+    id: string,
+    statusTaskDto: StatusTaskDto,
+  ): Promise<Task> {
+    try {
+      await this.update(id, {
+        status: statusTaskDto.status,
+      });
+
+      return await this.findOne(id);
+    } catch (error) {
+      this.logger.error(
+        `Failed to update task with id: "${id}". Data: ${JSON.stringify(
+          statusTaskDto,
         )}`,
         error.stack,
       );

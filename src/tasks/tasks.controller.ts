@@ -9,11 +9,13 @@ import {
   Put,
   Delete,
   ParseUUIDPipe,
+  Patch,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 
 import { TasksService } from './tasks.service';
 import { CreateTaskDto } from './dto/create-task.dto';
+import { StatusTaskDto } from './dto/status-task.dto';
 import { GetUser } from '../auth/get-user.decorator';
 import { User } from '../users/user.entity';
 import { Task } from './task.entity';
@@ -41,6 +43,24 @@ export class TasksController {
     createTaskDto.ownerId = user.id;
 
     return this.tasksService.updateTask(id, createTaskDto);
+  }
+
+  @Patch('/:id')
+  @UsePipes(ValidationPipe)
+  updateStatus(
+    @Param('id', new ParseUUIDPipe()) id: string,
+    @Body() statusTaskDto: StatusTaskDto,
+    @GetUser() user: User,
+  ): Promise<Task> {
+    this.logger.verbose(
+      `User "${
+        user.email
+      }" update status task id: "${id}". Data: ${JSON.stringify(
+        statusTaskDto,
+      )}`,
+    );
+
+    return this.tasksService.updateStatusTask(id, statusTaskDto, user);
   }
 
   @Delete('/:id')

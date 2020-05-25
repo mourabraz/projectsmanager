@@ -5,6 +5,7 @@ import { TaskRepository } from './task.repository';
 import { User } from '../users/user.entity';
 import { Task } from './task.entity';
 import { CreateTaskDto } from './dto/create-task.dto';
+import { StatusTaskDto } from './dto/status-task.dto';
 import { ProjectsService } from '../projects/projects.service';
 
 @Injectable()
@@ -49,6 +50,27 @@ export class TasksService {
     }
 
     return await this.taskRepository.updateTask(id, createTaskDto);
+  }
+
+  async updateStatusTask(
+    id: string,
+    statusTaskDto: StatusTaskDto,
+    user: User,
+  ): Promise<Task> {
+    const found = await this.taskRepository.findOne({
+      id,
+    });
+
+    if (!found) {
+      this.logger.verbose(`Task with id "${id}" not found.`);
+
+      throw new NotFoundException();
+    }
+
+    // check if projectId exists and is related to authenticated user
+    await this.projectsService.getProjectByIdForUser(found.projectId, user);
+
+    return await this.taskRepository.updateStatusTask(id, statusTaskDto);
   }
 
   async deleteTask(id: string, user: User): Promise<{ total: number }> {
