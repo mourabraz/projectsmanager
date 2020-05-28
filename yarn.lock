@@ -834,6 +834,11 @@
   dependencies:
     date-fns "*"
 
+"@types/dot-object@^2.1.1":
+  version "2.1.1"
+  resolved "https://registry.yarnpkg.com/@types/dot-object/-/dot-object-2.1.1.tgz#b88d40c39f2f36d4db89d169d8235e91fc469ab5"
+  integrity sha512-GCQFfk9TYEUVgHZguc+4GKBiF6krlEXBAZPtPtCnmg2Fk0BNf09t4uWcoIRM6jgJgQT4QYZzLStpS26+Cit1hw==
+
 "@types/ejs@^3.0.3":
   version "3.0.4"
   resolved "https://registry.yarnpkg.com/@types/ejs/-/ejs-3.0.4.tgz#8851fcdedb96e410fbb24f83b8be6763ef9afa77"
@@ -2458,7 +2463,7 @@ combined-stream@^1.0.6, combined-stream@^1.0.8, combined-stream@~1.0.6:
   dependencies:
     delayed-stream "~1.0.0"
 
-commander@4.1.1:
+commander@4.1.1, commander@^4.0.0:
   version "4.1.1"
   resolved "https://registry.yarnpkg.com/commander/-/commander-4.1.1.tgz#9fd602bd936294e9e9ef46a3f4d6964044b18068"
   integrity sha512-NOKm8xhkzAjzFx8B2v5OAHT+u5pRQc2UCa2Vq9jYL/31o2wi9mxBA7LIFs3sV5VSC49z6pEhfbMULvShKj26WA==
@@ -3019,6 +3024,14 @@ domutils@^1.5.1:
   dependencies:
     dom-serializer "0"
     domelementtype "1"
+
+dot-object@^2.1.3:
+  version "2.1.3"
+  resolved "https://registry.yarnpkg.com/dot-object/-/dot-object-2.1.3.tgz#aa261fdefd232f0edb17e77ff4708bbed6f04b2e"
+  integrity sha512-YihsbZiGU2nEXQs1vjwjBNDJ85BMRHO4ahybAsuHERCxUecFoyt4xM3NO4GskNj8hFLRsgrwE4xBDe8XSOAiYg==
+  dependencies:
+    commander "^4.0.0"
+    glob "^7.1.5"
 
 dotenv-expand@5.1.0:
   version "5.1.0"
@@ -4031,7 +4044,7 @@ glob-parent@^5.0.0, glob-parent@~5.1.0:
   dependencies:
     is-glob "^4.0.1"
 
-glob@7.1.6, glob@^7.0.0, glob@^7.1.1, glob@^7.1.2, glob@^7.1.3, glob@^7.1.4, glob@^7.1.6:
+glob@7.1.6, glob@^7.0.0, glob@^7.1.1, glob@^7.1.2, glob@^7.1.3, glob@^7.1.4, glob@^7.1.5, glob@^7.1.6:
   version "7.1.6"
   resolved "https://registry.yarnpkg.com/glob/-/glob-7.1.6.tgz#141f33b81a7c2492e125594307480c46679278a6"
   integrity sha512-LwaxwyZ72Lk7vZINtNNrywX0ZuLyStrdDtabefZKAY5ZGJhVtgdznluResxNmPitE0SAO+O26sWTHeKSI2wMBA==

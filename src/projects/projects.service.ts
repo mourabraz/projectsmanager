@@ -26,6 +26,10 @@ export class ProjectsService {
     return await this.projectRepository.getProjectsForUser(user);
   }
 
+  async getProjectsForUserWithRelation(user: User) {
+    return await this.projectRepository.getProjectsForUserWithRelations(user);
+  }
+
   async getProjectByIdForUser(id: string, user: User): Promise<Project> {
     const found = await this.projectRepository.getProjectByIdForUser(id, user);
 

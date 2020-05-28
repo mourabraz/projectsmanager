@@ -40,9 +40,7 @@ export class Project {
   @JoinColumn({ name: 'user_id' })
   owner: User;
 
-  @OneToMany((type) => UserProject, (userProject) => userProject.user, {
-    eager: false,
-  })
+  @OneToMany((type) => UserProject, (userProject) => userProject.project)
   usersProjects: UserProject[];
   //participants: UserProject[];
 

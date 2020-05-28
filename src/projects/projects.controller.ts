@@ -31,7 +31,7 @@ export class ProjectsController {
   index(@GetUser() user: User) {
     this.logger.verbose(`User "${user.email}" retrieving all projects.`);
 
-    return this.projectsService.getProjectsForUser(user);
+    return this.projectsService.getProjectsForUserWithRelation(user);
   }
 
   @Post()

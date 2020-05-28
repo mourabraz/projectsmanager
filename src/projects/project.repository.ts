@@ -5,19 +5,132 @@ import { Project } from './project.entity';
 import { User } from '../users/user.entity';
 import { CreateProjectDto } from './dto/create-project.dto';
 
+import {
+  QueryAsObject,
+  transformFlatToNest,
+} from '../util/postgres-query-wrap/query-as-object';
+
 @EntityRepository(Project)
 export class ProjectRepository extends Repository<Project> {
   private logger = new Logger(ProjectRepository.name);
+
+  private concatParticipantsOfProject(dataArray: any[]) {
+    const uniques = dataArray.filter(
+      (s1, pos, arr) => arr.findIndex((s2) => s2.id === s1.id) === pos,
+    );
+
+    const diff = dataArray.filter(
+      (s1, pos, arr) => arr.findIndex((s2) => s2.id === s1.id) !== pos,
+    );
+
+    const newList = uniques.map((i) => {
+      const temp = {
+        ...i,
+        participants: [i.users_projects.participants],
+      };
+
+      delete temp.users_projects;
+
+      return temp;
+    });
+
+    newList.forEach((i) => {
+      const index = diff.findIndex((d) => d.id === i.id);
+
+      if (index !== -1) {
+        const indexParticipant = i.participants.findIndex(
+          (p) => p.id === diff[index].users_projects.participants.id,
+        );
+
+        if (indexParticipant === -1) {
+          i.participants.push(diff[index].users_projects.participants);
+        }
+      }
+    });
+
+    return newList;
+  }
 
   async getProjectsForUser(user: User): Promise<Project[]> {
     try {
       return await this.query(
         `SELECT projects.id, projects.name FROM projects
-      INNER JOIN users_projects ON projects.id = users_projects.project_id 
+      INNER JOIN users_projects ON projects.id = users_projects.project_id
       INNER JOIN users ON users_projects.user_id = users.id
       WHERE users.id = $1`,
         [user.id],
       );
+    } catch (error) {
+      this.logger.error(
+        `Failed to get projects for user "${user.email}".`,
+        error.stack,
+      );
+
+      throw new InternalServerErrorException();
+    }
+  }
+
+  async getProjectsForUserWithRelations(user: User): Promise<Project[]> {
+    try {
+      const [qs, qp] = new QueryAsObject(
+        {
+          table: 'projects',
+          select: 'id, name',
+          where: `id IN (SELECT users_projects.project_id FROM users_projects WHERE users_projects.user_id = :userId )`,
+
+          includes: [
+            {
+              table: 'users',
+              select: 'id, name, email',
+              as: 'owner',
+              localKey: 'id',
+              targetKey: 'user_id',
+              includes: [
+                {
+                  table: 'photos',
+                  select: 'filename, user_id',
+                  localKey: 'user_id',
+                  targetKey: 'id',
+                },
+              ],
+            },
+            {
+              table: 'users_projects',
+              select: 'project_id, user_id',
+              localKey: 'project_id',
+              targetKey: 'id',
+              includes: [
+                {
+                  table: 'users',
+                  as: 'participants',
+                  select: 'id, name, email',
+                  localKey: 'id',
+                  targetKey: 'user_id',
+
+                  includes: [
+                    {
+                      table: 'photos',
+                      as: 'avatar',
+                      select: 'filename, user_id',
+                      localKey: 'user_id',
+                      targetKey: 'id',
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+        { userId: user.id },
+      ).getQuery();
+
+      console.log(qs, qp);
+
+      const result = await this.query(qs, qp);
+
+      const res = this.concatParticipantsOfProject(transformFlatToNest(result));
+
+      return res;
     } catch (error) {
       this.logger.error(
         `Failed to get projects for user "${user.email}".`,
