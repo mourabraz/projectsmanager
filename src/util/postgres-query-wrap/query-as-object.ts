@@ -35,7 +35,6 @@ class QueryAsObject {
 
   private getSelectFromIncludes(
     target: TableObject,
-    //includes: TableObject[],
     select = '',
     currentAlias = '',
   ): string {
@@ -133,9 +132,7 @@ class QueryAsObject {
     if (c) {
       const [, parameter] = c.match(/:(\w*)/);
       this.parameters.push(parameter);
-      console.log(parameter);
       c = c.replace(':' + parameter, '$1');
-      console.log('NEW C', c);
     }
 
     if (this.schema.includes.length > 0) {
@@ -201,7 +198,6 @@ class QueryAsObject {
   }
 
   public getQuery(): [string, any[]] {
-    console.log(this);
     return [this.queryString, this.queryParameters];
   }
 }

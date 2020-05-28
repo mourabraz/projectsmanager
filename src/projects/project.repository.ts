@@ -124,8 +124,6 @@ export class ProjectRepository extends Repository<Project> {
         { userId: user.id },
       ).getQuery();
 
-      console.log(qs, qp);
-
       const result = await this.query(qs, qp);
 
       const res = this.concatParticipantsOfProject(transformFlatToNest(result));
