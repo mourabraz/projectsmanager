@@ -103,7 +103,30 @@ export class TaskRepository extends Repository<Task> {
         description: createTaskDto.description,
       });
 
-      return await this.findOne(id);
+      const result = this.createQueryBuilder('tasks')
+        .where({ id })
+        .select([
+          'tasks.id',
+          'tasks.title',
+          'tasks.order',
+          'tasks.description',
+          'tasks.startedAt',
+          'tasks.completedAt',
+          'tasks.status',
+          'tasks.projectId',
+          'tasks.ownerId',
+          'tasks.createdAt',
+          'tasks.updatedAt',
+          'owner.id',
+          'owner.name',
+          'owner.email',
+          'photo.filename',
+        ])
+        .leftJoin('tasks.owner', 'owner')
+        .leftJoin('owner.photo', 'photo')
+        .getOne();
+
+      return result;
     } catch (error) {
       this.logger.error(
         `Failed to update task with id: "${id}". Data: ${JSON.stringify(
