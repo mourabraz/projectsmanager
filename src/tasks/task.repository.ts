@@ -62,6 +62,33 @@ export class TaskRepository extends Repository<Task> {
     }
   }
 
+  async getTaskByIdWithRelations(taskId: string): Promise<Task> {
+    const result = this.createQueryBuilder('tasks')
+      .where({ id: taskId })
+      .select([
+        'tasks.id',
+        'tasks.title',
+        'tasks.order',
+        'tasks.description',
+        'tasks.startedAt',
+        'tasks.completedAt',
+        'tasks.status',
+        'tasks.projectId',
+        'tasks.ownerId',
+        'tasks.createdAt',
+        'tasks.updatedAt',
+        'owner.id',
+        'owner.name',
+        'owner.email',
+        'photo.filename',
+      ])
+      .leftJoin('tasks.owner', 'owner')
+      .leftJoin('owner.photo', 'photo')
+      .getOne();
+
+    return result;
+  }
+
   async createTask(createTaskDto: CreateTaskDto): Promise<Task> {
     try {
       const { title, description, projectId, ownerId } = createTaskDto;
@@ -83,7 +110,7 @@ export class TaskRepository extends Repository<Task> {
 
       await this.save(task);
 
-      return task;
+      return this.getTaskByIdWithRelations(task.id);
     } catch (error) {
       this.logger.error(
         `Failed to create task for project. Data: ${JSON.stringify(
@@ -103,30 +130,7 @@ export class TaskRepository extends Repository<Task> {
         description: createTaskDto.description,
       });
 
-      const result = this.createQueryBuilder('tasks')
-        .where({ id })
-        .select([
-          'tasks.id',
-          'tasks.title',
-          'tasks.order',
-          'tasks.description',
-          'tasks.startedAt',
-          'tasks.completedAt',
-          'tasks.status',
-          'tasks.projectId',
-          'tasks.ownerId',
-          'tasks.createdAt',
-          'tasks.updatedAt',
-          'owner.id',
-          'owner.name',
-          'owner.email',
-          'photo.filename',
-        ])
-        .leftJoin('tasks.owner', 'owner')
-        .leftJoin('owner.photo', 'photo')
-        .getOne();
-
-      return result;
+      return this.getTaskByIdWithRelations(id);
     } catch (error) {
       this.logger.error(
         `Failed to update task with id: "${id}". Data: ${JSON.stringify(
@@ -144,49 +148,52 @@ export class TaskRepository extends Repository<Task> {
     statusTaskDto: StatusTaskDto,
   ): Promise<Task> {
     try {
-      let tasks = await this.find({
-        where: { projectId: task.projectId, status: statusTaskDto.status },
+      let fromTasksList = await this.find({
+        where: { projectId: task.projectId, status: task.status },
         order: { order: 'ASC' },
       });
 
+      const startIndexFrom = fromTasksList.findIndex((t) => t.id === task.id);
       const endIndex = statusTaskDto.order - 1;
 
       if (task.status === statusTaskDto.status) {
-        const startIndex = tasks.findIndex((t) => t.id === task.id);
-
-        const [removed] = tasks.splice(startIndex, 1);
-        tasks.splice(endIndex, 0, removed);
+        const [removed] = fromTasksList.splice(startIndexFrom, 1);
+        fromTasksList.splice(endIndex, 0, removed);
 
         // eslint-disable-next-line no-param-reassign
-        tasks = tasks.map((item, _index) => ({
+        fromTasksList = fromTasksList.map((item, _index) => ({
           ...item,
           order: _index + 1,
         }));
       } else {
-        let tasksChange = await this.find({
-          where: { projectId: task.projectId, status: task.status },
+        let toTasksList = await this.find({
+          where: { projectId: task.projectId, status: statusTaskDto.status },
           order: { order: 'ASC' },
         });
 
         task.status = statusTaskDto.status;
-        tasks.splice(endIndex, 0, task);
+        task.completedAt =
+          statusTaskDto.status === TaskStatus.DONE ? new Date() : null;
+        toTasksList.splice(endIndex, 0, task);
 
-        tasks = tasks.map((item, _index) => ({
+        toTasksList = toTasksList.map((item, _index) => ({
           ...item,
           order: _index + 1,
         }));
 
-        tasksChange = tasks.map((item, _index) => ({
+        fromTasksList.splice(startIndexFrom, 1);
+
+        fromTasksList = fromTasksList.map((item, _index) => ({
           ...item,
           order: _index + 1,
         }));
 
-        await this.save(tasksChange);
+        await this.save(toTasksList);
       }
 
-      await this.save(tasks);
+      await this.save(fromTasksList);
 
-      return await this.findOne(task.id);
+      return await this.getTaskByIdWithRelations(task.id);
     } catch (error) {
       this.logger.error(
         `Failed to update task with id: "${task.id}". Data: ${JSON.stringify(
