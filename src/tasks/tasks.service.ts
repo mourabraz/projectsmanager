@@ -1,4 +1,9 @@
-import { Injectable, NotFoundException, Logger } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  Logger,
+  BadRequestException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 
 import { TaskRepository } from './task.repository';
@@ -53,10 +58,18 @@ export class TasksService {
 
     if (!found) {
       this.logger.verbose(
-        `Task with id "${id}" not found for owner id: "${createTaskDto.ownerId}".`,
+        `The task with id "${id}" not found for owner id: "${createTaskDto.ownerId}".`,
       );
 
       throw new NotFoundException();
+    }
+
+    if (found.completedAt) {
+      this.logger.verbose(
+        `The task with id "${id}" has the status set to "DONE. Update title and/or description is not possible ": "${createTaskDto.ownerId}".`,
+      );
+
+      throw new BadRequestException();
     }
 
     return await this.taskRepository.updateTask(id, createTaskDto);
