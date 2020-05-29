@@ -88,6 +88,7 @@ export class ProjectRepository extends Repository<Project> {
               includes: [
                 {
                   table: 'photos',
+                  as: 'photo',
                   select: 'filename, user_id',
                   localKey: 'user_id',
                   targetKey: 'id',
