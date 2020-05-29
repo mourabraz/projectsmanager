@@ -25,6 +25,16 @@ export class TasksService {
     return this.taskRepository.getTasksByProjectId(projectId);
   }
 
+  async getTasksByProjectIdWithRelations(
+    projectId: string,
+    user: User,
+  ): Promise<Task[]> {
+    // check if projectId exists and is related to authenticated user
+    await this.projectsService.getProjectByIdForUser(projectId, user);
+
+    return this.taskRepository.getTasksByProjectIdWithRelations(projectId);
+  }
+
   async createTaskForUser(createTaskDto: CreateTaskDto, user: User) {
     // check if projectId exists and is related to authenticated user
     await this.projectsService.getProjectByIdForUser(

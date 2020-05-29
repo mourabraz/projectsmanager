@@ -32,7 +32,7 @@ export class ProjectsTasksController {
   ): Promise<Task[]> {
     this.logger.verbose(`User "${user.email}" retrieving all tasks.`);
 
-    return this.tasksService.getTasksByProjectId(projectId, user);
+    return this.tasksService.getTasksByProjectIdWithRelations(projectId, user);
   }
 
   @Post()

@@ -26,6 +26,42 @@ export class TaskRepository extends Repository<Task> {
     }
   }
 
+  async getTasksByProjectIdWithRelations(projectId: string): Promise<Task[]> {
+    try {
+      const result = this.createQueryBuilder('tasks')
+        .where({ projectId })
+        .select([
+          'tasks.id',
+          'tasks.title',
+          'tasks.order',
+          'tasks.description',
+          'tasks.startedAt',
+          'tasks.completedAt',
+          'tasks.status',
+          'tasks.projectId',
+          'tasks.ownerId',
+          'tasks.createdAt',
+          'tasks.updatedAt',
+          'owner.id',
+          'owner.name',
+          'owner.email',
+          'photo.filename',
+        ])
+        .leftJoin('tasks.owner', 'owner')
+        .leftJoin('owner.photo', 'photo')
+        .getMany();
+
+      return result;
+    } catch (error) {
+      this.logger.error(
+        `Failed to get tasks for project id "${projectId}".`,
+        error.stack,
+      );
+
+      throw new InternalServerErrorException();
+    }
+  }
+
   async createTask(createTaskDto: CreateTaskDto): Promise<Task> {
     try {
       const { title, description, projectId, ownerId } = createTaskDto;
