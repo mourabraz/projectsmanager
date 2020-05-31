@@ -1,0 +1,327 @@
+<!doctype html>
+<html class="no-js" lang="">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="x-ua-compatible" content="ie=edge">
+        <title>Documentation</title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <link rel="icon" type="image/x-icon" href="./images/favicon.ico">
+	      <link rel="stylesheet" href="./styles/style.css">
+    </head>
+    <body>
+
+        <div class="navbar navbar-default navbar-fixed-top visible-xs">
+            <a href="./" class="navbar-brand">Documentation</a>
+            <button type="button" class="btn btn-default btn-menu ion-ios-menu" id="btn-menu"></button>
+        </div>
+
+        <div class="xs-menu menu" id="mobile-menu">
+                <div id="book-search-input" role="search"><input type="text" placeholder="Type to search"></div>            <compodoc-menu></compodoc-menu>
+        </div>
+
+        <div class="container-fluid main">
+           <div class="row main">
+               <div class="hidden-xs menu">
+                   <compodoc-menu mode="normal"></compodoc-menu>
+               </div>
+               <!-- START CONTENT -->
+               <div class="content getting-started">
+                   <div class="content-data">
+
+<h1 id="backend-in-nestjs-to-projects-manager-app">Backend in NestJS to Projects Manager App</h1>
+<h2 id="description">Description</h2>
+<ul>
+<li>all users must be athenticated</li>
+<li>each user can create, update, delete groups created by hilmself (group&#39;s owner)</li>
+<li>each group can have several projects</li>
+<li>the owner can invite other users (participants) to the group, the participant must accept the invite</li>
+<li>the owner can delete an invitation before it has been accepted</li>
+<li>the owner can expel any participant. And the participants can leave any group.</li>
+<li>the owner can change the group&#39;s owner to another participant (the old owner becomes a participant)</li>
+<li>the onwer can delete a group and all data (projects) associated will be lost</li>
+<li>users (owner/participants of a group) can create, update, delete projects created by hilmself (projects&#39;s owner)</li>
+<li>when the owner of a project does not belong anymore to the related group the project&#39;s owner will be the group&#39;s owner</li>
+<li>each project can have several tasks</li>
+</ul>
+<h2 id="api">API</h2>
+<h2 id="routes">Routes</h2>
+<table class="table table-bordered compodoc-table">
+<thead>
+<tr>
+<th align="center">Method</th>
+<th align="left">Path</th>
+<th align="center">Public</th>
+<th>Description</th>
+<th>Tests</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="center">POST</td>
+<td align="left">/auth/signup</td>
+<td align="center">Y</td>
+<td>register a new user</td>
+<td>:heavy_check_mark:</td>
+</tr>
+<tr>
+<td align="center">GET</td>
+<td align="left">/auth/signin</td>
+<td align="center">Y</td>
+<td>login</td>
+<td>:heavy_check_mark:</td>
+</tr>
+<tr>
+<td align="center">POST</td>
+<td align="left">/auth/forgot_password</td>
+<td align="center">Y</td>
+<td>request recovery token</td>
+<td>👎</td>
+</tr>
+<tr>
+<td align="center">-</td>
+<td align="left">-</td>
+<td align="center">-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td align="center">GET</td>
+<td align="left">/users/photo/:id</td>
+<td align="center">N</td>
+<td>get user&#39;s photo</td>
+<td>👎</td>
+</tr>
+<tr>
+<td align="center">POST</td>
+<td align="left">/users/photo/</td>
+<td align="center">N</td>
+<td>upload user&#39;s photo (&lt;= 2mb, png/jpeg/jpg/gif)</td>
+<td>👎</td>
+</tr>
+<tr>
+<td align="center">-</td>
+<td align="left">-</td>
+<td align="center">-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td align="center">PUT</td>
+<td align="left">/users</td>
+<td align="center">N</td>
+<td>update user&#39;s name and/or email and/or password</td>
+<td>👎</td>
+</tr>
+<tr>
+<td align="center">-</td>
+<td align="left">-</td>
+<td align="center">-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td align="center">GET</td>
+<td align="left">/groups</td>
+<td align="center">N</td>
+<td>List all groups for the authenticated user (as onwer or participant)</td>
+<td>:heavy_check_mark:</td>
+</tr>
+<tr>
+<td align="center">POST</td>
+<td align="left">/groups</td>
+<td align="center">N</td>
+<td>create a new group (the authenticated user as owner)</td>
+<td>:heavy_check_mark:</td>
+</tr>
+<tr>
+<td align="center">PATCH</td>
+<td align="left">/groups/:id</td>
+<td align="center">N</td>
+<td>update the group&#39;s name, the authenticated user must be the owner</td>
+<td>:heavy_check_mark:</td>
+</tr>
+<tr>
+<td align="center">DELETE</td>
+<td align="left">/groups/:id</td>
+<td align="center">N</td>
+<td>delete a group. All associations to the group will be lost.</td>
+<td>:heavy_check_mark:</td>
+</tr>
+<tr>
+<td align="center">-</td>
+<td align="left">-</td>
+<td align="center">-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td align="center">GET</td>
+<td align="left">/groups/:id/projects</td>
+<td align="center">N</td>
+<td>List all projects for a group</td>
+<td>:heavy_check_mark:</td>
+</tr>
+<tr>
+<td align="center">POST</td>
+<td align="left">/groups/:id/projects</td>
+<td align="center">N</td>
+<td>create a new project in a group</td>
+<td>:heavy_check_mark:</td>
+</tr>
+<tr>
+<td align="center">-</td>
+<td align="left">-</td>
+<td align="center">-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td align="center">PUT</td>
+<td align="left">/projects/:id</td>
+<td align="center">N</td>
+<td>update the title or description of a project (the authenticated must be the owner or a participant)</td>
+<td>:heavy_check_mark:</td>
+</tr>
+<tr>
+<td align="center">DELETE</td>
+<td align="left">/projects/:id</td>
+<td align="center">N</td>
+<td>delete a project</td>
+<td>:heavy_check_mark:</td>
+</tr>
+<tr>
+<td align="center">-</td>
+<td align="left">-</td>
+<td align="center">-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td align="center">GET</td>
+<td align="left">/groups/:id/invitations</td>
+<td align="center">N</td>
+<td>List all invitations for a group (only the owner)</td>
+<td>:heavy_check_mark:</td>
+</tr>
+<tr>
+<td align="center">POST</td>
+<td align="left">/groups/:id/invitations</td>
+<td align="center">N</td>
+<td>create a new invitation for a user to get into a group</td>
+<td>:heavy_check_mark:</td>
+</tr>
+<tr>
+<td align="center">-</td>
+<td align="left">-</td>
+<td align="center">-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td align="center">GET</td>
+<td align="left">/invitations</td>
+<td align="center">N</td>
+<td>List all invitations to participate in a group for the authenticated user</td>
+<td>:heavy_check_mark:</td>
+</tr>
+<tr>
+<td align="center">PATCH</td>
+<td align="left">/invitations/:id/accept</td>
+<td align="center">N</td>
+<td>update the invitation to mark as accepted</td>
+<td>:heavy_check_mark:</td>
+</tr>
+<tr>
+<td align="center">DELETE</td>
+<td align="left">/invitations/:id</td>
+<td align="center">N</td>
+<td>delete an invitation not accepted</td>
+<td>:heavy_check_mark:</td>
+</tr>
+</tbody>
+</table>
+<h2 id="test">Test</h2>
+<p>This project is focused on integration tests.
+We performing the test sequentially, in order to do not mock the Database (Postgres).</p>
+<h2 id="emails">Emails</h2>
+<ul>
+<li>Every new user (sign up) a welcome email will be sent</li>
+<li>When a new invitation is created an email is sent to the participant</li>
+<li>When request a forgot password a link to get a recovery token is send by email</li>
+</ul>
+<p>All emails are added to a queue using <a href="https://redis.io/">Redis</a> and <a href="https://github.com/OptimalBits/bull#readme">Bull</a>. The execution of the job will run in another process (different of the main app), to accomplish this feature we use the WebSocket feature to provide the communication between the main app and the Bull execution environment.</p>
+<p>For the templates of the email, we use the <a href="https://handlebarsjs.com/">handlebars</a></p>
+<p>For a more simple example see this repo: <a href="https://github.com/mourabraz/nestjs-queue-email-example">nestjs-queue-email-example</a></p>
+<h2 id="license">License</h2>
+<p>MIT © <a href="mailto:mourabraz@hotmail.com">mourabraz@hotmail.com</a></p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                   
+
+
+
+
+                   </div><div class="search-results">
+    <div class="has-results">
+        <h1 class="search-results-title"><span class='search-results-count'></span> result-matching "<span class='search-query'></span>"</h1>
+        <ul class="search-results-list"></ul>
+    </div>
+    <div class="no-results">
+        <h1 class="search-results-title">No results matching "<span class='search-query'></span>"</h1>
+    </div>
+</div>
+</div>
+               <!-- END CONTENT -->
+           </div>
+       </div>
+
+       <script>
+            var COMPODOC_CURRENT_PAGE_DEPTH = 0;
+            var COMPODOC_CURRENT_PAGE_CONTEXT = 'getting-started';
+            var COMPODOC_CURRENT_PAGE_URL = 'index.html';
+            var MAX_SEARCH_RESULTS = 15;
+       </script>
+
+       <script src="./js/libs/custom-elements.min.js"></script>
+       <script src="./js/libs/lit-html.js"></script>
+       <!-- Required to polyfill modern browsers as code is ES5 for IE... -->
+       <script src="./js/libs/custom-elements-es5-adapter.js" charset="utf-8" defer></script>
+       <script src="./js/menu-wc.js" defer></script>
+
+       <script src="./js/libs/bootstrap-native.js"></script>
+
+       <script src="./js/libs/es6-shim.min.js"></script>
+       <script src="./js/libs/EventDispatcher.js"></script>
+       <script src="./js/libs/promise.min.js"></script>
+       <script src="./js/libs/zepto.min.js"></script>
+
+       <script src="./js/compodoc.js"></script>
+
+       <script src="./js/tabs.js"></script>
+       <script src="./js/menu.js"></script>
+       <script src="./js/libs/clipboard.min.js"></script>
+       <script src="./js/libs/prism.js"></script>
+       <script src="./js/sourceCode.js"></script>
+          <script src="./js/search/search.js"></script>
+          <script src="./js/search/lunr.min.js"></script>
+          <script src="./js/search/search-lunr.js"></script>
+          <script src="./js/search/search_index.js"></script>
+       <script src="./js/lazy-load-graphs.js"></script>
+
+
+    </body>
+</html>

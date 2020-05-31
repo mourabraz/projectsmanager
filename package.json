@@ -22,7 +22,8 @@
     "test:e2e:cov": "yarn test:e2e --coverage",
     "typeorm": "ts-node-dev ./node_modules/typeorm/cli.js",
     "queue": "ts-node -r tsconfig-paths/register src/queue/queue.module.ts",
-    "seed": "ts-node -r tsconfig-paths/register src/seed/seed.module.ts"
+    "seed": "ts-node -r tsconfig-paths/register src/seed/seed.module.ts",
+    "doc": "npx compodoc -p tsconfig.json -n \"Documentation\""
   },
   "dependencies": {
     "@hapi/joi": "^17.1.1",
@@ -57,6 +58,7 @@
     "typeorm": "^0.2.24"
   },
   "devDependencies": {
+    "@compodoc/compodoc": "^1.1.11",
     "@nestjs/cli": "^7.1.5",
     "@nestjs/schematics": "^7.0.0",
     "@nestjs/testing": "^7.0.9",

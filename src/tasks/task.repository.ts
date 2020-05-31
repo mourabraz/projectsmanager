@@ -5,10 +5,33 @@ import { Task } from './task.entity';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { StatusTaskDto } from './dto/status-task.dto';
 import { TaskStatus } from './task-status.enum';
+import { User } from '../users/user.entity';
 
 @EntityRepository(Task)
 export class TaskRepository extends Repository<Task> {
   private logger = new Logger(TaskRepository.name);
+
+  async getTaskByIdForUser(id: string, user: User): Promise<Task> {
+    try {
+      const tasks = await this.query(
+        `SELECT tasks.id FROM tasks
+      INNER JOIN projects ON projects.id = tasks.project_id 
+      INNER JOIN users_projects ON users_projects.project_id = projects.id
+      INNER JOIN users ON users_projects.user_id = users.id
+      WHERE users.id = $1 AND tasks.id = $2 LIMIT 1`,
+        [user.id, id],
+      );
+
+      return tasks[0];
+    } catch (error) {
+      this.logger.error(
+        `Failed to get task with id: "${id}" for user "${user.email}".`,
+        error.stack,
+      );
+
+      throw new InternalServerErrorException();
+    }
+  }
 
   async getTasksByProjectId(projectId: string): Promise<Task[]> {
     try {

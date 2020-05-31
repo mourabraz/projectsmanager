@@ -1,9 +1,18 @@
-//import { IsNotEmpty } from 'class-validator';
+import { IsNotEmpty, IsString, IsUUID, IsOptional } from 'class-validator';
 
-export class CreateTaskDto {
-  //@IsNotEmpty()
+export class CreateStepDto {
+  @IsNotEmpty()
+  @IsString()
   title: string;
 
-  //@IsNotEmpty()
+  @IsString()
   description: string;
+
+  @IsUUID()
+  @IsOptional()
+  taskId?: string;
+
+  @IsUUID()
+  @IsOptional()
+  ownerId?: string;
 }

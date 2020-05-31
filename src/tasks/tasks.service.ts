@@ -23,6 +23,20 @@ export class TasksService {
     private projectsService: ProjectsService,
   ) {}
 
+  async getTaskByIdForUser(id: string, user: User): Promise<Task> {
+    const found = await this.taskRepository.getTaskByIdForUser(id, user);
+
+    if (!found) {
+      this.logger.verbose(
+        `Task with id "${id}" not found for user: "${user.email}".`,
+      );
+
+      throw new NotFoundException();
+    }
+
+    return found;
+  }
+
   async getTasksByProjectId(projectId: string, user: User): Promise<Task[]> {
     // check if projectId exists and is related to authenticated user
     await this.projectsService.getProjectByIdForUser(projectId, user);

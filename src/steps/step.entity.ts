@@ -20,17 +20,34 @@ export class Step {
   @Column()
   title: string;
 
-  @Column('text')
+  @Column({ nullable: true, default: '' })
   description: string;
 
-  @Column({ type: 'timestamptz', precision: 3, name: 'started_at' })
+  @Column()
+  order: number;
+
+  @Column({
+    type: 'timestamptz',
+    precision: 3,
+    name: 'started_at',
+    default: () => 'NOW()',
+  })
   startedAt: Date;
 
-  @Column({ type: 'timestamptz', precision: 3, name: 'completed_at' })
+  @Column({
+    type: 'timestamptz',
+    precision: 3,
+    name: 'completed_at',
+    nullable: true,
+    default: null,
+  })
   completedAt: Date;
 
   @Column({ name: 'task_id' })
   taskId: string;
+
+  @Column({ name: 'user_id', nullable: true })
+  ownerId: string;
 
   @CreateDateColumn({ name: 'created_at', type: 'timestamptz' })
   createdAt: Date;
