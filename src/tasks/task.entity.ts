@@ -25,7 +25,7 @@ export class Task {
   @Column()
   order: number;
 
-  @Column({ nullable: true, default: '' })
+  @Column({ type: 'text', nullable: true, default: '' })
   description: string;
 
   @Column({

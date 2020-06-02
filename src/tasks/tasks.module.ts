@@ -18,5 +18,6 @@ import { ProjectsTasksController } from './projects-tasks.controller';
   ],
   providers: [TasksService],
   controllers: [TasksController, ProjectsTasksController],
+  exports: [TasksService],
 })
 export class TasksModule {}

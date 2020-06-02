@@ -36,7 +36,7 @@ export class ProjectsTasksController {
   }
 
   @Post()
-  @UsePipes(ValidationPipe)
+  @UsePipes(new ValidationPipe({ transform: true }))
   store(
     @Param('projectId', new ParseUUIDPipe()) projectId: string,
     @Body() createTaskDto: CreateTaskDto,

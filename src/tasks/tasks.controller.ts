@@ -27,7 +27,7 @@ export class TasksController {
   constructor(private tasksService: TasksService) {}
 
   @Put('/:id')
-  @UsePipes(ValidationPipe)
+  @UsePipes(new ValidationPipe({ transform: true }))
   update(
     @Param('id', new ParseUUIDPipe()) id: string,
     @Body() createTaskDto: CreateTaskDto,
