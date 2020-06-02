@@ -99,7 +99,6 @@ class QueryAsObject {
         : '';
 
       if (nestWhere) {
-        console.log('NEST have WHERE');
         const [, parameter] = nestWhere.match(/:(\w*)/);
         this.parameters.push(parameter);
         nestWhere = nestWhere.replace(':' + parameter, '$1');
@@ -146,7 +145,7 @@ class QueryAsObject {
     let join = '';
 
     includes.forEach((i) => {
-      join += ' JOIN (';
+      join += ' LEFT JOIN (';
 
       join += 'SELECT ';
       join += i.select
@@ -206,7 +205,12 @@ const transformFlatToNest = (data): any[] => {
   const newArr = [];
 
   for (const each of data) {
-    const newObj = DotObject(each);
+    const eachWithoutNullKeys = { ...each };
+    Object.keys(eachWithoutNullKeys).forEach(
+      (key) =>
+        eachWithoutNullKeys[key] == null && delete eachWithoutNullKeys[key],
+    );
+    const newObj = DotObject(eachWithoutNullKeys);
     newArr.push(newObj);
   }
 
