@@ -29,8 +29,17 @@ export class User {
   @Column()
   email: string;
 
-  @Column({ select: true })
+  @Column({ select: false })
   password: string;
+
+  @Column({
+    type: 'timestamptz',
+    precision: 3,
+    name: 'password_updated_at',
+    default: () => 'NOW()',
+    select: false,
+  })
+  passwordUpdatedAt: Date;
 
   @CreateDateColumn({ name: 'created_at', type: 'timestamptz' })
   createdAt: Date;

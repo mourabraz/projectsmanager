@@ -47,7 +47,7 @@ export class AuthService {
       authCredentialsDto,
     );
 
-    if (!user || !user.email || !user.updatedAt) {
+    if (!user || !user.email || !user.passwordUpdatedAt) {
       this.logger.verbose(
         `Failed sign in for user". Data: ${JSON.stringify(authCredentialsDto)}`,
       );
@@ -57,9 +57,11 @@ export class AuthService {
 
     const payload: JwtPayload = {
       email: user.email,
-      updatedAt: user.updatedAt,
+      passwordUpdatedAt: user.passwordUpdatedAt,
     };
     const accessToken = this.jwtService.sign(payload);
+
+    delete user.passwordUpdatedAt;
 
     return { user, accessToken };
   }
@@ -126,7 +128,7 @@ export class AuthService {
 
     const payload: JwtPayload = {
       email: user.email,
-      updatedAt: user.updatedAt,
+      passwordUpdatedAt: user.passwordUpdatedAt,
     };
     const recoveryToken = this.jwtService.sign(payload, {
       expiresIn: '1h',

@@ -5,11 +5,7 @@ import {
   Column,
   CreateDateColumn,
   UpdateDateColumn,
-  OneToOne,
-  JoinColumn,
 } from 'typeorm';
-
-import { User } from '../users/user.entity';
 
 @Entity('forgot_passwords')
 @Unique(['email'])

@@ -13,11 +13,15 @@ export class UserRepository extends Repository<User> {
     return bcrypt.hash(password, 10);
   }
 
-  async updateUser(updateUserDto: UpdateUserDto, user: User): Promise<User> {
+  async updateUser(
+    updateUserDto: UpdateUserDto,
+    user: User,
+  ): Promise<User | string> {
     const { name, email, password } = updateUserDto;
 
     if (password) {
       user.password = await this.hashPassword(password);
+      user.passwordUpdatedAt = new Date();
     }
 
     if (name) {
@@ -31,8 +35,9 @@ export class UserRepository extends Repository<User> {
     try {
       await this.save(user);
       delete user.password;
+      delete user.passwordUpdatedAt;
 
-      return user;
+      return password || email ? 'ok' : user;
     } catch (error) {
       this.logger.error(`Failed to update user "${user.email}".`, error.stack);
 

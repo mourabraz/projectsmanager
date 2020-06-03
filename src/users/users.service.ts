@@ -63,7 +63,10 @@ export class UsersService {
     return photo.filename;
   }
 
-  async updateUser(updateUserDto: UpdateUserDto, user: User): Promise<User> {
+  async updateUser(
+    updateUserDto: UpdateUserDto,
+    user: User,
+  ): Promise<User | string> {
     const { email } = updateUserDto;
 
     if (email && email !== user.email) {

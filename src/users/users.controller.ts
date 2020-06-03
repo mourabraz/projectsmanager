@@ -26,7 +26,7 @@ export class UsersController {
   update(
     @Body() updateUserDto: UpdateUserDto,
     @GetUser() user: User,
-  ): Promise<User> {
+  ): Promise<User | string> {
     this.logger.verbose(
       `User "${user.email}" update with: ${JSON.stringify(updateUserDto)}`,
     );
