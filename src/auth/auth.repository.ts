@@ -52,10 +52,9 @@ export class AuthRepository extends Repository<User> {
         'user.password',
         'user.passwordUpdatedAt',
         'photo.filename',
+        'photo.id',
       ])
       .getOne();
-
-    console.log(user);
 
     if (user && (await user.validatePassword(password))) {
       delete user.password;

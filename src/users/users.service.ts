@@ -82,7 +82,10 @@ export class UsersService {
     return await this.userRepository.updateUser(updateUserDto, user);
   }
 
-  async updateUserPhoto(file, user: User): Promise<{ url: string }> {
+  async updateUserPhoto(
+    file,
+    user: User,
+  ): Promise<{ url: string; filename: string; id: string }> {
     let photo = await this.photoRepository.findOne({
       where: {
         userId: user.id,
@@ -114,7 +117,11 @@ export class UsersService {
         },
       );
 
-      return { url: `${this.appConfigService.url}/users/photo/${photo.id}` };
+      return {
+        url: `${this.appConfigService.url}/users/photo/${photo.id}`,
+        id: photo.id,
+        filename: photo.filename,
+      };
     } catch (error) {
       this.logger.error(
         `Failed to update user's photo "${user.email}".`,

@@ -32,7 +32,9 @@ export class Photo {
   @UpdateDateColumn({ name: 'updated_at', type: 'timestamptz' })
   updatedAt: Date;
 
-  @OneToOne(type => User)
+  @OneToOne((type) => User)
   @JoinColumn({ name: 'user_id' })
   user: User;
+
+  url?: string;
 }

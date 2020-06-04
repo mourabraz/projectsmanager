@@ -2,12 +2,18 @@ import { object as DotObject } from 'dot-object';
 
 interface TableObject {
   table: string;
+  virtual?: IVirtualAttribute;
   select?: string;
   as?: string;
   localKey?: string;
   targetKey?: string;
   includes?: TableObject[];
   where?: string;
+}
+
+interface IVirtualAttribute {
+  field: string;
+  execute: string;
 }
 
 class QueryAsObject {
@@ -141,6 +147,35 @@ class QueryAsObject {
     return c ? ' WHERE ' + c : '';
   }
 
+  private addSelectedFields(table: TableObject): string {
+    const as = table.as || table.table;
+    let select = table.select.split(',').map((s) => s.trim());
+
+    if (table.virtual) {
+      select = select.filter((s) => table.virtual.field !== s);
+    }
+
+    let query = '';
+
+    query += select.map((c) => `${as}.${c.trim()}`).join(',');
+
+    return query;
+  }
+
+  private addVirtualFields(table: TableObject): string {
+    let query = '';
+
+    if (table.virtual) {
+      console.log('HAS VIRTUAL FIELD');
+      query += ',';
+      query += table.virtual.execute;
+      query += ' AS ';
+      query += table.virtual.field;
+    }
+
+    return query;
+  }
+
   private buildJoins(includes: TableObject[]): string {
     let join = '';
 
@@ -148,10 +183,12 @@ class QueryAsObject {
       join += ' LEFT JOIN (';
 
       join += 'SELECT ';
-      join += i.select
-        .split(',')
-        .map((c) => `${i.as || i.table}.${c.trim()}`)
-        .join(',');
+      join += this.addSelectedFields(i);
+
+      console.log(this.addSelectedFields(i));
+
+      join += this.addVirtualFields(i);
+
       join += ' FROM ';
       join += i.as ? `${i.table} as ${i.as}` : i.table;
 
@@ -187,6 +224,7 @@ class QueryAsObject {
 
     q += this.buildWhereParent();
 
+    console.log(q);
     this.queryString = q;
   }
 

@@ -75,7 +75,7 @@ export class ProjectRepository extends Repository<Project> {
       const [qs, qp] = new QueryAsObject(
         {
           table: 'projects',
-          select: 'id, name',
+          select: 'id, name, created_at, updated_at',
           where: `id IN (SELECT users_projects.project_id FROM users_projects WHERE users_projects.user_id = :userId )`,
 
           includes: [
@@ -88,8 +88,12 @@ export class ProjectRepository extends Repository<Project> {
               includes: [
                 {
                   table: 'photos',
+                  virtual: {
+                    field: 'url',
+                    execute: "CONCAT('http://localhost:3333/users/photo/', id)",
+                  },
                   as: 'photo',
-                  select: 'filename, user_id',
+                  select: 'filename, user_id, id, url',
                   localKey: 'user_id',
                   targetKey: 'id',
                 },
@@ -111,8 +115,13 @@ export class ProjectRepository extends Repository<Project> {
                   includes: [
                     {
                       table: 'photos',
+                      virtual: {
+                        field: 'url',
+                        execute:
+                          "CONCAT('http://localhost:3333/users/photo/', id)",
+                      },
                       as: 'avatar',
-                      select: 'filename, user_id',
+                      select: 'filename, user_id, id, url',
                       localKey: 'user_id',
                       targetKey: 'id',
                     },

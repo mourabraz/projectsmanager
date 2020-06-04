@@ -33,7 +33,7 @@ export class AuthController {
   @Post('/signin')
   signIn(
     @Body() authcredentialsDto: AuthCredentialsDto,
-  ): Promise<{ accessToken: string }> {
+  ): Promise<{ user: User; accessToken: string }> {
     this.logger.verbose(
       `Login a user with data "${JSON.stringify(authcredentialsDto)}" .`,
     );

@@ -20,7 +20,6 @@ import { GetUser } from '../auth/get-user.decorator';
 import { MulterConfigService } from '../config/multer/config.service';
 
 @Controller('users/photo')
-@UseGuards(AuthGuard())
 export class UsersPhotosController {
   private logger = new Logger(UsersPhotosController.name);
 
@@ -42,11 +41,12 @@ export class UsersPhotosController {
   }
 
   @Post()
+  @UseGuards(AuthGuard())
   @UseInterceptors(FileInterceptor('file'))
   uploadPhoto(
     @UploadedFile() file,
     @GetUser() user: User,
-  ): Promise<{ url: string }> {
+  ): Promise<{ url: string; filename: string; id: string }> {
     this.logger.verbose(`User "${user.email}" upload photo`);
 
     return this.usersService.updateUserPhoto(file, user);

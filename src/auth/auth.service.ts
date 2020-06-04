@@ -16,6 +16,7 @@ import { User } from '../users/user.entity';
 import { EmailsService } from '../emails/emails.service';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { ForgotPasswordRepository } from './forgot-password.repository';
+import { AppConfigService } from '../config/app/config.service';
 
 @Injectable()
 export class AuthService {
@@ -28,6 +29,7 @@ export class AuthService {
     private forgotPasswordRepository: ForgotPasswordRepository,
     private jwtService: JwtService,
     private emailsService: EmailsService,
+    private appConfigService: AppConfigService,
   ) {}
 
   async signUp(authCredentialsDto: AuthCredentialsDto): Promise<User> {
@@ -62,6 +64,13 @@ export class AuthService {
     const accessToken = this.jwtService.sign(payload);
 
     delete user.passwordUpdatedAt;
+
+    if (user.photo) {
+      user.photo = {
+        ...user.photo,
+        url: `${this.appConfigService.url}/users/photo/${user.photo.id}`,
+      };
+    }
 
     return { user, accessToken };
   }
