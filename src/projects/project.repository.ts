@@ -90,7 +90,8 @@ export class ProjectRepository extends Repository<Project> {
                   table: 'photos',
                   virtual: {
                     field: 'url',
-                    execute: "CONCAT('http://localhost:3333/users/photo/', id)",
+                    execute:
+                      "CONCAT('http://localhost:3333/users/photo/', filename)",
                   },
                   as: 'photo',
                   select: 'filename, user_id, id, url',
@@ -118,7 +119,7 @@ export class ProjectRepository extends Repository<Project> {
                       virtual: {
                         field: 'url',
                         execute:
-                          "CONCAT('http://localhost:3333/users/photo/', id)",
+                          "CONCAT('http://localhost:3333/users/photo/', filename)",
                       },
                       as: 'avatar',
                       select: 'filename, user_id, id, url',

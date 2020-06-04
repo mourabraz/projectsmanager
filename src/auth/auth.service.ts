@@ -68,7 +68,7 @@ export class AuthService {
     if (user.photo) {
       user.photo = {
         ...user.photo,
-        url: `${this.appConfigService.url}/users/photo/${user.photo.id}`,
+        url: `${this.appConfigService.url}/users/photo/${user.photo.filename}`,
       };
     }
 

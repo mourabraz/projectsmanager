@@ -9,7 +9,6 @@ import {
   Get,
   Param,
   Res,
-  ParseUUIDPipe,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -28,16 +27,18 @@ export class UsersPhotosController {
     private multerConfigService: MulterConfigService,
   ) {}
 
-  @Get('/:id')
+  @Get('/:filename')
   async getUserPhoto(
-    @Param('id', new ParseUUIDPipe()) id: string,
+    @Param('filename') filename: string,
     @Res() res: Response,
   ): Promise<void> {
-    this.logger.verbose(`Get photo with id "${id}"`);
+    this.logger.verbose(`Get photo with filename "${filename}"`);
 
-    const filename = await this.usersService.getPhotoFilename(id);
+    const file = await this.usersService.getPhotoByFilename(filename);
 
-    res.sendFile(filename, { root: this.multerConfigService.uploadPhotoDest });
+    res.sendFile(file.filename, {
+      root: this.multerConfigService.uploadPhotoDest,
+    });
   }
 
   @Post()

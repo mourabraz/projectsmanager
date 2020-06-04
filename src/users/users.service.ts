@@ -51,16 +51,16 @@ export class UsersService {
     return found;
   }
 
-  async getPhotoFilename(id: string): Promise<string> {
-    const photo = await this.photoRepository.findOne(id);
+  async getPhotoByFilename(filename: string): Promise<Photo> {
+    const photo = await this.photoRepository.findOne({ where: { filename } });
 
     if (!photo) {
-      this.logger.verbose(`Photo with id "${id}" not found.`);
+      this.logger.verbose(`Photo with filename "${filename}" not found.`);
 
       throw new NotFoundException();
     }
 
-    return photo.filename;
+    return photo;
   }
 
   async updateUser(
@@ -118,7 +118,7 @@ export class UsersService {
       );
 
       return {
-        url: `${this.appConfigService.url}/users/photo/${photo.id}`,
+        url: `${this.appConfigService.url}/users/photo/${photo.filename}`,
         id: photo.id,
         filename: photo.filename,
       };
