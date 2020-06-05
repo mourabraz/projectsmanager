@@ -171,6 +171,83 @@ export class ProjectRepository extends Repository<Project> {
     }
   }
 
+  async getProjectByIdWithRelations(id: string): Promise<Project> {
+    try {
+      const [qs, qp] = new QueryAsObject(
+        {
+          table: 'projects',
+          select: 'id, name, created_at, updated_at',
+          where: 'id = :projectId',
+
+          includes: [
+            {
+              table: 'users',
+              select: 'id, name, email',
+              as: 'owner',
+              localKey: 'id',
+              targetKey: 'user_id',
+              includes: [
+                {
+                  table: 'photos',
+                  virtual: {
+                    field: 'url',
+                    execute:
+                      "CONCAT('http://localhost:3333/users/photo/', filename)",
+                  },
+                  as: 'photo',
+                  select: 'filename, user_id, id, url',
+                  localKey: 'user_id',
+                  targetKey: 'id',
+                },
+              ],
+            },
+            {
+              table: 'users_projects',
+              select: 'project_id, user_id',
+              localKey: 'project_id',
+              targetKey: 'id',
+              includes: [
+                {
+                  table: 'users',
+                  as: 'participants',
+                  select: 'id, name, email',
+                  localKey: 'id',
+                  targetKey: 'user_id',
+
+                  includes: [
+                    {
+                      table: 'photos',
+                      virtual: {
+                        field: 'url',
+                        execute:
+                          "CONCAT('http://localhost:3333/users/photo/', filename)",
+                      },
+                      as: 'avatar',
+                      select: 'filename, user_id, id, url',
+                      localKey: 'user_id',
+                      targetKey: 'id',
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+        { projectId: id },
+      ).getQuery();
+
+      const result = await this.query(qs, qp);
+
+      const res = this.concatParticipantsOfProject(transformFlatToNest(result));
+
+      return res[0];
+    } catch (error) {
+      this.logger.error(`Failed to get project with id "${id}".`, error.stack);
+
+      throw new InternalServerErrorException();
+    }
+  }
+
   async getProjectByIdForOwner(id: string, user: User): Promise<Project> {
     try {
       return await this.findOne({

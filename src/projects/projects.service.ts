@@ -82,7 +82,11 @@ export class ProjectsService {
       await this.usersProjectsService.addParticipantToProject(user, project.id);
     }
 
-    return project;
+    const projectWithRelations = this.projectRepository.getProjectByIdWithRelations(
+      project.id,
+    );
+
+    return projectWithRelations;
   }
 
   async updateProject(
