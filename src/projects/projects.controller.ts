@@ -9,8 +9,10 @@ import {
   ValidationPipe,
   Delete,
   Param,
-  Patch,
   ParseUUIDPipe,
+  Put,
+  Patch,
+  Query,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 
@@ -19,6 +21,7 @@ import { GetUser } from '../auth/get-user.decorator';
 import { User } from '../users/user.entity';
 import { CreateProjectDto } from './dto/create-project.dto';
 import { Project } from './project.entity';
+import { GetProjectsFilterDto } from './dto/get-projects-filter.dto';
 
 @Controller('projects')
 @UseGuards(AuthGuard())
@@ -28,10 +31,18 @@ export class ProjectsController {
   constructor(private projectsService: ProjectsService) {}
 
   @Get()
-  index(@GetUser() user: User) {
+  index(
+    @Query() filterDto: GetProjectsFilterDto,
+    @GetUser() user: User,
+  ): Promise<Project[]> {
     this.logger.verbose(`User "${user.email}" retrieving all projects.`);
 
-    return this.projectsService.getProjectsForUserWithRelation(user);
+    let archived = false;
+    if (Object.keys(filterDto).length) {
+      archived = filterDto.hasOwnProperty('archived');
+    }
+
+    return this.projectsService.getProjectsForUserWithRelation(user, archived);
   }
 
   @Post()
@@ -49,7 +60,7 @@ export class ProjectsController {
     return this.projectsService.createProject(createProjectDto, user);
   }
 
-  @Patch('/:id')
+  @Put('/:id')
   @UsePipes(ValidationPipe)
   update(
     @Param('id', new ParseUUIDPipe()) id: string,
@@ -65,6 +76,18 @@ export class ProjectsController {
     );
 
     return this.projectsService.updateProject(id, createProjectDto, user);
+  }
+
+  @Patch('/:id/archive')
+  archive(
+    @Param('id', new ParseUUIDPipe()) id: string,
+    @GetUser() user: User,
+  ): Promise<{ total: number }> {
+    this.logger.verbose(
+      `User "${user.email}" toggle archive project with id: "${id}".`,
+    );
+
+    return this.projectsService.toggleArchiveProject(id, user);
   }
 
   @Delete('/:id')

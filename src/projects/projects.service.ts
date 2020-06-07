@@ -26,8 +26,11 @@ export class ProjectsService {
     return await this.projectRepository.getProjectsForUser(user);
   }
 
-  async getProjectsForUserWithRelation(user: User) {
-    return await this.projectRepository.getProjectsForUserWithRelations(user);
+  async getProjectsForUserWithRelation(user: User, archived: boolean) {
+    return await this.projectRepository.getProjectsForUserWithRelations(
+      user,
+      archived,
+    );
   }
 
   async getProjectByIdForUser(id: string, user: User): Promise<Project> {
@@ -112,6 +115,28 @@ export class ProjectsService {
     createProjectDto.ownerId = user.id;
 
     return await this.projectRepository.updateProject(id, createProjectDto);
+  }
+
+  async toggleArchiveProject(
+    id: string,
+    user: User,
+  ): Promise<{ total: number }> {
+    const found = await this.projectRepository.findOne({
+      where: { id, ownerId: user.id },
+    });
+
+    if (!found) {
+      this.logger.verbose(
+        `Project with id "${id}" not found for owner: "${user.email}".`,
+      );
+
+      throw new NotFoundException();
+    }
+
+    return {
+      total: (await this.projectRepository.toggleArchiveProject(found))
+        .affected,
+    };
   }
 
   async deleteProject(id: string, user: User): Promise<{ total: number }> {

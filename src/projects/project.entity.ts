@@ -27,6 +27,15 @@ export class Project {
   @Column({ name: 'user_id' })
   ownerId: string;
 
+  @Column({
+    type: 'timestamptz',
+    precision: 3,
+    name: 'archived_at',
+    nullable: true,
+    default: null,
+  })
+  archivedAt: Date;
+
   @CreateDateColumn({ name: 'created_at', type: 'timestamptz' })
   createdAt: Date;
 
