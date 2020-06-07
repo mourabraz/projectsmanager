@@ -45,7 +45,7 @@ export class StepsController {
     return this.stepsService.updateStep(id, createStepDto);
   }
 
-  @Patch('/:id/completedat')
+  @Patch('/:id/completed')
   @UsePipes(ValidationPipe)
   updateCompletedAt(
     @Param('id', new ParseUUIDPipe()) id: string,

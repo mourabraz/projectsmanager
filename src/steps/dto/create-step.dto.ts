@@ -6,7 +6,8 @@ export class CreateStepDto {
   title: string;
 
   @IsString()
-  description: string;
+  @IsOptional()
+  description?: string;
 
   @IsUUID()
   @IsOptional()

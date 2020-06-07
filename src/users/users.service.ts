@@ -92,7 +92,7 @@ export class UsersService {
       },
     });
 
-    const prevFilename = photo.filename;
+    const prevFilename = photo ? photo.filename : null;
 
     if (!photo) {
       photo = new Photo();
@@ -105,17 +105,19 @@ export class UsersService {
 
       await this.photoRepository.save(photo);
 
-      fs.unlink(
-        resolve(this.multerConfigService.uploadPhotoDest, prevFilename),
-        async (err) => {
-          if (err) {
-            this.logger.error(
-              `Failed to remove file: "${prevFilename}"`,
-              err.stack,
-            );
-          }
-        },
-      );
+      if (prevFilename) {
+        fs.unlink(
+          resolve(this.multerConfigService.uploadPhotoDest, prevFilename),
+          async (err) => {
+            if (err) {
+              this.logger.error(
+                `Failed to remove file: "${prevFilename}"`,
+                err.stack,
+              );
+            }
+          },
+        );
+      }
 
       return {
         url: `${this.appConfigService.url}/users/photo/${photo.filename}`,

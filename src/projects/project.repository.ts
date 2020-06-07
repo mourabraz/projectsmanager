@@ -70,7 +70,7 @@ export class ProjectRepository extends Repository<Project> {
     }
   }
 
-  async getProjectsForUserWithRelations(user: User): Promise<Project[]> {
+  async getProjectsForUserWithRelations(user: User): Promise<any> {
     try {
       const [qs, qp] = new QueryAsObject(
         {
@@ -138,6 +138,29 @@ export class ProjectRepository extends Repository<Project> {
       const result = await this.query(qs, qp);
 
       const res = this.concatParticipantsOfProject(transformFlatToNest(result));
+
+      // const res = this.createQueryBuilder('projects')
+      //   .select([
+      //     'projects.id',
+      //     'projects.name',
+      //     'projects.createdAt',
+      //     'projects.updatedAt',
+
+      //     'owner.name',
+      //     'owner.email',
+      //     'owner.photo.filename',
+      //     'owner.photo.id',
+      //     'participants.email',
+      //   ])
+      //   .leftJoin('projects.owner', 'owner')
+      //   .leftJoin('owner.photo', 'owner.photo')
+      //   .leftJoinAndSelect('projects.usersProjects', 'userProject')
+      //   .leftJoin('userProject.user', 'participants')
+      //   .where(
+      //     'projects.id IN (SELECT users_projects.project_id FROM users_projects WHERE users_projects.user_id = :userId )',
+      //     { userId: user.id },
+      //   ).getMany();
+      // console.log(res.getQuery());
 
       return res;
     } catch (error) {

@@ -50,7 +50,7 @@ export class StepRepository extends Repository<Step> {
 
   async createStep(createStepDto: CreateStepDto): Promise<Step> {
     try {
-      const { title, description, taskId, ownerId } = createStepDto;
+      const { title, description = '', taskId, ownerId } = createStepDto;
 
       const oldSteps = await this.find({
         where: { taskId },

@@ -60,9 +60,7 @@ export class StepsService {
   }
 
   async updateCompletedAtStep(id: string, user: User): Promise<Step> {
-    const found = await this.stepRepository.findOne({
-      id,
-    });
+    const found = await this.stepRepository.findOne(id);
 
     if (!found) {
       this.logger.verbose(`Step with id "${id}" not found.`);
