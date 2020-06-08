@@ -14,6 +14,7 @@ import { User } from '../users/user.entity';
 import { Task } from '../tasks/task.entity';
 import { UserProject } from '../users-projects/user-project.entity';
 import { Invitation } from '../invitations/invitation.entity';
+import { Fiile } from '../fiiles/fiile.entity';
 
 @Entity('projects')
 @Index(['name', 'ownerId'], { unique: true })
@@ -60,4 +61,7 @@ export class Project {
     eager: false,
   })
   invitations: Invitation[];
+
+  @OneToMany((type) => Fiile, (fiile) => fiile.project, { eager: false })
+  fiiles: Fiile[];
 }

@@ -11,6 +11,7 @@ import {
 import { User } from '../users/user.entity';
 import { Task } from '../tasks/task.entity';
 import { Step } from '../steps/step.entity';
+import { Project } from '../projects/project.entity';
 
 @Entity('fiiles')
 export class Fiile {
@@ -32,6 +33,9 @@ export class Fiile {
   @Column({ name: 'user_id', nullable: true, default: null })
   userId: string;
 
+  @Column({ name: 'project_id', nullable: true, default: null })
+  projectId: string;
+
   @Column({ name: 'task_id', nullable: true, default: null })
   taskId: string;
 
@@ -50,6 +54,13 @@ export class Fiile {
   })
   @JoinColumn({ name: 'user_id' })
   user: User;
+
+  @ManyToOne((type) => Project, (project) => project.fiiles, {
+    eager: false,
+    onDelete: 'CASCADE',
+  })
+  @JoinColumn({ name: 'project_id' })
+  project: Project;
 
   @ManyToOne((type) => Task, (task) => task.fiiles, {
     eager: false,
