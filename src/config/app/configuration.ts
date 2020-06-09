@@ -7,4 +7,5 @@ export default registerAs('app', () => ({
   port: process.env.APP_PORT,
   key: process.env.APP_KEY,
   experiesIn: process.env.APP_JWT_EXPIRES_IN,
+  experiesIn2: process.env.APP_JWT_EXPIRES_IN_2,
 }));

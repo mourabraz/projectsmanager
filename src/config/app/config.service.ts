@@ -33,4 +33,8 @@ export class AppConfigService {
   get experiesIn(): string {
     return this.configService.get<string>('app.experiesIn');
   }
+
+  get experiesIn2(): string {
+    return this.configService.get<string>('app.experiesIn2');
+  }
 }

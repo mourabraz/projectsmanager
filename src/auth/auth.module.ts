@@ -11,6 +11,7 @@ import { AppConfigModule } from '../config/app/config.module';
 import { AppConfigService } from '../config/app/config.service';
 import { EmailsModule } from '../emails/emails.module';
 import { ForgotPasswordRepository } from './forgot-password.repository';
+import { TokenRepository } from './token.repository';
 
 @Module({
   imports: [
@@ -25,7 +26,11 @@ import { ForgotPasswordRepository } from './forgot-password.repository';
       }),
       inject: [AppConfigService],
     }),
-    TypeOrmModule.forFeature([AuthRepository, ForgotPasswordRepository]),
+    TypeOrmModule.forFeature([
+      AuthRepository,
+      ForgotPasswordRepository,
+      TokenRepository,
+    ]),
     AppConfigModule,
     EmailsModule,
   ],

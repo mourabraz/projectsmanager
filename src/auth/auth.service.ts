@@ -9,14 +9,17 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { JwtService } from '@nestjs/jwt';
 import { isBefore, subHours } from 'date-fns';
 
+import { AppConfigService } from '../config/app/config.service';
 import { AuthRepository } from './auth.repository';
 import { AuthCredentialsDto } from './dto/auth-credentials.dto';
+import { RefreshCredentialsDto } from './dto/refresh-credentials.dto';
 import { JwtPayload } from './jwt-payload.interface';
 import { User } from '../users/user.entity';
 import { EmailsService } from '../emails/emails.service';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { ForgotPasswordRepository } from './forgot-password.repository';
-import { AppConfigService } from '../config/app/config.service';
+import { TokenRepository } from './token.repository';
+import { Token } from './token.entity';
 
 @Injectable()
 export class AuthService {
@@ -27,6 +30,8 @@ export class AuthService {
     private authRepository: AuthRepository,
     @InjectRepository(ForgotPasswordRepository)
     private forgotPasswordRepository: ForgotPasswordRepository,
+    @InjectRepository(TokenRepository)
+    private tokenRepository: TokenRepository,
     private jwtService: JwtService,
     private emailsService: EmailsService,
     private appConfigService: AppConfigService,
@@ -44,7 +49,7 @@ export class AuthService {
 
   async signIn(
     authCredentialsDto: AuthCredentialsDto,
-  ): Promise<{ user: User; accessToken: string }> {
+  ): Promise<{ user: User; accessToken: string; refreshToken: string }> {
     const user = await this.authRepository.validateUserPassword(
       authCredentialsDto,
     );
@@ -63,8 +68,13 @@ export class AuthService {
     };
     const accessToken = this.jwtService.sign(payload);
 
-    delete user.passwordUpdatedAt;
+    const refreshToken = this.jwtService.sign(payload, {
+      expiresIn: this.appConfigService.experiesIn2,
+    });
 
+    await this.createOrUpdateTokenForUser(refreshToken, user);
+
+    delete user.passwordUpdatedAt;
     if (user.photo) {
       user.photo = {
         ...user.photo,
@@ -72,7 +82,87 @@ export class AuthService {
       };
     }
 
-    return { user, accessToken };
+    return { user, accessToken, refreshToken };
+  }
+
+  async createOrUpdateTokenForUser(refreshToken: string, user: User) {
+    let found = await this.tokenRepository.findOne({
+      where: { userId: user.id },
+    });
+
+    if (!found) {
+      found = new Token();
+      found.userId = user.id;
+      found.email = user.email;
+    }
+
+    found.token = refreshToken;
+
+    try {
+      return this.tokenRepository.save(found);
+    } catch (error) {
+      this.logger.error(
+        `Failed to create refresh token for user with email "${user.email}".`,
+        error.stack,
+      );
+
+      throw new InternalServerErrorException();
+    }
+  }
+
+  async refreshToken(
+    refreshCredentialsDto: RefreshCredentialsDto,
+    user: User,
+  ): Promise<{ user: User; accessToken: string; refreshToken: string }> {
+    const token = await this.tokenRepository.findOne({
+      where: {
+        email: refreshCredentialsDto.email,
+        userId: user.id,
+      },
+    });
+
+    if (!token) {
+      this.logger.verbose(
+        `Failed refresh token for user". Data: ${user.email}`,
+      );
+
+      throw new UnauthorizedException('Invalid credentials');
+    }
+
+    const userReloaded = await this.authRepository
+      .createQueryBuilder('user')
+      .leftJoinAndSelect('user.photo', 'photo')
+      .where('user.id = :id', { id: user.id })
+      .select([
+        'user.id',
+        'user.name',
+        'user.email',
+        'user.passwordUpdatedAt',
+        'photo.filename',
+        'photo.id',
+      ])
+      .getOne();
+
+    const payload: JwtPayload = {
+      email: userReloaded.email,
+      passwordUpdatedAt: userReloaded.passwordUpdatedAt,
+    };
+    const accessToken = this.jwtService.sign(payload);
+
+    const refreshToken = this.jwtService.sign(payload, {
+      expiresIn: this.appConfigService.experiesIn2,
+    });
+
+    delete userReloaded.passwordUpdatedAt;
+
+    if (userReloaded.photo) {
+      userReloaded.photo = {
+        ...userReloaded.photo,
+        url: `${this.appConfigService.url}/users/photo/${userReloaded.photo.filename}`,
+      };
+    }
+
+    return { user: userReloaded, accessToken, refreshToken };
   }
 
   async forgotPassword(forgotPasswordDto: ForgotPasswordDto): Promise<void> {
