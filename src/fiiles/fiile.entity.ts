@@ -22,7 +22,7 @@ export class Fiile {
   name: string;
 
   @Column('enum', { enum: ['IMAGE', 'VIDEO', 'PDF'], default: 'IMAGE' })
-  type: 'IMAGE' | 'VIDEO' | 'PDF';
+  type: 'IMAGE' | 'VIDEO' | 'PDF' | 'DOC' | 'ANY';
 
   @Column({ nullable: false })
   path: string;

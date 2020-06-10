@@ -20,6 +20,13 @@ const MimetypesMapEnum = {
   'image/jpg': 'IMAGE',
   'image/gif': 'IMAGE',
   'image/png': 'IMAGE',
+  'application/pdf': 'PDF',
+  'text/plain': 'DOC',
+  'application/vnd.oasis.opendocument.text': 'DOC',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
+    'DOC',
+  'application/vnd.openxmlformats-officedocument.presentationml.presentation':
+    'ANY',
 };
 
 @Injectable()
