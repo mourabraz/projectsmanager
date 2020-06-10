@@ -239,20 +239,184 @@ class QueryAsObject {
   }
 }
 
+const toCamel = (s: string) => {
+  return s.replace(/([_][a-z])/gi, ($1) => {
+    return $1.toUpperCase().replace('_', '');
+  });
+};
+
+const concatResultOfManyToMany = (
+  dataArray: any[],
+  fields: { field: string; through: string } = { field: '', through: '' },
+) => {
+  const uniques = dataArray.filter(
+    (s1, pos, arr) => arr.findIndex((s2) => s2.id === s1.id) === pos,
+  );
+
+  const diff = dataArray.filter(
+    (s1, pos, arr) => arr.findIndex((s2) => s2.id === s1.id) !== pos,
+  );
+
+  const newList = uniques.map((i) => {
+    const temp = {
+      ...i,
+      [fields.field]: i[fields.through][fields.field]
+        ? [i[fields.through][fields.field]]
+        : [],
+    };
+
+    delete temp[fields.through];
+
+    return temp;
+  });
+
+  newList.forEach((i) => {
+    const index = diff.findIndex((d) => d.id === i.id);
+
+    if (index !== -1) {
+      const indexField = i[fields.field]
+        ? i[fields.field].findIndex(
+            (p) => p.id === diff[index][fields.through][fields.field].id,
+          )
+        : -1;
+
+      if (indexField === -1) {
+        i[fields.field].push(diff[index][fields.through][fields.field]);
+      }
+    }
+  });
+
+  return newList;
+};
+
+const concatResultOfOneToMany = (
+  dataArray: any[],
+  fields: { field: string; through?: string } = { field: '', through: '' },
+) => {
+  const uniques = dataArray.filter(
+    (s1, pos, arr) => arr.findIndex((s2) => s2.id === s1.id) === pos,
+  );
+
+  const diff = dataArray.filter(
+    (s1, pos, arr) => arr.findIndex((s2) => s2.id === s1.id) !== pos,
+  );
+
+  const newList = uniques.map((i) => {
+    const temp = {
+      ...i,
+      [fields.field]: i[fields.field] ? [i[fields.field]] : [],
+    };
+
+    //delete temp.users_projects;
+
+    return temp;
+  });
+
+  newList.forEach((i) => {
+    const index = diff.findIndex((d) => d.id === i.id);
+
+    if (index !== -1) {
+      const indexField = i[fields.field]
+        ? i[fields.field].findIndex(
+            (p) => p.id === diff[index][fields.field].id,
+          )
+        : -1;
+
+      if (indexField === -1) {
+        i[fields.field].push(diff[index][fields.field]);
+      }
+    }
+  });
+
+  return newList;
+};
+
+const removeNullObjects = (obj: {}) => {
+  Object.keys(obj).forEach((key) => {
+    const keyCamel = toCamel(key);
+
+    obj[keyCamel] = obj[key];
+
+    if (key !== keyCamel) {
+      delete obj[key];
+    }
+
+    if (
+      !['string', 'number', 'boolean', 'symbol', 'function'].includes(
+        typeof obj[keyCamel],
+      ) &&
+      !(obj[keyCamel] instanceof Date) && //Object.prototype.toString.call(obj[keyCamel]) === '[object Date]'
+      obj[keyCamel] != null
+    ) {
+      const isAllValuesNullOrUndefined = Object.values(obj[keyCamel]).every(
+        (v) => v == null,
+      );
+
+      if (isAllValuesNullOrUndefined) {
+        obj[keyCamel] = null;
+      } else {
+        obj[keyCamel] = removeNullObjects(obj[keyCamel]);
+      }
+    }
+  });
+
+  return obj;
+};
+
 const transformFlatToNest = (data): any[] => {
   const newArr = [];
 
   for (const each of data) {
-    const eachWithoutNullKeys = { ...each };
-    Object.keys(eachWithoutNullKeys).forEach(
-      (key) =>
-        eachWithoutNullKeys[key] == null && delete eachWithoutNullKeys[key],
-    );
-    const newObj = DotObject(eachWithoutNullKeys);
+    let newObj = DotObject(each);
+
+    newObj = removeNullObjects(newObj);
+
     newArr.push(newObj);
   }
 
   return newArr;
 };
 
-export { QueryAsObject, transformFlatToNest };
+export {
+  QueryAsObject,
+  transformFlatToNest,
+  concatResultOfManyToMany,
+  concatResultOfOneToMany,
+};
+
+// private concatParticipantsOfProject(dataArray: any[]) {
+//   const uniques = dataArray.filter(
+//     (s1, pos, arr) => arr.findIndex((s2) => s2.id === s1.id) === pos,
+//   );
+
+//   const diff = dataArray.filter(
+//     (s1, pos, arr) => arr.findIndex((s2) => s2.id === s1.id) !== pos,
+//   );
+
+//   const newList = uniques.map((i) => {
+//     const temp = {
+//       ...i,
+//       participants: [i.usersProjects.participants],
+//     };
+
+//     delete temp.usersProjects;
+
+//     return temp;
+//   });
+
+//   newList.forEach((i) => {
+//     const index = diff.findIndex((d) => d.id === i.id);
+
+//     if (index !== -1) {
+//       const indexParticipant = i.participants.findIndex(
+//         (p) => p.id === diff[index].usersProjects.participants.id,
+//       );
+
+//       if (indexParticipant === -1) {
+//         i.participants.push(diff[index].usersProjects.participants);
+//       }
+//     }
+//   });
+
+//   return newList;
+// }
