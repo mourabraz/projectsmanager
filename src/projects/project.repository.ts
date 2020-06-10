@@ -13,48 +13,13 @@ import { CreateProjectDto } from './dto/create-project.dto';
 import {
   QueryAsObject,
   transformFlatToNest,
+  concatResultOfManyToMany,
+  concatResultOfOneToMany,
 } from '../util/postgres-query-wrap/query-as-object';
 
 @EntityRepository(Project)
 export class ProjectRepository extends Repository<Project> {
   private logger = new Logger(ProjectRepository.name);
-
-  private concatParticipantsOfProject(dataArray: any[]) {
-    const uniques = dataArray.filter(
-      (s1, pos, arr) => arr.findIndex((s2) => s2.id === s1.id) === pos,
-    );
-
-    const diff = dataArray.filter(
-      (s1, pos, arr) => arr.findIndex((s2) => s2.id === s1.id) !== pos,
-    );
-
-    const newList = uniques.map((i) => {
-      const temp = {
-        ...i,
-        participants: [i.users_projects.participants],
-      };
-
-      delete temp.users_projects;
-
-      return temp;
-    });
-
-    newList.forEach((i) => {
-      const index = diff.findIndex((d) => d.id === i.id);
-
-      if (index !== -1) {
-        const indexParticipant = i.participants.findIndex(
-          (p) => p.id === diff[index].users_projects.participants.id,
-        );
-
-        if (indexParticipant === -1) {
-          i.participants.push(diff[index].users_projects.participants);
-        }
-      }
-    });
-
-    return newList;
-  }
 
   async getProjectsForUser(user: User): Promise<Project[]> {
     try {
@@ -150,7 +115,12 @@ export class ProjectRepository extends Repository<Project> {
 
       const result = await this.query(qs, qp);
 
-      const res = this.concatParticipantsOfProject(transformFlatToNest(result));
+      //console.log('RESULT', result);
+
+      const res = concatResultOfManyToMany(transformFlatToNest(result), {
+        field: 'participants',
+        through: 'usersProjects',
+      });
 
       // const res = this.createQueryBuilder('projects')
       //   .select([
@@ -274,7 +244,10 @@ export class ProjectRepository extends Repository<Project> {
 
       const result = await this.query(qs, qp);
 
-      const res = this.concatParticipantsOfProject(transformFlatToNest(result));
+      const res = concatResultOfOneToMany(transformFlatToNest(result), {
+        field: 'participants',
+        through: 'usersProjects',
+      });
 
       return res[0];
     } catch (error) {

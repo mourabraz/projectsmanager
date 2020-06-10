@@ -6,6 +6,11 @@ import { CreateTaskDto } from './dto/create-task.dto';
 import { StatusTaskDto } from './dto/status-task.dto';
 import { TaskStatus } from './task-status.enum';
 import { User } from '../users/user.entity';
+import {
+  transformFlatToNest,
+  QueryAsObject,
+  concatResultOfOneToMany,
+} from '../util/postgres-query-wrap/query-as-object';
 
 @EntityRepository(Task)
 export class TaskRepository extends Repository<Task> {
@@ -51,30 +56,75 @@ export class TaskRepository extends Repository<Task> {
 
   async getTasksByProjectIdWithRelations(projectId: string): Promise<Task[]> {
     try {
-      const result = this.createQueryBuilder('tasks')
-        .where({ projectId })
-        .select([
-          'tasks.id',
-          'tasks.title',
-          'tasks.order',
-          'tasks.description',
-          'tasks.startedAt',
-          'tasks.completedAt',
-          'tasks.status',
-          'tasks.projectId',
-          'tasks.ownerId',
-          'tasks.createdAt',
-          'tasks.updatedAt',
-          'owner.id',
-          'owner.name',
-          'owner.email',
-          'photo.filename',
-        ])
-        .leftJoin('tasks.owner', 'owner')
-        .leftJoin('owner.photo', 'photo')
-        .getMany();
+      // const result = this.createQueryBuilder('tasks')
+      //   .where({ projectId })
+      //   .select([
+      //     'tasks.id',
+      //     'tasks.title',
+      //     'tasks.order',
+      //     'tasks.description',
+      //     'tasks.startedAt',
+      //     'tasks.completedAt',
+      //     'tasks.status',
+      //     'tasks.projectId',
+      //     'tasks.ownerId',
+      //     'tasks.createdAt',
+      //     'tasks.updatedAt',
+      //     'owner.id',
+      //     'owner.name',
+      //     'owner.email',
+      //     'photo.filename',
+      //   ])
+      //   .leftJoin('tasks.owner', 'owner')
+      //   .leftJoin('owner.photo', 'photo')
+      //   .getMany();
+      const [qs, qp] = new QueryAsObject(
+        {
+          table: 'tasks',
+          select: `id, title, order, description, started_at, completed_at, 
+          status, project_id, created_at, updated_at`,
+          where: 'project_id = :projectId',
 
-      return result;
+          includes: [
+            {
+              table: 'users',
+              select: 'id, name, email',
+              as: 'owner',
+              localKey: 'id',
+              targetKey: 'user_id',
+              includes: [
+                {
+                  table: 'photos',
+                  virtual: {
+                    field: 'url',
+                    execute:
+                      "CONCAT('http://192.168.8.108:8080/users/photo/', filename)",
+                  },
+                  as: 'photo',
+                  select: 'filename, user_id, id, url',
+                  localKey: 'user_id',
+                  targetKey: 'id',
+                },
+              ],
+            },
+            {
+              table: 'fiiles',
+              select: 'id, name, type, size, user_id, task_id',
+              localKey: 'task_id',
+              targetKey: 'id',
+            },
+          ],
+        },
+        { projectId },
+      ).getQuery();
+
+      const result = await this.query(qs, qp);
+
+      const res = concatResultOfOneToMany(transformFlatToNest(result), {
+        field: 'fiiles',
+      });
+
+      return res;
     } catch (error) {
       this.logger.error(
         `Failed to get tasks for project id "${projectId}".`,
