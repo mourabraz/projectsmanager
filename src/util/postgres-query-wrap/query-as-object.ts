@@ -271,19 +271,27 @@ const concatResultOfManyToMany = (
   });
 
   newList.forEach((i) => {
-    const index = diff.findIndex((d) => d.id === i.id);
+    const rest = diff.filter((d) => d.id === i.id);
 
-    if (index !== -1) {
-      const indexField = i[fields.field]
-        ? i[fields.field].findIndex(
-            (p) => p.id === diff[index][fields.through][fields.field].id,
-          )
-        : -1;
-
-      if (indexField === -1) {
-        i[fields.field].push(diff[index][fields.through][fields.field]);
+    rest.forEach((a) => {
+      if (i[fields.field]) {
+        i[fields.field].push(a[fields.through][fields.field]);
       }
-    }
+    });
+
+    // const index = diff.findIndex((d) => d.id === i.id);
+
+    // if (index !== -1) {
+    //   const indexField = i[fields.field]
+    //     ? i[fields.field].findIndex(
+    //         (p) => p.id === diff[index][fields.through][fields.field].id,
+    //       )
+    //     : -1;
+
+    //   if (indexField === -1) {
+    //     i[fields.field].push(diff[index][fields.through][fields.field]);
+    //   }
+    // }
   });
 
   return newList;
@@ -313,19 +321,27 @@ const concatResultOfOneToMany = (
   });
 
   newList.forEach((i) => {
-    const index = diff.findIndex((d) => d.id === i.id);
+    const rest = diff.filter((d) => d.id === i.id);
 
-    if (index !== -1) {
-      const indexField = i[fields.field]
-        ? i[fields.field].findIndex(
-            (p) => p.id === diff[index][fields.field].id,
-          )
-        : -1;
-
-      if (indexField === -1) {
-        i[fields.field].push(diff[index][fields.field]);
+    rest.forEach((a) => {
+      if (i[fields.field]) {
+        i[fields.field].push(a[fields.field]);
       }
-    }
+    });
+
+    // const index = diff.findIndex((d) => d.id === i.id);
+
+    // if (index !== -1) {
+    //   const indexField = i[fields.field]
+    //     ? i[fields.field].findIndex(
+    //         (p) => p.id === diff[index][fields.field].id,
+    //       )
+    //     : -1;
+
+    //   if (indexField === -1) {
+    //     i[fields.field].push(diff[index][fields.field]);
+    //   }
+    // }
   });
 
   return newList;
