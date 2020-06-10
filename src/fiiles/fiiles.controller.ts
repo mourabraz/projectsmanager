@@ -1,3 +1,4 @@
+import { Response } from 'express';
 import {
   Controller,
   UseGuards,
@@ -7,6 +8,8 @@ import {
   UploadedFile,
   Param,
   ParseUUIDPipe,
+  Get,
+  Res,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -17,7 +20,6 @@ import { MulterConfigService } from '../config/multer/config.service';
 import { User } from '../users/user.entity';
 
 @Controller('files')
-@UseGuards(AuthGuard())
 export class FiilesController {
   private logger = new Logger(FiilesController.name);
 
@@ -26,21 +28,22 @@ export class FiilesController {
     private multerConfigService: MulterConfigService,
   ) {}
 
-  // @Get('/:filename')
-  // async getFile(
-  //   @Param('filename') filename: string,
-  //   @Res() res: Response,
-  // ): Promise<void> {
-  //   this.logger.verbose(`Get file with filename "${filename}"`);
+  @Get('/:filename')
+  async getFile(
+    @Param('filename') filename: string,
+    @Res() res: Response,
+  ): Promise<void> {
+    this.logger.verbose(`Get file with filename "${filename}"`);
 
-  //   //const file = await this.usersService.getPhotoByFilename(filename);
+    const file = await this.fiilesService.getByFilename(filename);
 
-  //   // res.sendFile(file.filename, {
-  //   //   root: this.multerConfigService.uploadPhotoDest,
-  //   // });
-  // }
+    res.sendFile(file.path, {
+      root: this.multerConfigService.uploadFileDest,
+    });
+  }
 
   @Post('/:id/task')
+  @UseGuards(AuthGuard())
   @UseInterceptors(FileInterceptor('file'))
   uploadForTask(
     @Param('id', new ParseUUIDPipe()) id: string,

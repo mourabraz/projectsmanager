@@ -2,6 +2,7 @@ import {
   Injectable,
   Logger,
   InternalServerErrorException,
+  NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 
@@ -32,6 +33,18 @@ export class FiilesService {
     private multerConfigService: MulterConfigService,
     private tasksService: TasksService,
   ) {}
+
+  async getByFilename(path: string): Promise<Fiile> {
+    const fiile = await this.fiileRepository.findOne({ where: { path } });
+
+    if (!fiile) {
+      this.logger.verbose(`File with path "${path}" not found.`);
+
+      throw new NotFoundException();
+    }
+
+    return fiile;
+  }
 
   async uploadFileForTaskId(
     taskId: string,

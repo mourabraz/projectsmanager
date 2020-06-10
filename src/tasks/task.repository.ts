@@ -109,7 +109,11 @@ export class TaskRepository extends Repository<Task> {
             },
             {
               table: 'fiiles',
-              select: 'id, name, type, size, user_id, task_id',
+              virtual: {
+                field: 'url',
+                execute: "CONCAT('http://192.168.8.108:8080/files/', path)",
+              },
+              select: 'id, name, type, path, size, user_id, task_id, url',
               localKey: 'task_id',
               targetKey: 'id',
             },
