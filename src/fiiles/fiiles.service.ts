@@ -74,10 +74,11 @@ export class FiilesService {
 
       await this.fiileRepository.save(fiile);
 
+      const newFiile = await this.fiileRepository.findOne({ path: fiile.path });
+
       return {
         url: `${this.appConfigService.url}/files/${fiile.path}`,
-        id: fiile.id,
-        path: fiile.path,
+        ...newFiile,
       };
     } catch (error) {
       this.logger.error(

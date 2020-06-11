@@ -43,6 +43,10 @@ export class InvitationsService {
     return this.invitationRepository.getInvitationsToParticipate(user);
   }
 
+  async getInvitationsToUser(user: User): Promise<Invitation[]> {
+    return this.invitationRepository.getInvitationsToUser(user);
+  }
+
   async createInvitation(
     createInvitationDto: CreateInvitationDto,
     user: User,

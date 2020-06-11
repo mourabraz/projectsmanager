@@ -9,6 +9,8 @@ interface TableObject {
   targetKey?: string;
   includes?: TableObject[];
   where?: string;
+  whereArray?: [string, string][];
+  order?: [string, 'ASC' | 'DESC'][];
 }
 
 interface IVirtualAttribute {
@@ -127,17 +129,34 @@ class QueryAsObject {
   }
 
   private buildWhereParent(): string {
+    let counterParamenter = 0;
     let c = this.schema.where
-      ? this.schema.where
-          .split(',')
-          .map((c) => `${this.schema.as || this.schema.table}.${c.trim()}`)
-          .join(',')
+      ? `${this.schema.as || this.schema.table}.${this.schema.where.trim()}`
       : '';
 
     if (c) {
       const [, parameter] = c.match(/:(\w*)/);
       this.parameters.push(parameter);
-      c = c.replace(':' + parameter, '$1');
+
+      c = c.replace(':' + parameter, `$${++counterParamenter}`);
+    }
+
+    if (this.schema.whereArray) {
+      this.schema.whereArray.forEach((w) => {
+        const [condition, statement] = w;
+
+        let d = ` ${condition} ${
+          this.schema.as || this.schema.table
+        }.${statement.trim()}`;
+
+        if (d) {
+          const [, parameter] = d.match(/:(\w*)/);
+          this.parameters.push(parameter);
+
+          d = d.replace(':' + parameter, `$${++counterParamenter}`);
+          c += d;
+        }
+      });
     }
 
     if (this.schema.includes.length > 0) {
@@ -210,6 +229,24 @@ class QueryAsObject {
     return join;
   }
 
+  private buildParentOrderStatement(): string {
+    if (this.schema.order && this.schema.order.length > 0) {
+      let query = ' ORDER BY ';
+      this.schema.order.forEach((i) => {
+        const [column, order] = i;
+
+        query += `${this.schema.table || this.schema.as}.${column} ${order}, `;
+      });
+      query = query.trim().slice(0, -1);
+
+      console.log('ORDER STATEMENT', query);
+
+      return query;
+    }
+
+    return '';
+  }
+
   private buildQueryString() {
     let q = 'SELECT ';
     q += this.buildSelectParent();
@@ -223,6 +260,8 @@ class QueryAsObject {
     }
 
     q += this.buildWhereParent();
+
+    q += this.buildParentOrderStatement();
 
     console.log(q);
     this.queryString = q;

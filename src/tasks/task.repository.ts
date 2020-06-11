@@ -84,6 +84,7 @@ export class TaskRepository extends Repository<Task> {
           select: `id, title, order, description, started_at, completed_at, 
           status, project_id, created_at, updated_at`,
           where: 'project_id = :projectId',
+          order: [['order', 'ASC']],
 
           includes: [
             {
@@ -98,7 +99,7 @@ export class TaskRepository extends Repository<Task> {
                   virtual: {
                     field: 'url',
                     execute:
-                      "CONCAT('http://192.168.8.108:8080/users/photo/', filename)",
+                      "CONCAT('http://192.168.8.102:8080/users/photo/', filename)",
                   },
                   as: 'photo',
                   select: 'filename, user_id, id, url',
@@ -111,7 +112,7 @@ export class TaskRepository extends Repository<Task> {
               table: 'fiiles',
               virtual: {
                 field: 'url',
-                execute: "CONCAT('http://192.168.8.108:8080/files/', path)",
+                execute: "CONCAT('http://192.168.8.102:8080/files/', path)",
               },
               select: 'id, name, type, path, size, user_id, task_id, url',
               localKey: 'task_id',
@@ -140,30 +141,80 @@ export class TaskRepository extends Repository<Task> {
   }
 
   async getTaskByIdWithRelations(taskId: string): Promise<Task> {
-    const result = this.createQueryBuilder('tasks')
-      .where({ id: taskId })
-      .select([
-        'tasks.id',
-        'tasks.title',
-        'tasks.order',
-        'tasks.description',
-        'tasks.startedAt',
-        'tasks.completedAt',
-        'tasks.status',
-        'tasks.projectId',
-        'tasks.ownerId',
-        'tasks.createdAt',
-        'tasks.updatedAt',
-        'owner.id',
-        'owner.name',
-        'owner.email',
-        'photo.filename',
-      ])
-      .leftJoin('tasks.owner', 'owner')
-      .leftJoin('owner.photo', 'photo')
-      .getOne();
+    // const result = this.createQueryBuilder('tasks')
+    //   .where({ id: taskId })
+    //   .select([
+    //     'tasks.id',
+    //     'tasks.title',
+    //     'tasks.order',
+    //     'tasks.description',
+    //     'tasks.startedAt',
+    //     'tasks.completedAt',
+    //     'tasks.status',
+    //     'tasks.projectId',
+    //     'tasks.ownerId',
+    //     'tasks.createdAt',
+    //     'tasks.updatedAt',
+    //     'owner.id',
+    //     'owner.name',
+    //     'owner.email',
+    //     'photo.filename',
+    //   ])
+    //   .leftJoin('tasks.owner', 'owner')
+    //   .leftJoin('owner.photo', 'photo')
+    //   .leftJoin('tasks.fiiles', 'fiiles')
+    //   .getOne();
+    const [qs, qp] = new QueryAsObject(
+      {
+        table: 'tasks',
+        select: `id, title, order, description, started_at, completed_at, 
+        status, project_id, created_at, updated_at`,
+        where: 'id = :taskId',
 
-    return result;
+        includes: [
+          {
+            table: 'users',
+            select: 'id, name, email',
+            as: 'owner',
+            localKey: 'id',
+            targetKey: 'user_id',
+            includes: [
+              {
+                table: 'photos',
+                virtual: {
+                  field: 'url',
+                  execute:
+                    "CONCAT('http://192.168.8.102:8080/users/photo/', filename)",
+                },
+                as: 'photo',
+                select: 'filename, user_id, id, url',
+                localKey: 'user_id',
+                targetKey: 'id',
+              },
+            ],
+          },
+          {
+            table: 'fiiles',
+            virtual: {
+              field: 'url',
+              execute: "CONCAT('http://192.168.8.102:8080/files/', path)",
+            },
+            select: 'id, name, type, path, size, user_id, task_id, url',
+            localKey: 'task_id',
+            targetKey: 'id',
+          },
+        ],
+      },
+      { taskId },
+    ).getQuery();
+
+    const result = await this.query(qs, qp);
+
+    const res = concatResultOfOneToMany(transformFlatToNest(result), {
+      field: 'fiiles',
+    });
+
+    return res && res[0] ? res[0] : [];
   }
 
   async createTask(createTaskDto: CreateTaskDto): Promise<Task> {

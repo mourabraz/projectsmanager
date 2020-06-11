@@ -69,7 +69,7 @@ export class ProjectRepository extends Repository<Project> {
                   virtual: {
                     field: 'url',
                     execute:
-                      "CONCAT('http://192.168.8.108:8080/users/photo/', filename)",
+                      "CONCAT('http://192.168.8.102:8080/users/photo/', filename)",
                   },
                   as: 'photo',
                   select: 'filename, user_id, id, url',
@@ -97,7 +97,7 @@ export class ProjectRepository extends Repository<Project> {
                       virtual: {
                         field: 'url',
                         execute:
-                          "CONCAT('http://192.168.8.108:8080/users/photo/', filename)",
+                          "CONCAT('http://192.168.8.102:8080/users/photo/', filename)",
                       },
                       as: 'avatar',
                       select: 'filename, user_id, id, url',
@@ -198,7 +198,7 @@ export class ProjectRepository extends Repository<Project> {
                   virtual: {
                     field: 'url',
                     execute:
-                      "CONCAT('http://192.168.8.108:8080/users/photo/', filename)",
+                      "CONCAT('http://192.168.8.102:8080/users/photo/', filename)",
                   },
                   as: 'photo',
                   select: 'filename, user_id, id, url',
@@ -226,7 +226,7 @@ export class ProjectRepository extends Repository<Project> {
                       virtual: {
                         field: 'url',
                         execute:
-                          "CONCAT('http://192.168.8.108:8080/users/photo/', filename)",
+                          "CONCAT('http://192.168.8.102:8080/users/photo/', filename)",
                       },
                       as: 'avatar',
                       select: 'filename, user_id, id, url',

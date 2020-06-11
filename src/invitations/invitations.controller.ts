@@ -25,9 +25,9 @@ export class InvitationsController {
   @Get()
   index(@GetUser() user: User): Promise<Invitation[]> {
     this.logger.verbose(
-      `User "${user.email}" retrieving all invitations to participate.`,
+      `User "${user.email}" retrieving all related invitations.`,
     );
-    return this.invitationsService.getInvitationsToParticipate(user);
+    return this.invitationsService.getInvitationsToUser(user);
   }
 
   @Patch('/:id/accept')
