@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsString, IsUUID, IsOptional } from 'class-validator';
+import { IsString, IsOptional, IsUUID } from 'class-validator';
 import { Transform } from 'class-transformer';
 import * as sanitizeHtml from 'sanitize-html';
 
@@ -33,18 +33,15 @@ function tranformDescription(dirty) {
   return sanitized;
 }
 
-export class CreateTaskDto {
-  @IsNotEmpty()
+export class UpdateTaskDto {
   @IsString()
+  @IsOptional()
   title: string;
 
   @IsString()
+  @IsOptional()
   @Transform(tranformDescription)
   description: string;
-
-  @IsUUID()
-  @IsOptional()
-  projectId?: string;
 
   @IsString()
   @IsOptional()

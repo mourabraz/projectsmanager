@@ -16,6 +16,15 @@ export class UsersProjectsService {
     return this.userProjectRepository.createUserProject(user, id);
   }
 
+  async removeParticipantToProject(
+    user: User,
+    id: string,
+  ): Promise<{
+    total: number;
+  }> {
+    return this.userProjectRepository.removeUserProject(user, id);
+  }
+
   async isUserByIdInProjectById(
     userId: string,
     projectId: string,

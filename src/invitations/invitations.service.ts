@@ -134,6 +134,41 @@ export class InvitationsService {
     return invitation;
   }
 
+  async leaveInvitation(id: string, user: User): Promise<Invitation> {
+    const invitation = await this.invitationRepository.findOne({
+      where: { id, emailTo: user.email },
+    });
+
+    if (!invitation) {
+      this.logger.error(
+        `Failed to found invitation with id "${id}" for user "${user.email}".`,
+      );
+
+      throw new NotFoundException();
+    }
+
+    invitation.acceptedAt = null;
+
+    try {
+      await this.invitationRepository.save(invitation);
+
+      //update table users_projects
+      await this.usersProjectsService.removeParticipantToProject(
+        user,
+        invitation.projectId,
+      );
+    } catch (error) {
+      this.logger.error(
+        `Failed to update invitation with id "${id}" for user "${user.email}".`,
+        error.stack,
+      );
+
+      throw new InternalServerErrorException();
+    }
+
+    return invitation;
+  }
+
   async deleteInvitation(id: string, user: User): Promise<{ total: number }> {
     const result = await this.invitationRepository.delete({
       id,

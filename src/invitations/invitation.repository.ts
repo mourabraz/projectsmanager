@@ -48,12 +48,12 @@ export class InvitationRepository extends Repository<Invitation> {
           table: 'invitations',
           select: `id, email_to, project_id, user_id, accepted_at, 
           created_at, updated_at`,
-          where: 'email_to = :emailTo',
+          //where: 'email_to = :emailTo',
           whereArray: [
-            // ['', 'email_to = :emailTo'],
+            ['', 'email_to = :emailTo'],
             ['OR', 'user_id = :userId'],
           ],
-          //order: [['created_at', 'ASC']],
+          order: [['created_at', 'ASC']],
 
           includes: [
             {
@@ -79,6 +79,7 @@ export class InvitationRepository extends Repository<Invitation> {
             },
             {
               table: 'projects',
+              as: 'project',
               select: 'id, name',
               localKey: 'id',
               targetKey: 'project_id',

@@ -13,7 +13,7 @@ import {
 import { AuthGuard } from '@nestjs/passport';
 
 import { TasksService } from './tasks.service';
-import { CreateTaskDto } from './dto/create-task.dto';
+import { UpdateTaskDto } from './dto/update-task.dto';
 import { StatusTaskDto } from './dto/status-task.dto';
 import { GetUser } from '../auth/get-user.decorator';
 import { User } from '../users/user.entity';
@@ -30,18 +30,18 @@ export class TasksController {
   @UsePipes(new ValidationPipe({ transform: true }))
   update(
     @Param('id', new ParseUUIDPipe()) id: string,
-    @Body() createTaskDto: CreateTaskDto,
+    @Body() updateTaskDto: UpdateTaskDto,
     @GetUser() user: User,
   ): Promise<Task> {
     this.logger.verbose(
       `User "${user.email}" update task id: "${id}". Data: ${JSON.stringify(
-        createTaskDto,
+        updateTaskDto,
       )}`,
     );
 
-    createTaskDto.ownerId = user.id;
+    updateTaskDto.ownerId = user.id;
 
-    return this.tasksService.updateTask(id, createTaskDto);
+    return this.tasksService.updateTask(id, updateTaskDto);
   }
 
   @Put('/:id/statusorder')

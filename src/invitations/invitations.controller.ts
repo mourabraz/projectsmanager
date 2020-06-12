@@ -31,7 +31,7 @@ export class InvitationsController {
   }
 
   @Patch('/:id/accept')
-  update(
+  updateToAccept(
     @Param('id', new ParseUUIDPipe()) id: string,
     @GetUser() user: User,
   ): Promise<Invitation> {
@@ -40,6 +40,18 @@ export class InvitationsController {
     );
 
     return this.invitationsService.acceptInvitation(id, user);
+  }
+
+  @Patch('/:id/leave')
+  updateToLeave(
+    @Param('id', new ParseUUIDPipe()) id: string,
+    @GetUser() user: User,
+  ): Promise<Invitation> {
+    this.logger.verbose(
+      `User "${user.email}" (update) leave invitation with id: "${id}".`,
+    );
+
+    return this.invitationsService.leaveInvitation(id, user);
   }
 
   @Delete('/:id')

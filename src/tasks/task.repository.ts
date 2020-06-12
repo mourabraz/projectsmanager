@@ -1,9 +1,11 @@
 import { Repository, EntityRepository } from 'typeorm';
 import { Logger, InternalServerErrorException } from '@nestjs/common';
+import { parseISO } from 'date-fns';
 
 import { Task } from './task.entity';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { StatusTaskDto } from './dto/status-task.dto';
+import { UpdateTaskDto } from './dto/update-task.dto';
 import { TaskStatus } from './task-status.enum';
 import { User } from '../users/user.entity';
 import {
@@ -82,7 +84,7 @@ export class TaskRepository extends Repository<Task> {
         {
           table: 'tasks',
           select: `id, title, order, description, started_at, completed_at, 
-          status, project_id, created_at, updated_at`,
+          status, project_id, created_at, updated_at, deadline_at`,
           where: 'project_id = :projectId',
           order: [['order', 'ASC']],
 
@@ -168,7 +170,7 @@ export class TaskRepository extends Repository<Task> {
       {
         table: 'tasks',
         select: `id, title, order, description, started_at, completed_at, 
-        status, project_id, created_at, updated_at`,
+        status, project_id, created_at, updated_at, deadline_at`,
         where: 'id = :taskId',
 
         includes: [
@@ -219,7 +221,16 @@ export class TaskRepository extends Repository<Task> {
 
   async createTask(createTaskDto: CreateTaskDto): Promise<Task> {
     try {
-      const { title, description, projectId, ownerId } = createTaskDto;
+      const {
+        title,
+        description,
+        projectId,
+        ownerId,
+        deadlineAt,
+        startedAt,
+      } = createTaskDto;
+
+      console.log(createTaskDto);
 
       const openTasks = await this.find({
         where: { projectId, status: 'OPEN' },
@@ -235,6 +246,8 @@ export class TaskRepository extends Repository<Task> {
       task.description = description;
       task.status = TaskStatus.OPEN;
       task.order = order;
+      task.deadlineAt = deadlineAt ? parseISO(deadlineAt) : null;
+      task.startedAt = startedAt ? parseISO(startedAt) : null;
 
       await this.save(task);
 
@@ -251,18 +264,26 @@ export class TaskRepository extends Repository<Task> {
     }
   }
 
-  async updateTask(id: string, createTaskDto: CreateTaskDto): Promise<Task> {
+  async updateTask(id: string, updateTaskDto: UpdateTaskDto): Promise<Task> {
     try {
-      await this.update(id, {
-        title: createTaskDto.title,
-        description: createTaskDto.description,
-      });
+      const updateTask = {
+        ...updateTaskDto,
+        ...(updateTaskDto.deadlineAt && updateTaskDto.deadlineAt === 'null'
+          ? { deadlineAt: null }
+          : {}),
+        ...(updateTaskDto.startedAt && updateTaskDto.startedAt === 'null'
+          ? { startedAt: null }
+          : {}),
+      };
+      delete updateTask.ownerId;
+
+      await this.update(id, updateTask);
 
       return this.getTaskByIdWithRelations(id);
     } catch (error) {
       this.logger.error(
         `Failed to update task with id: "${id}". Data: ${JSON.stringify(
-          createTaskDto,
+          updateTaskDto,
         )}`,
         error.stack,
       );
@@ -298,6 +319,10 @@ export class TaskRepository extends Repository<Task> {
           where: { projectId: task.projectId, status: statusTaskDto.status },
           order: { order: 'ASC' },
         });
+
+        if (task.status === 'OPEN' && statusTaskDto.status === 'IN_PROGRESS') {
+          task.startedAt = new Date();
+        }
 
         task.status = statusTaskDto.status;
         task.completedAt =

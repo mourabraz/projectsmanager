@@ -32,9 +32,19 @@ export class Task {
     type: 'timestamptz',
     precision: 3,
     name: 'started_at',
-    default: () => 'NOW()',
+    nullable: true,
+    default: null,
   })
   startedAt: Date;
+
+  @Column({
+    type: 'timestamptz',
+    precision: 3,
+    name: 'deadline_at',
+    nullable: true,
+    default: null,
+  })
+  deadlineAt: Date;
 
   @Column({
     type: 'timestamptz',

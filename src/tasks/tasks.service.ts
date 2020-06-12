@@ -10,6 +10,7 @@ import { TaskRepository } from './task.repository';
 import { User } from '../users/user.entity';
 import { Task } from './task.entity';
 import { CreateTaskDto } from './dto/create-task.dto';
+import { UpdateTaskDto } from './dto/update-task.dto';
 import { StatusTaskDto } from './dto/status-task.dto';
 import { ProjectsService } from '../projects/projects.service';
 
@@ -64,15 +65,15 @@ export class TasksService {
     return this.taskRepository.createTask(createTaskDto);
   }
 
-  async updateTask(id: string, createTaskDto: CreateTaskDto): Promise<Task> {
+  async updateTask(id: string, updateTaskDto: UpdateTaskDto): Promise<Task> {
     const found = await this.taskRepository.findOne({
       id,
-      ownerId: createTaskDto.ownerId,
+      ownerId: updateTaskDto.ownerId,
     });
 
     if (!found) {
       this.logger.verbose(
-        `The task with id "${id}" not found for owner id: "${createTaskDto.ownerId}".`,
+        `The task with id "${id}" not found for owner id: "${updateTaskDto.ownerId}".`,
       );
 
       throw new NotFoundException();
@@ -80,13 +81,13 @@ export class TasksService {
 
     if (found.completedAt) {
       this.logger.verbose(
-        `The task with id "${id}" has the status set to "DONE. Update title and/or description is not possible ": "${createTaskDto.ownerId}".`,
+        `The task with id "${id}" has the status set to "DONE. Update title and/or description is not possible ": "${updateTaskDto.ownerId}".`,
       );
 
       throw new BadRequestException();
     }
 
-    return await this.taskRepository.updateTask(id, createTaskDto);
+    return await this.taskRepository.updateTask(id, updateTaskDto);
   }
 
   async updateStatusTask(
