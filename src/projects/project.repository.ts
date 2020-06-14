@@ -240,7 +240,7 @@ export class ProjectRepository extends Repository<Project> {
 
       const result = await this.query(qs, qp);
 
-      const res = concatResultOfOneToMany(transformFlatToNest(result), {
+      const res = concatResultOfManyToMany(transformFlatToNest(result), {
         field: 'participants',
         through: 'usersProjects',
       });
