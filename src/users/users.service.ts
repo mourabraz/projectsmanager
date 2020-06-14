@@ -8,6 +8,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import * as Jimp from 'jimp';
 
 import { UserRepository } from './user.repository';
 import { User } from './user.entity';
@@ -105,9 +106,30 @@ export class UsersService {
 
       await this.photoRepository.save(photo);
 
+      const imageCopy = await Jimp.read(file.path);
+
+      if (imageCopy.bitmap.width > 500) {
+        await imageCopy.resize(500, Jimp.AUTO);
+      }
+      await imageCopy.writeAsync(file.destination + '/tn-' + file.filename);
+
       if (prevFilename) {
         fs.unlink(
           resolve(this.multerConfigService.uploadPhotoDest, prevFilename),
+          async (err) => {
+            if (err) {
+              this.logger.error(
+                `Failed to remove file: "${prevFilename}"`,
+                err.stack,
+              );
+            }
+          },
+        );
+        fs.unlink(
+          resolve(
+            this.multerConfigService.uploadPhotoDest,
+            `tn-${prevFilename}`,
+          ),
           async (err) => {
             if (err) {
               this.logger.error(

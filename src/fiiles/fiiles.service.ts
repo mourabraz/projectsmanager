@@ -5,6 +5,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import * as Jimp from 'jimp';
 
 import { AppConfigService } from '../config/app/config.service';
 
@@ -59,8 +60,6 @@ export class FiilesService {
     user: User,
   ): Promise<{ url: string; path: string; id: string }> {
     try {
-      console.log(file);
-
       //check if task exists and is related to authenticated user
       await this.tasksService.getTaskByIdForUser(taskId, user);
 
@@ -73,6 +72,15 @@ export class FiilesService {
       fiile.taskId = taskId;
 
       await this.fiileRepository.save(fiile);
+
+      if (fiile.type === 'IMAGE') {
+        const imageCopy = await Jimp.read(file.path);
+
+        if (imageCopy.bitmap.width > 500) {
+          await imageCopy.resize(500, Jimp.AUTO);
+        }
+        await imageCopy.writeAsync(file.destination + '/tn-' + file.filename);
+      }
 
       const newFiile = await this.fiileRepository.findOne({ path: fiile.path });
 

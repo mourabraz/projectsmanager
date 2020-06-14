@@ -10,6 +10,7 @@ import {
   ParseUUIDPipe,
   Get,
   Res,
+  BadRequestException,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -38,6 +39,24 @@ export class FiilesController {
     const file = await this.fiilesService.getByFilename(filename);
 
     res.sendFile(file.path, {
+      root: this.multerConfigService.uploadFileDest,
+    });
+  }
+
+  @Get('/:filename/thumbnail')
+  async getFileThumbnail(
+    @Param('filename') filename: string,
+    @Res() res: Response,
+  ): Promise<void> {
+    this.logger.verbose(`Get file thumbnail with filename "${filename}"`);
+
+    const file = await this.fiilesService.getByFilename(filename);
+
+    if (file.type !== 'IMAGE') {
+      throw new BadRequestException();
+    }
+
+    res.sendFile(`tn-${file.path}`, {
       root: this.multerConfigService.uploadFileDest,
     });
   }

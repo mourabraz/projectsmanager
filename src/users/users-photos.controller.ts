@@ -41,6 +41,20 @@ export class UsersPhotosController {
     });
   }
 
+  @Get('/:filename/thumbnail')
+  async getUserPhotoThumbnail(
+    @Param('filename') filename: string,
+    @Res() res: Response,
+  ): Promise<void> {
+    this.logger.verbose(`Get photo thumbnail with filename "${filename}"`);
+
+    const file = await this.usersService.getPhotoByFilename(filename);
+
+    res.sendFile(`tn-${file.filename}`, {
+      root: this.multerConfigService.uploadPhotoDest,
+    });
+  }
+
   @Post()
   @UseGuards(AuthGuard())
   @UseInterceptors(FileInterceptor('file'))

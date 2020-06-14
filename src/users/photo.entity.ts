@@ -37,4 +37,5 @@ export class Photo {
   user: User;
 
   url?: string;
+  urltn?: string;
 }
