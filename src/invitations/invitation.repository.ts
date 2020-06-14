@@ -67,8 +67,7 @@ export class InvitationRepository extends Repository<Invitation> {
                   table: 'photos',
                   virtual: {
                     field: 'url',
-                    execute:
-                      "CONCAT('http://192.168.8.102:8080/users/photo/', filename)",
+                    execute: `CONCAT('${process.env.APP_URL}/users/photo/', filename)`,
                   },
                   as: 'photo',
                   select: 'filename, user_id, id, url',

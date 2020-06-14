@@ -45,6 +45,8 @@ export class ProjectRepository extends Repository<Project> {
     archived: boolean,
   ): Promise<any> {
     try {
+      console.log('getProjectsForUserWithRelations', process.env.APP_URL);
+
       const whereClause = `id IN (SELECT users_projects.project_id 
         FROM users_projects WHERE users_projects.user_id = :userId )
          AND archived_at IS ${archived ? 'NOT' : ''} NULL `;
@@ -68,8 +70,7 @@ export class ProjectRepository extends Repository<Project> {
                   table: 'photos',
                   virtual: {
                     field: 'url',
-                    execute:
-                      "CONCAT('http://192.168.8.102:8080/users/photo/', filename)",
+                    execute: `CONCAT('${process.env.APP_URL}/users/photo/', filename)`,
                   },
                   as: 'photo',
                   select: 'filename, user_id, id, url',
@@ -96,8 +97,7 @@ export class ProjectRepository extends Repository<Project> {
                       table: 'photos',
                       virtual: {
                         field: 'url',
-                        execute:
-                          "CONCAT('http://192.168.8.102:8080/users/photo/', filename)",
+                        execute: `CONCAT('${process.env.APP_URL}/users/photo/', filename)`,
                       },
                       as: 'avatar',
                       select: 'filename, user_id, id, url',
@@ -197,8 +197,7 @@ export class ProjectRepository extends Repository<Project> {
                   table: 'photos',
                   virtual: {
                     field: 'url',
-                    execute:
-                      "CONCAT('http://192.168.8.102:8080/users/photo/', filename)",
+                    execute: `CONCAT('${process.env.APP_URL}/users/photo/', filename)`,
                   },
                   as: 'photo',
                   select: 'filename, user_id, id, url',
@@ -225,8 +224,7 @@ export class ProjectRepository extends Repository<Project> {
                       table: 'photos',
                       virtual: {
                         field: 'url',
-                        execute:
-                          "CONCAT('http://192.168.8.102:8080/users/photo/', filename)",
+                        execute: `CONCAT('${process.env.APP_URL}/users/photo/', filename)`,
                       },
                       as: 'avatar',
                       select: 'filename, user_id, id, url',

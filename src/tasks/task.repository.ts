@@ -100,8 +100,7 @@ export class TaskRepository extends Repository<Task> {
                   table: 'photos',
                   virtual: {
                     field: 'url',
-                    execute:
-                      "CONCAT('http://192.168.8.102:8080/users/photo/', filename)",
+                    execute: `CONCAT('${process.env.APP_URL}/users/photo/', filename)`,
                   },
                   as: 'photo',
                   select: 'filename, user_id, id, url',
@@ -114,7 +113,7 @@ export class TaskRepository extends Repository<Task> {
               table: 'fiiles',
               virtual: {
                 field: 'url',
-                execute: "CONCAT('http://192.168.8.102:8080/files/', path)",
+                execute: `CONCAT('${process.env.APP_URL}/files/', path)`,
               },
               select: 'id, name, type, path, size, user_id, task_id, url',
               localKey: 'task_id',
@@ -185,8 +184,7 @@ export class TaskRepository extends Repository<Task> {
                 table: 'photos',
                 virtual: {
                   field: 'url',
-                  execute:
-                    "CONCAT('http://192.168.8.102:8080/users/photo/', filename)",
+                  execute: `CONCAT('${process.env.APP_URL}/users/photo/', filename)`,
                 },
                 as: 'photo',
                 select: 'filename, user_id, id, url',
@@ -199,7 +197,7 @@ export class TaskRepository extends Repository<Task> {
             table: 'fiiles',
             virtual: {
               field: 'url',
-              execute: "CONCAT('http://192.168.8.102:8080/files/', path)",
+              execute: `CONCAT('${process.env.APP_URL}/files/', path)`,
             },
             select: 'id, name, type, path, size, user_id, task_id, url',
             localKey: 'task_id',
