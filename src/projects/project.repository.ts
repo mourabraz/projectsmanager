@@ -45,8 +45,6 @@ export class ProjectRepository extends Repository<Project> {
     archived: boolean,
   ): Promise<any> {
     try {
-      console.log('getProjectsForUserWithRelations', process.env.APP_URL);
-
       const whereClause = `id IN (SELECT users_projects.project_id 
         FROM users_projects WHERE users_projects.user_id = :userId )
          AND archived_at IS ${archived ? 'NOT' : ''} NULL `;
